@@ -1,0 +1,65 @@
+{
+  "name": "ycm2.api",
+  "version": "0.0.1",
+  "description": "",
+  "main": "cmd/main.ts",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only --deps cmd/main.ts --debug --config config/.env.development",
+    "build": "esbuild cmd/main.ts --bundle --keep-names --minify --platform=node --outfile=dist/main.min.js --packages=external" ,
+    "start": "node dist/main.min.js --debug --config config/.env"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aNNdii/ycm2.api.git"
+  },
+  "author": "",
+  "license": "MIT License",
+  "bugs": {
+    "url": "https://github.com/aNNdii/ycm2.api/issues"
+  },
+  "homepage": "https://github.com/aNNdii/ycm2.api#readme",
+  "devDependencies": {
+    "@types/debug": "^4.1.7",
+    "@types/jsonwebtoken": "^9.0.0",
+    "@types/koa": "^2.13.5",
+    "@types/koa__cors": "^3.3.0",
+    "@types/koa-better-body": "^3.3.3",
+    "@types/koa-compress": "^4.0.3",
+    "@types/koa-convert": "^1.2.4",
+    "@types/koa-router": "^7.4.4",
+    "@types/node": "^18.11.18",
+    "@types/sqlstring": "^2.3.0",
+    "esbuild": "^0.17.4",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.3.0",
+    "@graphql-tools/merge": "^8.3.15",
+    "@graphql-tools/schema": "^9.0.13",
+    "@koa/cors": "^4.0.0",
+    "ajv": "^8.12.0",
+    "commander": "^9.5.0",
+    "dataloader": "^2.1.0",
+    "debug": "^4.3.4",
+    "dotenv": "^16.0.3",
+    "expiry-map": "^2.0.0",
+    "fast-csv": "^4.3.6",
+    "graphql": "^16.6.0",
+    "hashids": "^2.2.10",
+    "iconv-lite": "^0.6.3",
+    "jsonwebtoken": "^9.0.0",
+    "jszip": "^3.10.1",
+    "koa": "^2.14.1",
+    "koa-better-body": "^3.3.9",
+    "koa-compress": "^5.1.0",
+    "koa-convert": "^2.0.0",
+    "koa-router": "^12.0.0",
+    "mariadb": "^3.0.2",
+    "nanoid": "^3.3.4",
+    "node-object-hash": "^2.3.10",
+    "sqlstring": "^2.3.3",
+    "svg-captcha": "^1.4.0",
+    "typedi": "^0.10.0"
+  }
+}
