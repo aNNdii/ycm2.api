@@ -21,6 +21,7 @@ export type IMapEntity = IEntity & {
   yOffset: number
   z: number
   direction: number
+  interval: number
   probability: number
   count: number
   mobId: number
@@ -75,6 +76,10 @@ export default class MapEntity extends Entity<MapEntityProperties> implements IM
 
   get direction() {
     return this.getProperty("map_entity.map_entity_direction")
+  }
+
+  get interval() {
+    return this.getProperty("map_entity.map_entity_interval")
   }
 
   get probability() {

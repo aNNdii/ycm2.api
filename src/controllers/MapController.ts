@@ -16,6 +16,9 @@ import Controller, { IController } from "./Controller";
 import { PaginationOptions } from "../services/PaginationService";
 import { EntityFilterMethod } from "../interfaces/Entity";
 import { IMapEntity } from "../entities/MapEntity";
+import { GameMapServiceToken } from "../services/GameMapService";
+import { MapRepositoryToken } from "../repositories/MapRepository";
+import JSZip from "jszip";
 
 export const MapControllerToken = new Token<IMapController>("MapController")
 
@@ -50,9 +53,74 @@ export type IMapController = IController & {
 export default class MapController extends Controller implements IMapController {
 
   init() {
+    this.get('/maps', this.handleMapsGetRequest.bind(this))
     this.post('/maps', this.handleMapsPostRequest.bind(this))
+
+    this.get('/maps/:mapHashId', this.handleMapGetRequest.bind(this))
     this.post('/maps/:mapHashId', this.handleMapPostRequest.bind(this))
+    
     this.post('/maps/:mapHashId/entities', this.handleMapEntitiesPostRequest.bind(this))
+  }
+
+  async handleMapsGetRequest(context: IHttpRouterContext) {
+    const gameMapService = Container.get(GameMapServiceToken)
+    const mapRepository = Container.get(MapRepositoryToken)
+
+    const maps = await mapRepository.getMaps()
+
+    const mapSettingPromises = maps.map(map => gameMapService.createMapSetting(map))
+    const mapIndexPromise = gameMapService.createMapIndex(maps)
+
+    const mapSettings = [...await Promise.allSettled(mapSettingPromises)] as any
+    const mapIndex = await mapIndexPromise
+
+    const zip = new JSZip();
+
+    zip.file("index", mapIndex)
+    maps.map((map, index) => zip.file(`${map.name}Setting.txt`, mapSettings[index].value))
+
+    const content = zip.generateNodeStream({ streamFiles: true })
+
+    context.setHeader("Content-disposition", "attachment; filename=maps.zip")
+    context.setHeader("Content-type", "application/zip, application/octet-stream")
+
+    context.setStatus(HttpStatusCode.OK)
+    context.setBody(content)
+  }
+
+  async handleMapGetRequest(context: IHttpRouterContext) {
+    const { mapHashId } = context.parameters
+
+    const map = await this.getMapByHashId(mapHashId, context)
+
+    const gameMapService = Container.get(GameMapServiceToken)
+    const mapRepository = Container.get(MapRepositoryToken)
+
+    const entities = await mapRepository.getMapEntities({
+      filter: { "map_entity.map_entity_map_id": map.id }
+    })
+    
+    const mapSettingPromise = gameMapService.createMapSetting(map)
+    const mapRegenPromise = gameMapService.createMapRegen(entities)
+
+    const mapSetting = await mapSettingPromise
+    const mapRegen = await mapRegenPromise
+
+    const zip = new JSZip();
+
+    zip.file("Setting.txt", mapSetting)
+    zip.file("regen.txt", mapRegen)
+    zip.file("stone.txt", "")
+    zip.file("boss.txt", "")
+    zip.file("npc.txt", "")
+
+    const content = zip.generateNodeStream({ streamFiles: true })
+
+    context.setHeader("Content-disposition", `attachment; filename=map_${map.name}.zip`)
+    context.setHeader("Content-type", "application/zip, application/octet-stream")
+
+    context.setStatus(HttpStatusCode.OK)
+    context.setBody(content)
   }
 
   async handleMapsPostRequest(context: IHttpRouterContext) {

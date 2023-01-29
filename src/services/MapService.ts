@@ -162,7 +162,7 @@ export default class MapService extends EntityService<MapServiceOptions> impleme
     this.log("importMapSettings", { mapId, path })
 
     const gameMapService = Container.get(GameMapServiceToken)
-    const map = await gameMapService.readMapSettings(path)
+    const map = await gameMapService.readMapSetting(path)
 
     const mapRepository = Container.get(MapRepositoryToken)
     return mapRepository.updateMaps({

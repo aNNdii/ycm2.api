@@ -1,14 +1,18 @@
+import { writeToString } from "fast-csv";
 import { createReadStream } from "fs";
 import iconv from "iconv-lite";
 
 import { Token } from "../infrastructures/Container";
 
-import { KoreanEncoding, parseProtoStream } from "../helpers/Game";
+import { DefaultEncoding, KoreanEncoding, parseProtoStream } from "../helpers/Game";
 import { readStreamToBuffer } from "../helpers/Stream";
 import { getEnumValues } from "../helpers/Enum";
 
 import { MapEntityTable, MapEntityType, MapTable } from "../interfaces/Map";
 import { GameMapEntityType } from "../interfaces/GameMap";
+
+import { IMapEntity } from "../entities/MapEntity";
+import { IMap } from "../entities/Map";
 
 import Service, { IService } from "./Service";
 
@@ -16,13 +20,16 @@ export const GameMapServiceToken = new Token<IGameMapService>("GameMapService")
 
 export type IGameMapService = IService & {
   readMapIndex(path: string): Promise<Partial<MapTable>[]>
-  readMapSettings(path: string): Promise<Partial<MapTable>>
+  readMapSetting(path: string): Promise<Partial<MapTable>>
   readMapRegen(path: string): Promise<Partial<MapEntityTable>[]>
 
   parseMapIndex(stream: NodeJS.ReadableStream): Promise<Partial<MapTable>[]>
-  parseMapSettings(stream: NodeJS.ReadableStream): Promise<Partial<MapTable>>
+  parseMapSetting(stream: NodeJS.ReadableStream): Promise<Partial<MapTable>>
   parseMapRegen(stream: NodeJS.ReadableStream): Promise<Partial<MapEntityTable>[]>
 
+  createMapIndex(maps: IMap[]): Promise<Buffer>
+  createMapSetting(map: IMap): Promise<Buffer>
+  createMapRegen(entities: IMapEntity[]): Promise<Buffer>
 }
 
 export default class GameMapService extends Service<any> implements IGameMapService {
@@ -37,9 +44,9 @@ export default class GameMapService extends Service<any> implements IGameMapServ
     return this.parseMapRegen(stream)
   }
 
-  readMapSettings(path: string) {
+  readMapSetting(path: string) {
     const stream = createReadStream(path)
-    return this.parseMapSettings(stream)
+    return this.parseMapSetting(stream)
   }
 
   parseMapIndex(stream: NodeJS.ReadableStream) {
@@ -50,7 +57,7 @@ export default class GameMapService extends Service<any> implements IGameMapServ
     })
   }
 
-  async parseMapSettings(stream: NodeJS.ReadableStream) {
+  async parseMapSetting(stream: NodeJS.ReadableStream) {
     const buffer = await readStreamToBuffer(stream)
     const content = buffer.toString()
 
@@ -117,6 +124,58 @@ export default class GameMapService extends Service<any> implements IGameMapServ
     })
 
     return entities
+  }
+
+  async createMapIndex(maps: IMap[]) {
+    const content = await writeToString(maps, {
+      delimiter: '\t',
+      transform: (map: IMap) => [
+        map.id,
+        map.name
+      ]
+    })
+
+    return iconv.encode(content, DefaultEncoding)
+  }
+
+  async createMapSetting(map: IMap) {
+    let content = ""
+
+    content += `ScriptType\tMapSetting\n`
+    content += `\n`
+    
+    content += `CellScale\t${map.cellScale}\n`
+    content += `HeightScale\t${map.heightScale}\n`
+    content += `\n`
+    
+    content += `MapSize\t${map.width}\t${map.height}\n`
+    content += `BasePosition\t${map.baseX}\t${map.baseY}\n`
+    content += `TextureSet\t${map.texture}\n`
+    content += `Environment\t${map.environment}\n`
+
+    return iconv.encode(content, DefaultEncoding)
+  }
+
+  async createMapRegen(entities: IMapEntity[]) {
+    const content = await writeToString(entities, {
+      delimiter: '\t',
+      transform: (entity: IMapEntity) => [
+        GameMapEntityType[entity.typeId]?.toLowerCase(),
+        entity.x,
+        entity.y,
+        entity.xOffset,
+        entity.yOffset,
+        entity.z,
+        entity.direction,
+        `${entity.interval}s`,
+        entity.probability,
+        entity.count,
+        entity.typeId === MapEntityType.MOB_GROUP ? entity.mobGroupId : entity.typeId === MapEntityType.MOB_GROUP_GROUP ? entity.mobGroupGroupId : entity.mobId
+      ]
+    })
+
+    return iconv.encode(content, DefaultEncoding)
+
   }
 
 }

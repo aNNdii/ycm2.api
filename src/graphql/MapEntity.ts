@@ -53,6 +53,10 @@ const GraphQLMapEntity: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: (entity: IMapEntity) => entity.direction
     },
+    interval: {
+      type: GraphQLInt,
+      resolve: (entity: IMapEntity) => entity.interval
+    },
     probability: {
       type: GraphQLInt,
       resolve: (entity: IMapEntity) => entity.probability
