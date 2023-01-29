@@ -25,7 +25,7 @@ import Controller, { IController } from "./Controller";
 
 export const ItemControllerToken = new Token<IItemController>("ItemController")
 
-export enum ItemCreateAction {
+export enum ItemRequestAction {
   IMPORT_ITEM_PROTO,
   IMPORT_ITEM_NAMES,
   IMPORT_ITEM_LIST,
@@ -90,21 +90,21 @@ export default class ItemController extends Controller implements IItemControlle
     auth.verifyAuthorization(Authorization.ITEMS, AuthorizationAction.WRITE)
 
     let { action } = context.body;
-    [action] = getEnumValues(ItemCreateAction, action)
+    [action] = getEnumValues(ItemRequestAction, action)
 
     this.log("postItemsRequest", { accountId: auth.accountId, action })
 
     switch (action) {
 
-      case ItemCreateAction.IMPORT_ITEM_PROTO:
+      case ItemRequestAction.IMPORT_ITEM_PROTO:
         await this.handleItemProtoImportRequest(context.body)
         break
 
-      case ItemCreateAction.IMPORT_ITEM_NAMES:
+      case ItemRequestAction.IMPORT_ITEM_NAMES:
         await this.handleItemNamesImportRequest(context.body)
         break
 
-      case ItemCreateAction.IMPORT_ITEM_LIST:
+      case ItemRequestAction.IMPORT_ITEM_LIST:
         await this.handleItemListImportRequest(context.body)
         break
 

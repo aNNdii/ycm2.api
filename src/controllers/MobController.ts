@@ -29,7 +29,7 @@ import Controller, { IController } from "./Controller"
 
 export const MobControllerToken = new Token<IMobController>("MobController")
 
-export enum MobActions {
+export enum MobRequestAction {
   IMPORT_MOB_NAMES,
   IMPORT_MOB_PROTO,
   IMPORT_DATABASE_MOB_PROTO,
@@ -195,21 +195,21 @@ export default class MobController extends Controller implements IMobController 
     auth.verifyAuthorization(Authorization.MOBS, AuthorizationAction.WRITE)
 
     let { action } = context.body;
-    [action] = getEnumValues(MobActions, action)
+    [action] = getEnumValues(MobRequestAction, action)
 
     this.log("postMobsRequest", { accountId: auth.accountId, action })
 
     switch (action) {
 
-      case MobActions.IMPORT_MOB_NAMES:
+      case MobRequestAction.IMPORT_MOB_NAMES:
         await this.handleMobNamesImportRequest(context.body)
         break
 
-      case MobActions.IMPORT_MOB_PROTO:
+      case MobRequestAction.IMPORT_MOB_PROTO:
         await this.handleMobProtoImportRequest(context.body)
         break
 
-      case MobActions.IMPORT_DATABASE_MOB_PROTO:
+      case MobRequestAction.IMPORT_DATABASE_MOB_PROTO:
         await this.handleMobProtoDatabaseImportRequest(context.body)
         break
 
@@ -229,17 +229,17 @@ export default class MobController extends Controller implements IMobController 
     auth.verifyAuthorization(Authorization.MOBS, AuthorizationAction.WRITE)
 
     let { action } = context.body;
-    [action] = getEnumValues(MobActions, action)
+    [action] = getEnumValues(MobRequestAction, action)
 
     this.log("postMobItemsRequest", { accountId: auth.accountId, action })
 
     switch (action) {
 
-      case MobActions.IMPORT_MOB_DROP_ITEM:
+      case MobRequestAction.IMPORT_MOB_DROP_ITEM:
         await this.handleMobDropItemImportRequest(context.body)
         break
 
-      case MobActions.IMPORT_COMMON_DROP_ITEM:
+      case MobRequestAction.IMPORT_COMMON_DROP_ITEM:
         await this.handleCommonDropItemRequest(context.body)
         break
 
@@ -259,17 +259,17 @@ export default class MobController extends Controller implements IMobController 
     auth.verifyAuthorization(Authorization.MOBS, AuthorizationAction.WRITE)
 
     let { action } = context.body;
-    [action] = getEnumValues(MobActions, action)
+    [action] = getEnumValues(MobRequestAction, action)
 
     this.log("postMobGroupsRequest", { accountId: auth.accountId, action })
 
     switch (action) {
 
-      case MobActions.IMPORT_MOB_GROUP:
+      case MobRequestAction.IMPORT_MOB_GROUP:
         await this.handleMobGroupImportRequest(context.body)
         break
 
-      case MobActions.IMPORT_MOB_GROUP_GROUP:
+      case MobRequestAction.IMPORT_MOB_GROUP_GROUP:
         await this.handleMobGroupGroupImportRequest(context.body)
         break
 

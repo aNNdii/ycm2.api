@@ -13,6 +13,7 @@ import { GameMapServiceToken } from "./GameMapService";
 import { PaginationOptions } from "./PaginationService";
 import EntityService from "./EntityService";
 import { IService } from "./Service";
+import { IMapEntity, MapEntityProperties } from "../entities/MapEntity";
 
 export const MapServiceToken = new Token<IMapService>("MapService")
 
@@ -24,20 +25,34 @@ export type MapOptions = PaginationOptions & {
   id?: EntityFilter<number>
 }
 
+export type MapEntityOptions = PaginationOptions & {
+  id?: EntityFilter<number>
+  mapId?: EntityFilter<number>
+  mobId?: EntityFilter<number>
+  mobGroupId?: EntityFilter<number>
+  mobGroupGroupId?: EntityFilter<number>
+}
+
 export type MapServiceOptions = {
   mapObfuscationSalt: string
+  mapEntityObfuscationSalt: string
 }
 
 export type IMapService = IService & {
   obfuscateMapId(id: any): string
   deobfuscateMapId(value: string | string[]): number[]
+  obfuscateMapEntityId(id: any): string
+  deobfuscateMapEntityId(value: string | string[]): number[]
 
   getMapPaginationOptions(args: any): PaginationOptions
+  getMapEntityPaginationOptions(args: any): PaginationOptions
 
   getMaps(options?: MapOptions): Promise<IMap[]>
+  getMapEntities(options?: MapEntityOptions): Promise<IMapEntity[]>
 
   importMapIndex(path: string, options?: MapIndexImportOptions): Promise<any>
   importMapSettings(mapId: number, path: string): Promise<any>
+  importMapRegen(mapId: number, path: string): Promise<any>
 }
 
 export default class MapService extends EntityService<MapServiceOptions> implements IMapService {
@@ -53,8 +68,23 @@ export default class MapService extends EntityService<MapServiceOptions> impleme
     })
   }
 
+  obfuscateMapEntityId(id: any) {
+    return this.obfuscateId(id, { salt: this.options.mapEntityObfuscationSalt })
+  }
+
+  deobfuscateMapEntityId(value: string | string[]) {
+    return this.deobfuscateId(value, {
+      error: ErrorMessage.MAP_ENTITY_INVALID_ID,
+      salt: this.options.mapEntityObfuscationSalt,
+    })
+  }
+
   getMapPaginationOptions(args: any) {
     return this.getPaginationOptions(args, { offsetHandler: offset => this.deobfuscateMapId(offset) })
+  }
+
+  getMapEntityPaginationOptions(args: any) {
+    return this.getPaginationOptions(args, { offsetHandler: offset => this.deobfuscateMapEntityId(offset) })
   }
 
   getMaps(options?: MapOptions) {
@@ -77,6 +107,36 @@ export default class MapService extends EntityService<MapServiceOptions> impleme
     if (id) filter["map.map_id"] = id
 
     return mapRepository.getMaps({ filter, where, order, limit })
+  }
+
+  getMapEntities(options?: MapEntityOptions) {
+    const {
+      id,
+      mapId,
+      mobId,
+      mobGroupId,
+      mobGroupGroupId,
+      orderId,
+      offset,
+      limit
+    } = options || {}
+
+    this.log("getMapEntities", options)
+
+    const mapRepository = Container.get(MapRepositoryToken)
+
+    const orders = this.getPaginationColumnOptions({ key: 'id', column: 'map_entity.map_entity_id' })
+
+    const filter: MapEntityProperties= {}
+    const { where, order } = this.getPaginationQueryOptions({ orderId, offset, orders })
+
+    if (id) filter["map_entity.map_entity_id"] = id
+    if (mapId) filter["map_entity.map_entity_map_id"] = mapId
+    if (mobId) filter["map_entity.map_entity_mob_id"] = mobId
+    if (mobGroupId) filter["map_entity.map_entity_mob_group_id"] = mobGroupId
+    if (mobGroupGroupId) filter["map_entity.map_entity_mob_group_group_id"] = mobGroupGroupId
+
+    return mapRepository.getMapEntities({ filter, where, order, limit })
   }
 
   async importMapIndex(path: string, options: MapIndexImportOptions) {
@@ -106,11 +166,25 @@ export default class MapService extends EntityService<MapServiceOptions> impleme
 
     const mapRepository = Container.get(MapRepositoryToken)
     return mapRepository.updateMaps({
+      filter: { map_id: mapId },
       entity: map,
-      filter: {
-        map_id: mapId
-      }
     })
+  }
+
+  async importMapRegen(mapId: number, path: string) {
+    this.log("importMapRegen", { mapId, path })
+
+    const gameMapService = Container.get(GameMapServiceToken)
+    const mapRepository = Container.get(MapRepositoryToken)
+
+    const entities = await gameMapService.readMapRegen(path)
+
+    const entityChunks = chunks(entities, 500)
+    const entityPromises = entityChunks.map(entities => mapRepository.createMapEntities({
+      entities: entities.map(entity => ({ map_entity_map_id: mapId, ...entity }))
+    }))
+
+    return Promise.all(entityPromises)
   }
 
 }

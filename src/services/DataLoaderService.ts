@@ -10,8 +10,8 @@ import { GuildGradeOptions, GuildMessageOptions, GuildOptions, GuildServiceToken
 import { LocaleItemOptions, LocaleMobOptions, LocaleOptions, LocaleServiceToken } from "./LocaleService";
 import { CharacterServiceToken, CharacterOptions, CharacterItemOptions } from "./CharacterService";
 import { ItemAttributeOptions, ItemOptions, ItemServiceToken } from "./ItemService";
+import { MapEntityOptions, MapOptions, MapServiceToken } from "./MapService";
 import { AccountServiceToken, AccountsOptions } from "./AccountService";
-import { MapOptions, MapServiceToken } from "./MapService";
 import Service, { IService, ServiceOptions } from "./Service";
 
 import { IMobGroupGroupMobGroup } from "../entities/MobGroupGroupMobGroup";
@@ -25,6 +25,7 @@ import { IGuildGrade } from "../entities/GuildGrade";
 import { ILocaleItem } from "../entities/LocaleItem";
 import { ICharacter } from "../entities/Character";
 import { ILocaleMob } from "../entities/LocaleMob";
+import { IMapEntity } from "../entities/MapEntity";
 import { IMobGroup } from "../entities/MobGroup";
 import { IMobItem } from "../entities/MobItem";
 import { IAccount } from "../entities/Account";
@@ -101,6 +102,13 @@ export type IDataLoaderService = IService & {
   getMaps(options?: MapOptions): Promise<IMap[]>
   getMapsById(id: number | number[]): Promise<IMap[]>
 
+  getMapEntities(options?: MapEntityOptions): Promise<IMapEntity[]>
+  getMapEntitiesById(id: number | number[]): Promise<IMapEntity[]>
+  getMapEntitiesByMapId(id: number | number[]): Promise<IMapEntity[]>
+  getMapEntitiesByMobId(id: number | number[]): Promise<IMapEntity[]>
+  getMapEntitiesByMobGroupId(id: number | number[]): Promise<IMapEntity[]>
+  getMapEntitiesByMobGroupGroupId(id: number | number[]): Promise<IMapEntity[]>
+
   getGuilds(options?: GuildOptions): Promise<IGuild[]>
   getGuildsById(id: number | number[]): Promise<IGuild[]>
 
@@ -117,640 +125,339 @@ export default class DataLoaderService extends Service<DataLoaderServiceOptions>
 
 
   getLocales(options?: LocaleOptions) {
-    return this.get('locales', () => new DataLoader(options => Container.get(LocaleServiceToken).getLocales(options))).load(options)
+    return this.getLoader('getLocales', options => Container.get(LocaleServiceToken).getLocales(options)).load(options)
   }
 
   getLocalesById(id: number | number[]) {
-    return this.get('localesById', () => new DataLoader(ids => this.loadLocalesByIds(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getLocales({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getLocalesById', func, { batch: true }).load(id)
   }
 
   getLocalesByCode(codes: string | string[]) {
-    return this.get('localesByCode', () => new DataLoader(codes => this.loadLocalesByCodes(codes), { batch: true })).load(codes)
+    const func = this.getLoaderBatchFunc(ids => this.getLocales({ code: [EntityFilterMethod.IN, ids] }), { key: 'code' })
+    return this.getLoader('getLocalesByCode', func, { batch: true }).load(codes)
   }
 
 
   getLocaleItems(options: LocaleItemOptions) {
-    return this.get('localeItems', () => new DataLoader(options => Container.get(LocaleServiceToken).getLocaleItems(options))).load(options)
+    return this.getLoader('getLocaleItems', options => Container.get(LocaleServiceToken).getLocaleItems(options)).load(options)
   }
 
   getLocaleItemsById(id: number | number[]) {
-    return this.get('localeItemsById', () => new DataLoader(ids => this.loadLocaleItemsByIds(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getLocaleItems({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getLocaleItemsById', func, { batch: true }).load(id)
   }
 
   getLocaleItemsByItemId(id: number | number[]) {
-    return this.get('localeItemsByItemId', () => new DataLoader(ids => this.loadLocaleItemsByItemIds(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getLocaleItems({ itemId: [EntityFilterMethod.IN, ids] }), { key: 'itemId' })
+    return this.getLoader('getLocaleItemsByItemId', func, { batch: true }).load(id)
   }
 
   getLocaleItemsByLocaleId(id: number | number[]) {
-    return this.get('localeItemsByLocaleId', () => new DataLoader(ids => this.loadLocaleItemsByLocaleIds(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getLocaleItems({ localeId: [EntityFilterMethod.IN, ids] }), { key: 'localeId' })
+    return this.getLoader('getLocaleItemsByLocaleId', func, { batch: true }).load(id)
   }
 
 
   getLocaleMobs(options: LocaleMobOptions) {
-    return this.get('localeMobs', () => new DataLoader(options => Container.get(LocaleServiceToken).getLocaleMobs(options))).load(options)
+    return this.getLoader('getLocaleMobs', options => Container.get(LocaleServiceToken).getLocaleMobs(options)).load(options)
   }
 
   getLocaleMobsById(id: number | number[]) {
-    return this.get('localeMobsById', () => new DataLoader(ids => this.loadLocaleMobsByIds(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getLocaleMobs({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getLocaleMobsById', func, { batch: true }).load(id)
   }
 
   getLocaleMobsByMobId(id: number | number[]) {
-    return this.get('localeMobsByMobId', () => new DataLoader(ids => this.loadLocaleMobsByMobIds(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getLocaleMobs({ mobId: [EntityFilterMethod.IN, ids] }), { key: 'mobId' })
+    return this.getLoader('getLocaleMobsByMobId', func, { batch: true }).load(id)
   }
 
   getLocaleMobsByLocaleId(id: number | number[]) {
-    return this.get('localeMobsByLocaleId', () => new DataLoader(ids => this.loadLocaleMobsByLocaleIds(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getLocaleMobs({ localeId: [EntityFilterMethod.IN, ids] }), { key: 'localeId' })
+    return this.getLoader('getLocaleMobsByLocaleId', func, { batch: true }).load(id)
   }
 
 
   getAccounts(options?: AccountsOptions) {
-    return this.get('accounts', () => new DataLoader(options => Container.get(AccountServiceToken).getAccounts(options))).load(options)
+    return this.getLoader('getAccounts', options => Container.get(AccountServiceToken).getAccounts(options)).load(options)
   }
 
   getAccountsById(id: number | number[]) {
-    return this.get('accountsById', () => new DataLoader(ids => this.loadAccountsByIds(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getAccounts({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getAccountsById', func, { batch: true }).load(id)
   }
 
 
   getCharacters(options?: CharacterOptions) {
-    return this.get('characters', () => new DataLoader(options => Container.get(CharacterServiceToken).getCharacters(options))).load(options)
+    return this.getLoader('getCharacters', options => Container.get(CharacterServiceToken).getCharacters(options)).load(options)
   }
 
   getCharactersById(id: number | number[]) {
-    return this.get('charactersById', () => new DataLoader(ids => this.loadCharactersById(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getCharacters({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getCharactersById', func, { batch: true }).load(id)
   }
 
   getCharactersByAccountId(id: number | number[]) {
-    return this.get('charactersByAccountId', () => new DataLoader(ids => this.loadCharactersByAccountId(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getCharacters({ accountId: [EntityFilterMethod.IN, ids] }), { key: 'accountId' })
+    return this.getLoader('getCharactersByAccountId', func, { batch: true }).load(id)
   }
 
   getCharactersByGuildId(id: number | number[]) {
-    return this.get('charactersByGuildId', () => new DataLoader(ids => this.loadCharactersByGuildId(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getCharacters({ guildId: [EntityFilterMethod.IN, ids] }), { key: 'guildId' })
+    return this.getLoader('getCharactersByGuildId', func, { batch: true }).load(id)
   }
 
 
   getCharacterItems(options?: CharacterItemOptions) {
-    return this.get('characterItems', () => new DataLoader(options => Container.get(CharacterServiceToken).getCharacterItems(options))).load(options)
+    return this.getLoader('getCharacterItems', options => Container.get(CharacterServiceToken).getCharacterItems(options)).load(options)
   }
 
 
   getItems(options?: ItemOptions) {
-    return this.get('items', () => new DataLoader(options => Container.get(ItemServiceToken).getItems(options))).load(options)
+    return this.getLoader('getItems', options => Container.get(ItemServiceToken).getItems(options)).load(options)
   }
 
   getItemsById(id: number | number[]) {
-    return this.get('itemsById', () => new DataLoader(ids => this.loadItemsById(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getItems({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getItemsById', func, { batch: true }).load(id)
   }
 
   getItemsByName(name: string | string[]) {
-    return this.get('itemsByName', () => new DataLoader(names => this.loadItemsByName(names), { batch: true })).load(name)
+    const func = this.getLoaderBatchFunc(ids => this.getItems({ name: [EntityFilterMethod.IN, ids] }), { key: 'name' })
+    return this.getLoader('getItemsByName', func, { batch: true }).load(name)
   }
 
 
   getItemAttributes(options?: ItemAttributeOptions) {
-    return this.get('itemAttributes', () => new DataLoader(options => Container.get(ItemServiceToken).getItemAttributes(options))).load(options)
+    return this.getLoader('getItemAttributes', options => Container.get(ItemServiceToken).getItemAttributes(options)).load(options)
   }
 
   getItemAttributesById(id: number | number[]) {
-    return this.get('itemAttributesById', () => new DataLoader(ids => this.loadItemAttributesById(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getItemAttributes({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getItemAttributesById', func, { batch: true }).load(id)
   }
 
   getItemRareAttributesById(id: number | number[]) {
-    return this.get('itemRareAttributesById', () => new DataLoader(ids => this.loadItemRareAttributesById(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getItemAttributes({ id: [EntityFilterMethod.IN, ids], rare: true }))
+    return this.getLoader('getItemRareAttributesById', func, { batch: true }).load(id)
   }
 
 
   getMobs(options?: ItemOptions) {
-    return this.get('mobs', () => new DataLoader(options => Container.get(MobServiceToken).getMobs(options))).load(options)
+    return this.getLoader('getMobs', options => Container.get(MobServiceToken).getMobs(options)).load(options)
   }
 
   getMobsById(id: number | number[]) {
-    return this.get('mobsById', () => new DataLoader(ids => this.loadMobsById(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobs({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getMobsById', func, { batch: true }).load(id)
   }
 
 
   getMobItems(options?: MobItemOptions) {
-    return this.get('mobItems', () => new DataLoader(options => Container.get(MobServiceToken).getMobItems(options))).load(options)
+    return this.getLoader('getMobItems', options => Container.get(MobServiceToken).getMobItems(options)).load(options)
   }
 
   getMobItemsById(id: number | number[]) {
-    return this.get('mobItemsById', () => new DataLoader(ids => this.loadMobItemsById(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobItems({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getMobItemsById', func, { batch: true }).load(id)
   }
 
   getMobItemsByMobId(id: number | number[]) {
-    return this.get('mobItemsByMobId', () => new DataLoader(ids => this.loadMobItemsByMobId(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobItems({ mobId: [EntityFilterMethod.IN, ids] }), { key: 'mobId' })
+    return this.getLoader('getMobItemsByMobId', func, { batch: true }).load(id)
   }
 
   getMobItemsByItemId(id: number | number[]) {
-    return this.get('mobItemsByItemId', () => new DataLoader(ids => this.loadMobItemsByItemId(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobItems({ itemId: [EntityFilterMethod.IN, ids] }), { key: 'itemId' })
+    return this.getLoader('getMobItemsByItemId', func, { batch: true }).load(id)
   }
 
 
   getMobRankItems(options?: MobRankItemOptions) {
-    return this.get('mobRankItems', () => new DataLoader(options => Container.get(MobServiceToken).getMobRankItems(options))).load(options)
+    return this.getLoader('getMobRankItems', options => Container.get(MobServiceToken).getMobRankItems(options)).load(options)
   }
 
   getMobRankItemsById(id: number | number[]) {
-    return this.get('mobRankItemsById', () => new DataLoader(ids => this.loadMobRankItemsById(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobRankItems({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getMobRankItemsById', func, { batch: true }).load(id)
   }
 
   getMobRankItemsByItemId(id: number | number[]) {
-    return this.get('mobRankItemsByItemId', () => new DataLoader(ids => this.loadMobRankItemsByItemId(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobRankItems({ itemId: [EntityFilterMethod.IN, ids] }), { key: 'itemId' })
+    return this.getLoader('getMobRankItemsByItemId', func, { batch: true }).load(id)
   }
 
   getMobRankItemsByMobRankId(id: number | number[]) {
-    return this.get('mobRankItemsByMobRankId', () => new DataLoader(ids => this.loadMobRankItemsByMobRankId(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobRankItems({ mobRankId: [EntityFilterMethod.IN, ids] }), { key: 'mobRankId' })
+    return this.getLoader('getMobRankItemsByMobRankId', func, { batch: true }).load(id)
   }
 
 
   getMobGroups(options?: MobGroupOptions) {
-    return this.get('mobGroups', () => new DataLoader(options => Container.get(MobServiceToken).getMobGroups(options))).load(options)
+    return this.getLoader('getMobGroups', options => Container.get(MobServiceToken).getMobGroups(options)).load(options)
   }
 
   getMobGroupsById(id: number | number[]) {
-    return this.get('mobGroupsById', () => new DataLoader(ids => this.loadMobGroupsById(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobGroups({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getMobGroupsById', func, { batch: true }).load(id)
   }
 
 
   getMobGroupMobs(options?: MobGroupMobOptions) {
-    return this.get('mobGroupMobs', () => new DataLoader(options => Container.get(MobServiceToken).getMobGroupMobs(options))).load(options)
+    return this.getLoader('getMobGroupMobs', options => Container.get(MobServiceToken).getMobGroupMobs(options)).load(options)
   }
 
   getMobGroupMobsById(id: number | number[]) {
-    return this.get('mobGroupMobsById', () => new DataLoader(ids => this.loadMobGroupMobsById(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobGroupMobs({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getMobGroupMobsById', func, { batch: true }).load(id)
   }
 
   getMobGroupMobsByMobId(id: number | number[]) {
-    return this.get('mobGroupMobsByMobId', () => new DataLoader(ids => this.loadMobGroupMobsByMobId(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobGroupMobs({ mobId: [EntityFilterMethod.IN, ids] }), { key: 'mobId' })
+    return this.getLoader('getMobGroupMobsByMobId', func, { batch: true }).load(id)
   }
 
   getMobGroupMobsByMobGroupId(id: number | number[]) {
-    return this.get('mobGroupMobsByMobGroupId', () => new DataLoader(ids => this.loadMobGroupMobsByMobGroupId(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobGroupMobs({ mobGroupId: [EntityFilterMethod.IN, ids] }), { key: 'mobGroupId' })
+    return this.getLoader('getMobGroupMobsByMobGroupId', func, { batch: true }).load(id)
   }
 
 
   getMobGroupGroups(options?: MobGroupOptions) {
-    return this.get('mobGroupGroups', () => new DataLoader(options => Container.get(MobServiceToken).getMobGroupGroups(options))).load(options)
+    return this.getLoader('getMobGroupGroups', options => Container.get(MobServiceToken).getMobGroupGroups(options)).load(options)
   }
 
   getMobGroupGroupsById(id: number | number[]) {
-    return this.get('mobGroupGroupsById', () => new DataLoader(ids => this.loadMobGroupGroupsById(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobGroupGroups({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getMobGroupGroupsById', func, { batch: true }).load(id)
   }
 
 
   getMobGroupGroupMobGroups(options?: MobGroupGroupMobGroupOptions) {
-    return this.get('mobGroupGroupMobGroups', () => new DataLoader(options => Container.get(MobServiceToken).getMobGroupGroupMobGroups(options))).load(options)
+    return this.getLoader('getMobGroupGroupMobGroups', options => Container.get(MobServiceToken).getMobGroupGroupMobGroups(options)).load(options)
   }
 
   getMobGroupGroupMobGroupsById(id: number | number[]) {
-    return this.get('mobGroupGroupMobGroupsById', () => new DataLoader(ids => this.loadMobGroupGroupMobGroupsById(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobGroupGroupMobGroups({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getMobGroupGroupMobGroupsById', func, { batch: true }).load(id)
   }
 
   getMobGroupGroupMobGroupsByMobGroupId(id: number | number[]) {
-    return this.get('mobGroupGroupMobGroupsByMobGroupId', () => new DataLoader(ids => this.loadMobGroupGroupMobGroupsByMobGroupId(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobGroupGroupMobGroups({ mobGroupId: [EntityFilterMethod.IN, ids] }), { key: 'mobGroupId' })
+    return this.getLoader('getMobGroupGroupMobGroupsByMobGroupId', func, { batch: true }).load(id)
   }
 
   getMobGroupGroupMobGroupsByMobGroupGroupId(id: number | number[]) {
-    return this.get('mobGroupGroupMobGroupsByMobGroupGroupId', () => new DataLoader(ids => this.loadMobGroupGroupMobGroupsByMobGroupGroupId(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMobGroupGroupMobGroups({ mobGroupId: [EntityFilterMethod.IN, ids] }), { key: 'mobGroupGroupId' })
+    return this.getLoader('getMobGroupGroupMobGroupsByMobGroupGroupId', func, { batch: true }).load(id)
   }
 
 
   getMaps(options?: MapOptions) {
-    return this.get('maps', () => new DataLoader(options => Container.get(MapServiceToken).getMaps(options))).load(options)
+    return this.getLoader('getMaps', options => Container.get(MapServiceToken).getMaps(options)).load(options)
   }
 
   getMapsById(id: number | number[]) {
-    return this.get('mapsById', () => new DataLoader(ids => this.loadMapsById(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getMaps({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getMapsById', func, { batch: true }).load(id)
+  }
+
+
+  getMapEntities(options?: MapEntityOptions) {
+    return this.getLoader('getMapEntities', options => Container.get(MapServiceToken).getMapEntities(options)).load(options)
+  }
+
+  getMapEntitiesById(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getMapEntities({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getMapEntitiesById', func, { batch: true }).load(id)
+  }
+
+  getMapEntitiesByMapId(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getMapEntities({ mapId: [EntityFilterMethod.IN, ids] }), { key: 'mapId' })
+    return this.getLoader('getMapEntitiesByMapId', func, { batch: true }).load(id)
+  }
+
+  getMapEntitiesByMobId(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getMapEntities({ mobId: [EntityFilterMethod.IN, ids] }), { key: 'mobId' })
+    return this.getLoader('getMapEntitiesByMobId', func, { batch: true }).load(id)
+  }
+
+  getMapEntitiesByMobGroupId(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getMapEntities({ mobGroupId: [EntityFilterMethod.IN, ids] }), { key: 'mobGroupId' })
+    return this.getLoader('getMapEntitiesByMobGroupId', func, { batch: true }).load(id)
+  }
+
+  getMapEntitiesByMobGroupGroupId(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getMapEntities({ mobGroupGroupId: [EntityFilterMethod.IN, ids] }), { key: 'mobGroupGroupId' })
+    return this.getLoader('getMapEntitiesByMobGroupGroupId', func, { batch: true }).load(id)
   }
 
 
   getGuilds(options?: GuildOptions) {
-    return this.get('guilds', () => new DataLoader(options => Container.get(GuildServiceToken).getGuilds(options))).load(options)
+    return this.getLoader('getGuilds', options => Container.get(GuildServiceToken).getGuilds(options)).load(options)
   }
 
   getGuildsById(id: number | number[]) {
-    return this.get('guildsById', () => new DataLoader(ids => this.loadGuildsById(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getGuilds({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getGuildsById', func, { batch: true }).load(id)
   }
 
 
   getGuildMessages(options?: GuildGradeOptions) {
-    return this.get('guildMessages', () => new DataLoader(options => Container.get(GuildServiceToken).getGuildMessages(options))).load(options)
+    return this.getLoader('getGuildMessages', options => Container.get(GuildServiceToken).getGuildMessages(options)).load(options)
   }
 
 
   getGuildGrades(options?: GuildGradeOptions) {
-    return this.get('guildGrades', () => new DataLoader(options => Container.get(GuildServiceToken).getGuildGrades(options))).load(options)
+    return this.getLoader('getGuildGrades', options => Container.get(GuildServiceToken).getGuildGrades(options)).load(options)
   }
 
   getGuildGradesByGuildId(id: number | number[]) {
-    return this.get('guildGradesByGuildId', () => new DataLoader(ids => this.loadGuildGradesByGuildId(ids), { batch: true })).load(id)
+    const func = this.getLoaderBatchFunc(ids => this.getGuildGrades({ guildId: [EntityFilterMethod.IN, ids] }), { key: 'guildId' })
+    return this.getLoader('getGuildGradesByGuildId', func, { batch: true }).load(id)
   }
 
   getGuildGradesByIdAndGuildId(id: number | number[], guildId: number | number[]) {
-    return this.get('guildGradesByIdAndGuildId', () => new DataLoader(ids => this.loadGuildGradesByIdAndGuildId(ids), { batch: true })).load([id, guildId])
+    const func = this.getLoaderBatchFunc(ids => {
+      let gradeIds: number[] = []
+      let guildIds: number[] = []
+
+      ids.map(({ id, guildId }: any) => {
+        gradeIds = [...gradeIds, ...[id].flat()]
+        guildIds = [...guildIds, ...[guildId].flat()]
+      })
+
+      return this.getGuildGrades({
+        id: [EntityFilterMethod.IN, gradeIds],
+        guildId: [EntityFilterMethod.IN, guildIds]
+      })
+    }, {
+      compareFunc: ({id, guildId}: any, entity: any) => [id].flat().includes(entity.id) && [guildId].flat().includes(entity.guildId)
+    })
+
+    return this.getLoader('getGuildGradesByGuildId', func, { batch: true }).load({ id, guildId })
   }
 
-
-  private get<Key = any, Value = any>(key: string, factory: () => IDataLoader<any, any>): IDataLoader<Key, Value> {
-    this.loaders[key] = this.loaders[key] || factory()
+  
+  private getLoader(key: string, func: (data: any) => Promise<any>, options?: any) {
+    this.loaders[key] = this.loaders[key] || new DataLoader(data => func(data), options)
     return this.loaders[key]
   }
 
-  private async loadAccountsByIds(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getAccounts({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadLocalesByIds(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getLocales({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadLocalesByCodes(codes: (string | string[])[]) {
-    const uCodes = unique(codes.flat())
-    const entities = await this.getLocales({ code: [EntityFilterMethod.IN, uCodes] })
-
-    return codes.map(code => {
-      const items: any[] = []
-      entities.map((entity: any) => [code].flat().includes(entity.code) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadCharactersById(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getCharacters({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadCharactersByAccountId(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getCharacters({ accountId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.accountId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadCharactersByGuildId(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getCharacters({ guildId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.guildId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadItemsById(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getItems({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadItemsByName(names: (string | string[])[]) {
-    const entities = await this.getItems({ name: [EntityFilterMethod.IN, names.flat()] })
-
-    return names.map(name => {
-      const items: any[] = []
-      entities.map((entity: any) => [name].flat().includes(entity.name) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadItemAttributesById(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getItemAttributes({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadItemRareAttributesById(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getItemAttributes({ id: [EntityFilterMethod.IN, uIds], rare: true })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMapsById(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMaps({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobsById(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobs({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadGuildsById(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getGuilds({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadGuildGradesByGuildId(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getGuildGrades({ guildId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.guildId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadGuildGradesByIdAndGuildId(ids: (number | number[])[]) {
-    let gradeIds: number[] = []
-    let guildIds: number[] = []
-
-    ids.map(([gradeId, guildId]: any) => {
-      gradeIds = [...gradeIds, ...[gradeId].flat()]
-      guildIds = [...guildIds, ...[guildId].flat()]
-    })
-
-    const uGradeIds = unique(gradeIds.flat())
-    const uGuildIds = unique(guildIds.flat())
-
-    const entities = await this.getGuildGrades({
-      id: [EntityFilterMethod.IN, uGradeIds],
-      guildId: [EntityFilterMethod.IN, uGuildIds]
-    })
-
-    return ids.map(([id, guildId]: any) => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) && [guildId].flat().includes(entity.guildId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadLocaleItemsByIds(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getLocaleItems({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadLocaleItemsByItemIds(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getLocaleItems({ itemId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.itemId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadLocaleItemsByLocaleIds(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getLocaleItems({ localeId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.localeId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadLocaleMobsByIds(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getLocaleMobs({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadLocaleMobsByMobIds(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getLocaleMobs({ mobId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.mobId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadLocaleMobsByLocaleIds(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getLocaleMobs({ localeId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.localeId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobItemsById(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobItems({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobItemsByMobId(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobItems({ mobId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.mobId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobItemsByItemId(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobItems({ itemId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.itemId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobRankItemsById(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobRankItems({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobRankItemsByItemId(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobRankItems({ itemId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.itemId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobRankItemsByMobRankId(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobRankItems({ mobRankId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.rankId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobGroupsById(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobGroups({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobGroupGroupsById(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobGroupGroups({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobGroupMobsById(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobGroupMobs({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobGroupMobsByMobId(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobGroupMobs({ mobId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.mobId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobGroupMobsByMobGroupId(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobGroupMobs({ mobGroupId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.mobGroupId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobGroupGroupMobGroupsById(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobGroupGroupMobGroups({ id: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.id) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobGroupGroupMobGroupsByMobGroupId(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobGroupGroupMobGroups({ mobGroupId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.mobGroupId) ? items.push(entity) : null)
-      return items
-    })
-  }
-
-  private async loadMobGroupGroupMobGroupsByMobGroupGroupId(ids: (number | number[])[]) {
-    const uIds = unique(ids.flat())
-    const entities = await this.getMobGroupGroupMobGroups({ mobGroupGroupId: [EntityFilterMethod.IN, uIds] })
-
-    return ids.map(id => {
-      const items: any[] = []
-      entities.map((entity: any) => [id].flat().includes(entity.mobGroupGroupId) ? items.push(entity) : null)
-      return items
-    })
+  private getLoaderBatchFunc(func: (data: any) => Promise<any>, options?: any) {
+    let { key = 'id', compareFunc } = options || {}
+    compareFunc = compareFunc || ((data: any, entity: any) => [data].flat().includes(entity[key]))
+
+    return async (data: any) => {
+      const entities = await func(data.flat())
+
+      return data.map((d: any) => {
+        const items: any[] = []
+        entities.map((entity: any) => compareFunc(d, entity) ? items.push(entity) : null)
+        return items
+      })
+    }
   }
 
 }

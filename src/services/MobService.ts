@@ -209,7 +209,7 @@ export default class MobService extends EntityService<MobServiceOptions> impleme
   }
 
   getMobPaginationOptions(args: any) {
-    return this.getPaginationOptions(args, { offsetHandler: offset => offset })
+    return this.getPaginationOptions(args, { offsetHandler: offset => [parseInt(offset)] })
   }
 
   getMobs(options?: MobOptions) {

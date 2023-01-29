@@ -62,6 +62,9 @@ export enum ErrorMessage {
   MAP_INVALID_ID = "invalid_map_id",
   MAP_NOT_FOUND = "map_not_found",
 
+  MAP_ENTITY_INVALID_ID = "invalid_map_entity_id",
+  MAP_ENTITY_NOT_FOUND = "map_entity_not_found",
+
   GUILD_INVALID_ID = "invalid_guild_id",
   GUILD_NOT_FOUND = "guild_not_found",
   GUILD_MESSAGE_INVALID_ID = "invalid_guild_message_id",

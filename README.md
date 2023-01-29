@@ -87,7 +87,7 @@ query {
       }
     }
     source {
-      mob
+      mobs
         mob {
           id
           name

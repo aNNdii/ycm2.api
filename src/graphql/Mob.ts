@@ -366,17 +366,7 @@ const GraphQLMob: GraphQLObjectType = new GraphQLObjectType({
     },
     items: {
       type: new GraphQLList(GraphQLMobItem),
-      args: {
-        ...getPaginationArguments()
-      },
-      resolve: (mob: IMob, args: any, context: IGraphQLContext) => {
-        const mobController = Container.get(MobControllerToken)
-
-        return mobController.getMobItems({ 
-          ...args,
-          mobId: mob.id
-        }, context)
-      }
+      resolve: (mob: IMob, args: any, context: IGraphQLContext) => context.dataLoaderService.getMobItemsByMobId(mob.id)
     },
     groups: {
       type: new GraphQLList(GraphQLMobGroupMob),

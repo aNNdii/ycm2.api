@@ -135,6 +135,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const LOCALE_ITEM_OBFUSCATION_SALT = process.env.LOCALE_ITEM_OBFUSCATION_SALT || OBFUSCATION_SALT
   const LOCALE_MOB_OBFUSCATION_SALT = process.env.LOCALE_MOB_OBFUSCATION_SALT || OBFUSCATION_SALT
   const MAP_OBFUSCATION_SALT = process.env.MAP_OBFUSCATION_SALT || OBFUSCATION_SALT
+  const MAP_ENTITY_OBFUSCATION_SALT = process.env.MAP_ENTITY_OBFUSCATION_SALT || OBFUSCATION_SALT
   const GUILD_OBFUSCATION_SALT = process.env.GUILD_OBFUSCATION_SALT || OBFUSCATION_SALT
   const GUILD_MESSAGE_OBFUSCATION_SALT = process.env.GUILD_MESSAGE_OBFUSCATION_SALT || OBFUSCATION_SALT
   const MOB_ITEM_OBFUSCATION_SALT = process.env.MOB_ITEM_OBFUSCATION_SALT || OBFUSCATION_SALT
@@ -280,7 +281,8 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   }))
 
   Container.set(MapServiceToken, new MapService({
-    mapObfuscationSalt: MAP_OBFUSCATION_SALT
+    mapObfuscationSalt: MAP_OBFUSCATION_SALT,
+    mapEntityObfuscationSalt: MAP_ENTITY_OBFUSCATION_SALT
   }))
 
   Container.set(GuildServiceToken, new GuildService({

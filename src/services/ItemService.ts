@@ -52,7 +52,7 @@ export type IItemService = IEntityService & {
 export default class ItemService extends EntityService<ItemServiceOptions> implements IItemService {
 
   getItemPaginationOptions(args: any) {
-    return this.getPaginationOptions(args, { offsetHandler: offset => offset })
+    return this.getPaginationOptions(args, { offsetHandler: offset => [parseInt(offset)] })
   }
 
   getItems(options?: ItemOptions) {

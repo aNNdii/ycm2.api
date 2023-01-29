@@ -1,10 +1,17 @@
-import { GraphQLFloat, GraphQLID, GraphQLInt, GraphQLObjectType, GraphQLString } from "graphql";
+import { GraphQLFloat, GraphQLID, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
+
+import Container from "../infrastructures/Container";
+
+import { getPaginationArguments } from "../helpers/GraphQL";
 
 import { Authorization, AuthorizationAction } from "../interfaces/Auth";
 
 import { IGraphQLContext } from "../entities/GraphQLContext";
-
 import { IMap } from "../entities/Map";
+
+import { MapControllerToken } from "../controllers/MapController";
+
+import GraphQLMapEntity from "./MapEntity";
 
 const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
   name: 'Map',
@@ -96,6 +103,19 @@ const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
         auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.READ)
 
         return map.environment
+      }
+    },
+    entities: {
+      type: new GraphQLList(GraphQLMapEntity),
+      args: {
+        ...getPaginationArguments()
+      },
+      resolve: (map: IMap, args: any, context: IGraphQLContext) => {
+        const mapController = Container.get(MapControllerToken)
+        return mapController.getMapEntities({
+          ...args,
+          mapId: [map.id]
+        }, context)
       }
     },
     createdDate: {

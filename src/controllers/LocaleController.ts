@@ -42,13 +42,10 @@ export type LocaleMobOptions = PaginationOptions & {
   mobId: number[]
 }
 
-export enum LocaleItemCreateAction {
+export enum LocaleRequestAction {
   IMPORT_ITEM_NAMES,
-  IMPORT_ITEM_DESCRIPTIONS
-}
-
-export enum LocaleMobCreateAction {
-  IMPORT_MOB_NAMES,
+  IMPORT_ITEM_DESCRIPTIONS,
+  IMPORT_MOB_NAMES
 }
 
 export type ILocaleController = IController & {
@@ -123,7 +120,7 @@ export default class LocaleController extends Controller implements ILocaleContr
     let { localeId } = context.parameters;
     let { action } = context.body;
 
-    [action] = getEnumValues(LocaleItemCreateAction, action)
+    [action] = getEnumValues(LocaleRequestAction, action)
 
     this.log("postLocaleItems", { accountId: auth.accountId, localeId, action })
 
@@ -131,11 +128,11 @@ export default class LocaleController extends Controller implements ILocaleContr
 
     switch (action) {
 
-      case LocaleItemCreateAction.IMPORT_ITEM_NAMES:
+      case LocaleRequestAction.IMPORT_ITEM_NAMES:
         await this.handleItemNamesImportRequest(locale, context.body)
         break
 
-      case LocaleItemCreateAction.IMPORT_ITEM_DESCRIPTIONS:
+      case LocaleRequestAction.IMPORT_ITEM_DESCRIPTIONS:
         await this.handleItemDescriptionsImportRequest(locale, context.body)
         break
 
@@ -196,7 +193,7 @@ export default class LocaleController extends Controller implements ILocaleContr
     let { localeId } = context.parameters;
     let { action } = context.body;
 
-    [action] = getEnumValues(LocaleMobCreateAction, action)
+    [action] = getEnumValues(LocaleRequestAction, action)
 
     this.log("postLocaleMobs", { accountId: auth.accountId, localeId, action })
 
@@ -204,7 +201,7 @@ export default class LocaleController extends Controller implements ILocaleContr
 
     switch (action) {
 
-      case LocaleMobCreateAction.IMPORT_MOB_NAMES:
+      case LocaleRequestAction.IMPORT_MOB_NAMES:
         await this.handleMobNamesImportRequest(locale, context.body)
         break
 
