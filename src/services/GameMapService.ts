@@ -159,19 +159,31 @@ export default class GameMapService extends Service<any> implements IGameMapServ
   async createMapRegen(entities: IMapEntity[]) {
     const content = await writeToString(entities, {
       delimiter: '\t',
-      transform: (entity: IMapEntity) => [
-        GameMapEntityType[entity.typeId]?.toLowerCase(),
-        entity.x,
-        entity.y,
-        entity.xOffset,
-        entity.yOffset,
-        entity.z,
-        entity.direction,
-        `${entity.interval}s`,
-        entity.probability,
-        entity.count,
-        entity.typeId === MapEntityType.MOB_GROUP ? entity.mobGroupId : entity.typeId === MapEntityType.MOB_GROUP_GROUP ? entity.mobGroupGroupId : entity.mobId
-      ]
+      transform: (entity: IMapEntity) => {
+
+        const type = GameMapEntityType[entity.typeId]?.toLowerCase()
+        const aggressive = type && entity.aggressive ? 'a' : ''
+
+        let entityId = entity.mobId || 0
+
+        if (entity.typeId === MapEntityType.MOB_GROUP) entityId = entity.mobGroupId
+        else if (entity.typeId === MapEntityType.MOB_GROUP_GROUP) entityId = entity.mobGroupGroupId
+
+        return [
+          `${type || 'e'}${aggressive}`,
+          entity.x,
+          entity.y,
+          entity.xOffset,
+          entity.yOffset,
+          entity.z,
+          entity.direction,
+          `${entity.interval}s`,
+          entity.probability,
+          entity.count,
+          entityId
+        ]
+
+      }
     })
 
     return iconv.encode(content, DefaultEncoding)

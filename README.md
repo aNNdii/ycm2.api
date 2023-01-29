@@ -26,7 +26,7 @@ An open source api for managing Metin2 game servers, written in Node.js and usin
   - common_drop_item.txt
   - mob_group.txt
   - mob_group_group.txt
-  - Map (Index, Settings.txt)
+  - Map (index, Settings.txt, regen.txt, boss.txt, stone.txt, npc.txt)
 
 
 ## Deployment
@@ -87,7 +87,7 @@ query {
       }
     }
     source {
-      mobs
+      mobs {
         mob {
           id
           name
@@ -107,7 +107,6 @@ query {
   - special_item_group.txt
   - cube.txt
   - blend.txt
-  - Map (regen.txt, boss.txt, stone.txt...)
 - And many, many more...
 
 
