@@ -77,7 +77,7 @@ export default class MapController extends Controller implements IMapController 
     const zip = new JSZip();
 
     zip.file("index", mapIndex)
-    maps.map((map, index) => zip.file(`${map.name}Setting.txt`, mapSettings[index].value))
+    maps.map((map, index) => zip.file(`${map.name}/Setting.txt`, mapSettings[index].value))
 
     const content = zip.generateNodeStream({ streamFiles: true })
 
