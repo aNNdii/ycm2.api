@@ -18,6 +18,9 @@ export enum ErrorMessage {
   ACCOUNT_NOT_FOUND = "account_not_found",
   ACCOUNT_BLOCKED = "account_blocked",
 
+  ACCOUNT_GROUP_INVALID_ID = "invalid_account_group_id",
+  ACCOUNT_GROUP_NOT_FOUND = "account_group_not_found",
+
   CHARACTER_INVALID_ID = "invalid_character_id",
 
   CHARACTER_ITEM_INVALID_ID = "invalid_character_item_id",

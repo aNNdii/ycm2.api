@@ -4,7 +4,7 @@ import Container from "../infrastructures/Container"
 
 import { getPaginationArguments } from "../helpers/GraphQL"
 
-import { Authorization, AuthorizationAction } from "../interfaces/Auth"
+import { Authorization } from "../interfaces/Auth"
 
 import { CharacterControllerToken } from "../controllers/CharacterController"
 
@@ -24,7 +24,7 @@ const GraphQLCharacterQuery = {
       const { id: hashId } = args || {}
 
       const auth = context.getAuth()
-      auth.verifyAuthorization(Authorization.CHARACTERS, AuthorizationAction.READ)
+      auth.verifyAuthorization(Authorization.CHARACTERS_READ)
 
       const characterController = Container.get(CharacterControllerToken)
       return characterController.getCharacterByHashId(hashId, context)
@@ -39,7 +39,7 @@ const GraphQLCharacterQuery = {
     },
     resolve: (_: any, args: any, context: IGraphQLContext) => {
       const auth = context.getAuth()
-      auth.verifyAuthorization(Authorization.CHARACTERS, AuthorizationAction.READ)
+      auth.verifyAuthorization(Authorization.CHARACTERS_READ)
 
       const characterController = Container.get(CharacterControllerToken)
       return characterController.getCharacters(args, context)

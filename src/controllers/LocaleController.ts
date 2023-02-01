@@ -7,8 +7,8 @@ import { getEnumValues } from "../helpers/Enum"
 import { HttpStatusCode } from "../interfaces/HttpStatusCode"
 import { ErrorMessage } from "../interfaces/ErrorMessage"
 
-import { Authorization, AuthorizationAction } from "../interfaces/Auth"
 import { EntityFilterMethod } from "../interfaces/Entity"
+import { Authorization } from "../interfaces/Auth"
 
 import { IHttpRouterContext } from "../entities/HttpRouterContext"
 import HttpRouterError from "../entities/HttpRouterError"
@@ -28,7 +28,9 @@ import Controller, { IController } from "./Controller"
 
 export const LocaleControllerToken = new Token<ILocaleController>("LocaleController")
 
-export type LocaleOptions = PaginationOptions & {}
+export type LocaleOptions = PaginationOptions & {
+
+}
 
 export type LocaleItemOptions = PaginationOptions & {
   id: number[]
@@ -43,8 +45,8 @@ export type LocaleMobOptions = PaginationOptions & {
 }
 
 export enum LocaleRequestAction {
-  IMPORT_ITEM_NAMES,
   IMPORT_ITEM_DESCRIPTIONS,
+  IMPORT_ITEM_NAMES,
   IMPORT_MOB_NAMES
 }
 
@@ -115,7 +117,7 @@ export default class LocaleController extends Controller implements ILocaleContr
 
   async handleLocaleItemsPostRequest(context: IHttpRouterContext) {
     const auth = context.getAuth()
-    auth.verifyAuthorization(Authorization.LOCALES, AuthorizationAction.WRITE)
+    auth.verifyAuthorization(Authorization.LOCALES_ITEMS_IMPORT)
 
     let { localeId } = context.parameters;
     let { action } = context.body;
@@ -188,7 +190,7 @@ export default class LocaleController extends Controller implements ILocaleContr
 
   async handleLocaleMobsPostRequest(context: IHttpRouterContext) {
     const auth = context.getAuth()
-    auth.verifyAuthorization(Authorization.LOCALES, AuthorizationAction.WRITE)
+    auth.verifyAuthorization(Authorization.LOCALES_MOBS_IMPORT)
 
     let { localeId } = context.parameters;
     let { action } = context.body;
@@ -214,8 +216,6 @@ export default class LocaleController extends Controller implements ILocaleContr
       status: HttpStatusCode.OK,
       data: {}
     })
-
-
   }
 
   async handleItemNamesImportRequest(locale: ILocale, options: any) {

@@ -21,7 +21,9 @@ export enum GameDatabase {
   CMS
 }
 
-export type IGameRepository = IMariaRepository & {}
+export type IGameRepository = IMariaRepository & {
+  getDatabaseName(database: GameDatabase): string
+}
 
 export default class GameRepository extends MariaRepository implements IGameRepository {
 

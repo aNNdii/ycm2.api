@@ -9,7 +9,7 @@ import { AccountControllerToken } from "../controllers/AccountController"
 import { HttpStatusCode } from "../interfaces/HttpStatusCode"
 import { ErrorMessage } from "../interfaces/ErrorMessage"
 
-import { Authorization, AuthorizationAction } from "../interfaces/Auth"
+import { Authorization } from "../interfaces/Auth"
 import { AccountStatus } from "../interfaces/Account"
 
 import { IGraphQLContext } from "../entities/GraphQLContext"
@@ -41,7 +41,7 @@ const GraphQLAccountQuery = {
       const { id: hashId } = args || {}
 
       const auth = context.getAuth()
-      auth.verifyAuthorization(Authorization.ACCOUNTS, AuthorizationAction.READ)
+      auth.verifyAuthorization(Authorization.ACCOUNTS_READ)
 
       const accountController = Container.get(AccountControllerToken)
       return accountController.getAccountByHashId(hashId, context)
@@ -55,7 +55,7 @@ const GraphQLAccountQuery = {
     },
     resolve: (_: any, args: any, context: IGraphQLContext) => {
       const auth = context.getAuth()
-      auth.verifyAuthorization(Authorization.ACCOUNTS, AuthorizationAction.READ)
+      auth.verifyAuthorization(Authorization.ACCOUNTS_READ)
 
       const accountController = Container.get(AccountControllerToken)
       return accountController.getAccounts(args, context)

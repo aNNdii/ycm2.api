@@ -4,7 +4,7 @@ import Container from "../infrastructures/Container";
 
 import { getPaginationArguments } from "../helpers/GraphQL";
 
-import { Authorization, AuthorizationAction } from "../interfaces/Auth";
+import { Authorization } from "../interfaces/Auth";
 
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { IMap } from "../entities/Map";
@@ -28,7 +28,7 @@ const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: (map: IMap, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.MAPS_READ)
 
         return map.width
       }
@@ -37,7 +37,7 @@ const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: (map: IMap, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.MAPS_READ)
 
         return map.height
       }
@@ -46,7 +46,7 @@ const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: (map: IMap, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.MAPS_READ)
 
         return map.baseX
       }
@@ -55,7 +55,7 @@ const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: (map: IMap, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.MAPS_READ)
 
         return map.baseY
       }
@@ -64,7 +64,7 @@ const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: (map: IMap, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.MAPS_READ)
 
         return map.viewRadius
       }
@@ -73,7 +73,7 @@ const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLFloat,
       resolve: (map: IMap, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.MAPS_READ)
 
         return map.heightScale
       }
@@ -82,7 +82,7 @@ const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: (map: IMap, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.MAPS_READ)
 
         return map.cellScale
       }
@@ -91,7 +91,7 @@ const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLString,
       resolve: (map: IMap, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.MAPS_READ)
 
         return map.texture
       }
@@ -100,7 +100,7 @@ const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLString,
       resolve: (map: IMap, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.MAPS_READ)
 
         return map.environment
       }
@@ -122,7 +122,7 @@ const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLString,
       resolve: (map: IMap, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.MAPS_READ)
 
         return new Date(map.createdDate).toISOString()
       }
@@ -131,7 +131,7 @@ const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLString,
       resolve: (map: IMap, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.MAPS_READ)
 
         return new Date(map.modifiedDate).toISOString()
       }

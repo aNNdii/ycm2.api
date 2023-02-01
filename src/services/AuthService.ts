@@ -1,17 +1,17 @@
 import jwt, { Algorithm } from "jsonwebtoken";
 
 import Container, { Token } from "../infrastructures/Container";
-import { AuthenticationMethod, AuthenticationTokenType, AuthorizationAdminId } from "../interfaces/Auth";
+import { AuthenticationTokenType } from "../interfaces/Auth";
 
 import { ErrorMessage } from "../interfaces/ErrorMessage";
 import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 
 import HttpRouterError from "../entities/HttpRouterError";
 import Auth, { IAuth } from "../entities/Auth";
+import { IAccount } from "../entities/Account";
 
 import { AccountServiceToken } from "./AccountService";
 import Service, { IService, ServiceOptions } from "./Service";
-import { IAccount } from "../entities/Account";
 
 export const AuthServiceToken = new Token<IAuthService>("AuthService")
 
@@ -29,7 +29,7 @@ export type IAuthService = IService & {
   getJwtToken(payload: any): string
   getJwtPayload(token: string): any
 
-  getAuthByAccount(account: IAccount): IAuth
+  getAuthByAccount(account: IAccount): Promise<IAuth>
   getAuthByToken(token: string, options?: AuthTokenOptions): IAuth
 }
 
@@ -56,10 +56,14 @@ export default class AuthService extends Service<AuthServiceOptions> implements 
     return payload as any
   }
 
-  getAuthByAccount(account: IAccount) {
+  async getAuthByAccount(account: IAccount) {
+    const accountService = Container.get(AccountServiceToken)
+
+    const authorizations = await accountService.getAccountGroupAuthorizations({ accountId: account.id })
+
     return new Auth({
       accountId: account.id,
-      authorizationId: AuthorizationAdminId
+      authorizations: authorizations?.map(authorization => authorization.authorizationId)
     })
   }
 
@@ -77,7 +81,6 @@ export default class AuthService extends Service<AuthServiceOptions> implements 
 
     return new Auth({
       accountId: accountId,
-      authorizationId: AuthorizationAdminId
     })
   }
 

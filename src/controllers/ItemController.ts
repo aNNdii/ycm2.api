@@ -10,7 +10,7 @@ import { ErrorMessage } from "../interfaces/ErrorMessage";
 import { IHttpRouterContext } from "../entities/HttpRouterContext";
 import HttpRouterError from "../entities/HttpRouterError";
 
-import { Authorization, AuthorizationAction } from "../interfaces/Auth";
+import { Authorization } from "../interfaces/Auth";
 import { GameItemProtoFormat } from "../interfaces/GameItem";
 
 import { ItemRepositoryToken } from "../repositories/ItemRepository";
@@ -87,7 +87,7 @@ export default class ItemController extends Controller implements IItemControlle
 
   async handleItemsPostRequest(context: IHttpRouterContext) {
     const auth = context.getAuth()
-    auth.verifyAuthorization(Authorization.ITEMS, AuthorizationAction.WRITE)
+    auth.verifyAuthorization(Authorization.ITEMS_IMPORT)
 
     let { action } = context.body;
     [action] = getEnumValues(ItemRequestAction, action)

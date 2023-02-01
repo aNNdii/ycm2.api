@@ -1,24 +1,25 @@
 import DataLoader, { IDataLoader } from "../infrastructures/DataLoader";
 import Container from "../infrastructures/Container";
 
-import { unique } from "../helpers/Array";
-
 import { EntityFilterMethod } from "../interfaces/Entity";
 
 import { MobGroupGroupMobGroupOptions, MobGroupMobOptions, MobGroupOptions, MobItemOptions, MobOptions, MobRankItemOptions, MobServiceToken } from "./MobService";
+import { AccountGroupAccountOptions, AccountGroupAuthorizationOptions, AccountGroupOptions, AccountServiceToken, AccountsOptions } from "./AccountService";
 import { GuildGradeOptions, GuildMessageOptions, GuildOptions, GuildServiceToken } from "./GuildService";
 import { LocaleItemOptions, LocaleMobOptions, LocaleOptions, LocaleServiceToken } from "./LocaleService";
 import { CharacterServiceToken, CharacterOptions, CharacterItemOptions } from "./CharacterService";
 import { ItemAttributeOptions, ItemOptions, ItemServiceToken } from "./ItemService";
 import { MapEntityOptions, MapOptions, MapServiceToken } from "./MapService";
-import { AccountServiceToken, AccountsOptions } from "./AccountService";
 import Service, { IService, ServiceOptions } from "./Service";
 
+import { IAccountGroupAuthorization } from "../entities/AccountGroupAuthorization";
 import { IMobGroupGroupMobGroup } from "../entities/MobGroupGroupMobGroup";
+import { IAccountGroupAccount } from "../entities/AccountGroupAccount";
 import { ICharacterItem } from "../entities/CharacterItem";
 import { IItemAttribute } from "../entities/ItemAttribute";
 import { IMobGroupGroup } from "../entities/MobGroupGroup";
 import { IGuildMessage } from "../entities/GuildMessage";
+import { IAccountGroup } from "../entities/AccountGroup";
 import { IMobGroupMob } from "../entities/MobGroupMob";
 import { IMobRankItem } from "../entities/MobRankItem";
 import { IGuildGrade } from "../entities/GuildGrade";
@@ -54,6 +55,16 @@ export type IDataLoaderService = IService & {
 
   getAccounts(options?: AccountsOptions): Promise<IAccount[]>
   getAccountsById(id: number | number[]): Promise<IAccount[]>
+
+  getAccountGroups(options?: AccountGroupOptions): Promise<IAccountGroup[]>
+  getAccountGroupsById(id: number | number[]): Promise<IAccountGroup[]>
+
+  getAccountGroupAccounts(options?: AccountGroupAccountOptions): Promise<IAccountGroupAccount[]>
+  getAccountGroupAccountsByAccountId(id: number | number[]): Promise<IAccountGroupAccount[]>
+  getAccountGroupAccountsByAccountGroupId(id: number | number[]): Promise<IAccountGroupAccount[]>
+
+  getAccountGroupAuthorizations(options?: AccountGroupAuthorizationOptions): Promise<IAccountGroupAuthorization[]>
+  getAccountGroupAuthorizationsByAccountGroupId(id: number | number[]): Promise<IAccountGroupAuthorization[]>
 
   getCharacters(options?: CharacterOptions): Promise<ICharacter[]>
   getCharactersById(id: number | number[]): Promise<ICharacter[]>
@@ -186,6 +197,42 @@ export default class DataLoaderService extends Service<DataLoaderServiceOptions>
   getAccountsById(id: number | number[]) {
     const func = this.getLoaderBatchFunc(ids => this.getAccounts({ id: [EntityFilterMethod.IN, ids] }))
     return this.getLoader('getAccountsById', func, { batch: true }).load(id)
+  }
+
+
+  getAccountGroups(options?: AccountGroupOptions) {
+    return this.getLoader('getAccountGroups', options => Container.get(AccountServiceToken).getAccountGroups(options)).load(options)
+  }
+
+  getAccountGroupsById(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getAccountGroups({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getAccountGroupsById', func, { batch: true }).load(id)
+  }
+
+
+  getAccountGroupAccounts(options?: AccountGroupAccountOptions) {
+    return this.getLoader('getAccountGroupAccounts', options => Container.get(AccountServiceToken).getAccountGroupAccounts(options)).load(options)
+  }
+
+  getAccountGroupAccountsByAccountId(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getAccountGroupAccounts({ accountId: [EntityFilterMethod.IN, ids] }), { key: 'accountId' })
+    return this.getLoader('getAccountGroupAccountsByAccountId', func, { batch: true }).load(id)
+
+  }
+  
+  getAccountGroupAccountsByAccountGroupId(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getAccountGroupAccounts({ accountGroupId: [EntityFilterMethod.IN, ids] }), { key: 'accountGroupId' })
+    return this.getLoader('getAccountGroupAccountsByAccountGroupId', func, { batch: true }).load(id)
+  }
+
+
+  getAccountGroupAuthorizations(options?: AccountGroupAuthorizationOptions) {
+    return this.getLoader('getAccountGroupAuthorizations', options => Container.get(AccountServiceToken).getAccountGroupAuthorizations(options)).load(options)
+  }
+  
+  getAccountGroupAuthorizationsByAccountGroupId(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getAccountGroupAuthorizations({ accountGroupId: [EntityFilterMethod.IN, ids] }), { key: 'accountGroupId' })
+    return this.getLoader('getAccountGroupAuthorizationsByAccountGroupId', func, { batch: true }).load(id)
   }
 
 

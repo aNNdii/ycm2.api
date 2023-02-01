@@ -1,24 +1,26 @@
+import JSZip from "jszip";
+
 import Container, { Token } from "../infrastructures/Container";
 
 import { getEnumValues } from "../helpers/Enum";
 
+import { Authorization } from "../interfaces/Auth";
 import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 import { ErrorMessage } from "../interfaces/ErrorMessage";
-import { Authorization, AuthorizationAction } from "../interfaces/Auth";
+import { EntityFilterMethod } from "../interfaces/Entity";
 
+import { MapRepositoryToken } from "../repositories/MapRepository";
+
+import { PaginationOptions } from "../services/PaginationService";
+import { GameMapServiceToken } from "../services/GameMapService";
 import { MapServiceToken } from "../services/MapService";
 
 import { IHttpRouterContext } from "../entities/HttpRouterContext";
 import HttpRouterError from "../entities/HttpRouterError";
+import { IMapEntity } from "../entities/MapEntity";
 import { IMap } from "../entities/Map";
 
 import Controller, { IController } from "./Controller";
-import { PaginationOptions } from "../services/PaginationService";
-import { EntityFilterMethod } from "../interfaces/Entity";
-import { IMapEntity } from "../entities/MapEntity";
-import { GameMapServiceToken } from "../services/GameMapService";
-import { MapRepositoryToken } from "../repositories/MapRepository";
-import JSZip from "jszip";
 
 export const MapControllerToken = new Token<IMapController>("MapController")
 
@@ -34,7 +36,7 @@ export type MapEntityOptions = PaginationOptions & {
   mobGroupGroupId: number[]
 }
 
-export enum MapRequestAction { 
+export enum MapRequestAction {
   IMPORT_MAP_INDEX,
   IMPORT_MAP_SETTINGS,
   IMPORT_MAP_REGEN
@@ -58,7 +60,7 @@ export default class MapController extends Controller implements IMapController 
 
     this.get('/maps/:mapHashId', this.handleMapGetRequest.bind(this))
     this.post('/maps/:mapHashId', this.handleMapPostRequest.bind(this))
-    
+
     this.post('/maps/:mapHashId/entities', this.handleMapEntitiesPostRequest.bind(this))
   }
 
@@ -99,7 +101,7 @@ export default class MapController extends Controller implements IMapController 
     const entities = await mapRepository.getMapEntities({
       filter: { "map_entity.map_entity_map_id": map.id }
     })
-    
+
     const mapSettingPromise = gameMapService.createMapSetting(map)
     const mapRegenPromise = gameMapService.createMapRegen(entities)
 
@@ -125,7 +127,7 @@ export default class MapController extends Controller implements IMapController 
 
   async handleMapsPostRequest(context: IHttpRouterContext) {
     const auth = context.getAuth()
-    auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.WRITE)
+    auth.verifyAuthorization(Authorization.MAPS_IMPORT)
 
     let { action } = context.body;
 
@@ -152,7 +154,7 @@ export default class MapController extends Controller implements IMapController 
 
   async handleMapPostRequest(context: IHttpRouterContext) {
     const auth = context.getAuth()
-    auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.WRITE)
+    auth.verifyAuthorization(Authorization.MAPS_IMPORT)
 
     let { mapHashId } = context.parameters;
     let { action } = context.body;
@@ -168,10 +170,10 @@ export default class MapController extends Controller implements IMapController 
       case MapRequestAction.IMPORT_MAP_SETTINGS:
         await this.handleMapSettingsImportRequest(map, context.body)
         break
-    
+
       default:
         throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
-    
+
     }
 
     context.setResponse({
@@ -182,7 +184,7 @@ export default class MapController extends Controller implements IMapController 
 
   async handleMapEntitiesPostRequest(context: IHttpRouterContext) {
     const auth = context.getAuth()
-    auth.verifyAuthorization(Authorization.MAPS, AuthorizationAction.WRITE)
+    auth.verifyAuthorization(Authorization.MAPS_IMPORT)
 
     let { mapHashId } = context.parameters;
     let { action } = context.body;
@@ -201,7 +203,7 @@ export default class MapController extends Controller implements IMapController 
 
       default:
         throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
-    
+
     }
 
     context.setResponse({
@@ -239,16 +241,17 @@ export default class MapController extends Controller implements IMapController 
   }
 
   async handleMapRegenImportRequest(map: IMap, options: any) {
-    let { file } = options;
+    let { file, override } = options;
 
     [file] = file || [];
+    override = ~~(override);
 
     this.log("importMapRegen", { mapId: map.id, path: file.path })
 
     if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
 
     const mapService = Container.get(MapServiceToken)
-    await mapService.importMapRegen(map.id, file.path)
+    await mapService.importMapRegen(map.id, file.path, { override })
   }
 
   getMaps(options: MapOptions, context: IHttpRouterContext) {
@@ -283,7 +286,7 @@ export default class MapController extends Controller implements IMapController 
   async getMapEntities(options: MapEntityOptions, context: IHttpRouterContext) {
     this.log("getMapEntities", options)
 
-    const { id, mapId, mobId, mobGroupId, mobGroupGroupId } = options 
+    const { id, mapId, mobId, mobGroupId, mobGroupGroupId } = options
 
     const mapService = Container.get(MapServiceToken)
     const paginationOptions = mapService.getMapEntityPaginationOptions(options)

@@ -2,7 +2,7 @@ import { GraphQLID, GraphQLNonNull, GraphQLString } from "graphql";
 
 import Container from "../infrastructures/Container";
 
-import { Authorization, AuthorizationAction } from "../interfaces/Auth";
+import { Authorization } from "../interfaces/Auth";
 
 import { CaptchaServiceToken } from "../services/CaptchaService";
 import { AccountServiceToken } from "../services/AccountService";
@@ -18,7 +18,7 @@ const GraphQLAccountMutation = {
     },
     resolve: (_: any, args: any, context: IGraphQLContext) => {
       const auth = context.getAuth()
-      auth.verifyAuthorization(Authorization.ACCOUNTS, AuthorizationAction.WRITE)
+      auth.verifyAuthorization(Authorization.ACCOUNTS_CREATE)
 
       return ""
     }

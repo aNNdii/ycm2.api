@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
 
-import { Authorization, AuthorizationAction } from "../interfaces/Auth";
+import { Authorization } from "../interfaces/Auth";
 
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { IAccount } from "../entities/Account";
@@ -26,7 +26,7 @@ const GraphQLAccount = new GraphQLObjectType({
       type: GraphQLString,
       resolve: (account: IAccount, _: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.ACCOUNTS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.ACCOUNTS_READ)
 
         return account.deleteCode
       }
@@ -35,7 +35,7 @@ const GraphQLAccount = new GraphQLObjectType({
       type: GraphQLString,
       resolve: (account: IAccount, _: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.ACCOUNTS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.ACCOUNTS_READ)
 
         return account.safeBoxCode
       }

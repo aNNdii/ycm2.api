@@ -4,8 +4,8 @@ import Container from "../infrastructures/Container";
 
 import { getFlagsByFlagId } from "../helpers/Game";
 
-import { ItemAntiFlag, ItemAttribute, ItemFlag, ItemImmuneFlag, ItemLimitType, ItemMaskType, ItemMaskTypeSubTypes, ItemType, ItemTypeSubTypes, ItemWearFlag } from "../interfaces/Item";
-import { Authorization, AuthorizationAction } from "../interfaces/Auth";
+import { ItemAntiFlag, ItemFlag, ItemImmuneFlag, ItemLimitType, ItemMaskType, ItemMaskTypeSubTypes, ItemType, ItemTypeSubTypes, ItemWearFlag } from "../interfaces/Item";
+import { Authorization } from "../interfaces/Auth";
 
 import { ItemControllerToken } from "../controllers/ItemController";
 
@@ -14,9 +14,6 @@ import { IItem } from "../entities/Item";
 
 import GraphQLCharacterItemAttribute from "./CharacterItemAttribute";
 import GraphQLLocaleItem from "./LocaleItem";
-import GraphQLMobItem from "./MobItem";
-import { MobControllerToken } from "../controllers/MobController";
-import { getPaginationArguments } from "../helpers/GraphQL";
 import GraphQLItemSource from "./ItemSource";
 
 const GraphQLItem: GraphQLObjectType = new GraphQLObjectType({
@@ -157,7 +154,7 @@ const GraphQLItem: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLString,
       resolve: (item: IItem, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.ITEMS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.ITEMS_READ)
 
         return item.icon
       }
@@ -166,7 +163,7 @@ const GraphQLItem: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLString,
       resolve: (item: IItem, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.ITEMS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.ITEMS_READ)
 
         return item.model
       }

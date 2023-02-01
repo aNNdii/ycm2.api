@@ -1,8 +1,8 @@
-import { GraphQLID, GraphQLList, GraphQLNonNull } from "graphql";
+import { GraphQLID, GraphQLList, GraphQLNonNull, GraphQLString } from "graphql";
 
 import Container from "../infrastructures/Container";
 
-import { Authorization, AuthorizationAction } from "../interfaces/Auth";
+// import { Authorization, AuthorizationAction } from "../interfaces/Auth";
 
 import { MapControllerToken } from "../controllers/MapController";
 

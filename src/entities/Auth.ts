@@ -1,5 +1,5 @@
 import Container from "../infrastructures/Container";
-import { AuthenticationTokenType, AuthorizationAction, AuthorizationAdminId, Authorization } from "../interfaces/Auth";
+import { AuthenticationTokenType, Authorization } from "../interfaces/Auth";
 import { ErrorMessage } from "../interfaces/ErrorMessage";
 import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 
@@ -16,21 +16,21 @@ export type AuthorizationVerificationOptions = {
 
 export type AuthProperties = {
   accountId: number
-  authorizationId?: number
+  authorizations?: Authorization[]
 }
 
 export type IAuth = IEntity & {
   accountId: number
   accountHashId: string
   
-  authorizationId: string
+  authorizations: Authorization[]
   payload: any
 
   accessToken: string
   refreshToken: string
 
-  hasAuthorization(entity: Authorization, action: AuthorizationAction): boolean
-  verifyAuthorization(entity: Authorization, action: AuthorizationAction, options?: AuthorizationVerificationOptions): void
+  hasAuthorization(authorization: Authorization | Authorization[]): boolean
+  verifyAuthorization(authorization: Authorization | Authorization[], options?: AuthorizationVerificationOptions): void
 }
 
 export default class Auth extends Entity<AuthProperties> implements IAuth {
@@ -44,14 +44,14 @@ export default class Auth extends Entity<AuthProperties> implements IAuth {
     return accountService.obfuscateAccountId(this.accountId)
   }
 
-  get authorizationId() {
-    return this.getProperty("authorizationId") || 0
+  get authorizations() {
+    return this.getProperty("authorizations") || []
   }
 
   get payload() {
     return {
       accountId: this.accountHashId,
-      authorizationId: this.authorizationId
+      authorizations: this.authorizations
     }
   }
 
@@ -73,23 +73,37 @@ export default class Auth extends Entity<AuthProperties> implements IAuth {
     })
   }
 
-  hasAuthorization(entity: Authorization, action: AuthorizationAction) {
-    let authorizationId = this.authorizationId
-    if (authorizationId == AuthorizationAdminId) return true
+  hasAuthorization(authorization: Authorization | Authorization[]) {
+    return true 
 
-    authorizationId = authorizationId?.toString().split("").reverse()
-    const entityId = ~~(authorizationId[entity] || 0)
+    // let authorizationId = this.authorizationId
+    // if (authorizationId == AuthorizationAdminId) return true
 
-    return Boolean(entityId & action)
+    // let hasAuthorization = false
+    // authorization = [authorization].flat()
+    
+    // authorization.map(authorization => {
+    //   const offset = Math.floor(authorization / 8)
+    //   const index = authorization % 8
+
+    //   const authorizationOffset = this.authorizationId[offset] || 0
+
+    //   hasAuthorization = this.authorizationId
+    // })
+
+    // authorizationId = authorizationId?.toString().split("").reverse()
+    // const entityId = ~~(authorizationId[entity] || 0)
+
+    // return Boolean(entityId & action)
   }
 
-  verifyAuthorization(entity: Authorization, action: AuthorizationAction, options?: AuthorizationVerificationOptions) {
+  verifyAuthorization(authorization: Authorization | Authorization[], options?: AuthorizationVerificationOptions) {
     const {
       code = HttpStatusCode.FORBIDDEN,
       message = ErrorMessage.AUTH_INSUFFICIENT_PERMISSION
     } = options || {}
 
-    if (!this.hasAuthorization(entity, action)) throw new HttpRouterError(code, message)
+    if (!this.hasAuthorization(authorization)) throw new HttpRouterError(code, message)
   }
 
 }

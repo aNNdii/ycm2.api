@@ -55,11 +55,11 @@ export default class AuthController extends Controller implements IAuthControlle
 
     const schema = {
       type: 'object',
+      required: ['username', 'password'],
       properties: {
         username: { type: 'string', minLength: 2, maxLength: 32 },
         password: { type: 'string', minLength: 2, maxLength: 32 }
       },
-      required: ['username', 'password']
     }
 
     const validator = Container.get(ValidatorServiceToken)
@@ -68,18 +68,17 @@ export default class AuthController extends Controller implements IAuthControlle
     const hashService = Container.get(HashServiceToken)
     const authService = Container.get(AuthServiceToken)
 
-    const hashPassword = hashService.mysql41Password(password || '')
-
     const [account] = await context.dataLoaderService.getAccounts({ username })
-
-    if (!account || hashPassword !== account.password) throw new HttpRouterError(HttpStatusCode.NOT_FOUND, ErrorMessage.ACCOUNT_NOT_FOUND)
-    if (account.status !== AccountStatus.OK) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.ACCOUNT_BLOCKED)
-
+    const hashPassword = hashService.mysql41Password(password || '')
+    
+    if (hashPassword !== account?.password) throw new HttpRouterError(HttpStatusCode.NOT_FOUND, ErrorMessage.ACCOUNT_NOT_FOUND)
+    if (account?.status !== AccountStatus.OK) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.ACCOUNT_BLOCKED)
+    
     return authService.getAuthByAccount(account)
   }
 
   async authenticateByRefreshToken(options: AuthenticationOptions, context: IHttpRouterContext) {
-    const { token } = options
+    const { token = '' } = options
 
     this.log("authenticateByRefreshToken", { token })
 
@@ -88,7 +87,7 @@ export default class AuthController extends Controller implements IAuthControlle
 
     const authService = Container.get(AuthServiceToken)
 
-    const auth = authService.getAuthByToken(token || '', { types: [AuthenticationTokenType.REFRESH] })
+    const auth = authService.getAuthByToken(token, { types: [AuthenticationTokenType.REFRESH] })
     const [account] = await context.dataLoaderService.getAccountsById(auth.accountId)
 
     if (account.status !== AccountStatus.OK) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.ACCOUNT_BLOCKED)

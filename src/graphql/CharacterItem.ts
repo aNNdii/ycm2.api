@@ -2,7 +2,7 @@ import { GraphQLID, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } 
 
 import Container from "../infrastructures/Container";
 
-import { Authorization, AuthorizationAction } from "../interfaces/Auth";
+import { Authorization } from "../interfaces/Auth";
 import { CharacterItemWindow } from "../interfaces/CharacterItem";
 
 import { CharacterControllerToken } from "../controllers/CharacterController";
@@ -28,7 +28,7 @@ const GraphQLCharacterItem: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLCharacter,
       resolve: (item: ICharacterItem, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-        auth.verifyAuthorization(Authorization.CHARACTERS, AuthorizationAction.READ)
+        auth.verifyAuthorization(Authorization.CHARACTERS_READ)
 
         const characterController = Container.get(CharacterControllerToken)
         return characterController.getCharacterById(item.characterId, context)

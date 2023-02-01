@@ -66,6 +66,7 @@ import GraphQLCaptchaMutation from "../src/graphql/CaptchaMutation"
 import GraphQLAuthMutation from "../src/graphql/AuthMutation"
 
 import GraphQLMobGroupGroupQuery from "../src/graphql/MobGroupGroupQuery"
+import GraphQLAccountGroupQuery from "../src/graphql/AccountGroupQuery"
 import GraphQLMobRankItemQuery from "../src/graphql/MobRankItemQuery"
 import GraphQLCharacterQuery from "../src/graphql/CharacterQuery"
 import GraphQLMobGroupQuery from "../src/graphql/MobGroupQuery"
@@ -129,6 +130,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const CAPTCHA_LENGTH = ~~(process.env.CAPTCHA_LENGTH || 6)
 
   const ACCOUNT_OBFUSCATION_SALT = process.env.ACCOUNT_OBFUSCATION_SALT || OBFUSCATION_SALT
+  const ACCOUNT_GROUP_OBFUSCATION_SALT = process.env.ACCOUNT_GROUP_OBFUSCATION_SALT || OBFUSCATION_SALT
   const CHARACTER_OBFUSCATION_SALT = process.env.CHARACTER_OBFUSCATION_SALT || OBFUSCATION_SALT
   const CHARACTER_ITEM_OBFUSCATION_SALT = process.env.CHARACTER_ITEM_OBFUSCATION_SALT || OBFUSCATION_SALT
   const LOCALE_OBFUSCATION_SALT = process.env.LOCALE_OBFUSCATION_SALT || OBFUSCATION_SALT
@@ -174,6 +176,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
     name: 'Query',
     fields: () => ({
       ...GraphQLAccountQuery,
+      ...GraphQLAccountGroupQuery,
       ...GraphQLCharacterQuery,
       ...GraphQLItemQuery,
       ...GraphQLMobQuery,
@@ -272,7 +275,8 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   }))
 
   Container.set(AccountServiceToken, new AccountService({
-    accountObfuscationSalt: ACCOUNT_OBFUSCATION_SALT
+    accountObfuscationSalt: ACCOUNT_OBFUSCATION_SALT,
+    accountGroupObfuscationSalt: ACCOUNT_GROUP_OBFUSCATION_SALT
   }))
 
   Container.set(CharacterServiceToken, new CharacterService({

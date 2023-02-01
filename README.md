@@ -3,6 +3,7 @@ An open source api for managing Metin2 game servers, written in Node.js and usin
 
 ## Features
 - Easy configuration
+- Stateless using JWT
 - Obfuscation of sensitive data (YouTube-like)
 - Account management
 - Character management

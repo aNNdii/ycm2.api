@@ -48,7 +48,9 @@ export type MariaRepositoryUpdateOptions<T> = MariaRepositoryQueryOptions & Mari
   entity?: Partial<T>
 }
 
-export type IMariaRepository = IRepository & {}
+export type IMariaRepository = IRepository & {
+  parseEntityFilter(column: string, filter: any): string
+}
 
 export default class MariaRepository extends Repository implements IMariaRepository {
 
@@ -109,11 +111,12 @@ export default class MariaRepository extends Repository implements IMariaReposit
     let queryValues: any[] = []
 
     if (filter) {
-      Object.entries(filter).map(([column, filter]) => {
-        const [filterWhere, filterValues] = this.parseEntityFilter(column, filter as any)
+      Object.entries(filter).map(([column, filter]: [string, any]) => {
+        const filterWhere = this.parseEntityFilter(column, filter)
+        // const [filterWhere, filterValues] = this.parseEntityFilter(column, filter as any)
 
         queryWheres.push(filterWhere)
-        queryValues.push(...filterValues)
+        // queryValues.push(...filterValues)
       })
     }
 
@@ -235,7 +238,8 @@ export default class MariaRepository extends Repository implements IMariaReposit
     }
   }
 
-  private parseEntityFilter(column: string, filter: any): [string, any] {
+  // private parseEntityFilter(column: string, filter: any): [string, any] {
+  parseEntityFilter(column: string, filter: any): string {
     const [action, value] = Array.isArray(filter) ? filter : [EntityFilterMethod.EQUAL, [filter]]
 
     column = escapeId(column)
@@ -243,40 +247,52 @@ export default class MariaRepository extends Repository implements IMariaReposit
     switch (action) {
 
       case EntityFilterMethod.RAW:
-        return [`${column} = ${value}`, []]
+        return `${column} = ${value}`
+        // return [`${column} = ${value}`, []]
 
       case EntityFilterMethod.EQUAL_NULL:
-        return [`${column} IS NULL`, []]
+        return `${column} IS NULL`
+        // return [`${column} IS NULL`, []]
 
       case EntityFilterMethod.NOT_EQUAL_NULL:
-        return [`${column} IS NOT NULL`, []]
+        return `${column} IS NOT NULL`
+        // return [`${column} IS NOT NULL`, []]
 
       case EntityFilterMethod.EQUAL:
-        return [`${column} = ?`, value]
+        return `${column} = ${escape(value)}`
+        // return [`${column} = ?`, value]
 
       case EntityFilterMethod.NOT_EQUAL:
-        return [`${column} != ?`, value]
+        return `${column} != ${escape(value)}`
+        // return [`${column} != ?`, value]
 
       case EntityFilterMethod.GREATER:
-        return [`${column} > ?`, value]
+        return `${column} > ${escape(value)}`
+        // return [`${column} > ?`, value]
 
       case EntityFilterMethod.GREATER_EQUAL:
-        return [`${column} >= ?`, value]
+        return `${column} >= ${escape(value)}`
+        // return [`${column} >= ?`, value]
 
       case EntityFilterMethod.LESS:
-        return [`${column} < ?`, value]
+        return `${column} < ${escape(value)}`
+        // return [`${column} < ?`, value]
 
       case EntityFilterMethod.LESS_EQUAL:
-        return [`${column} <= ?`, value]
+        return `${column} <= ${escape(value)}`
+        // return [`${column} <= ?`, value]
 
       case EntityFilterMethod.IN:
-        return [`${column} IN (?)`, [value]]
+        return `${column} IN (${escape(value)})`
+        // return [`${column} IN (?)`, [value]]
 
       case EntityFilterMethod.LIKE:
-        return [`${column} LIKE ?`, value]
+        return `${column} LIKE ${escape(value)}`
+        // return [`${column} LIKE ?`, value]
 
       case EntityFilterMethod.BETWEEN:
-        return [`${column} BETWEEN ? AND ?`, value]
+        return `${column} BETWEEN ${escape(value[0])} AND ${escape(value[1])}`
+        // return [`${column} BETWEEN ? AND ?`, value]
     }
 
     throw new Error(`unknown filter action`)

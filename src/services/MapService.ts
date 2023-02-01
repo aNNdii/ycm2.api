@@ -7,18 +7,22 @@ import { EntityFilter } from "../interfaces/Entity";
 
 import { MapRepositoryToken } from "../repositories/MapRepository";
 
+import { IMapEntity, MapEntityProperties } from "../entities/MapEntity";
 import { IMap, MapProperties } from "../entities/Map";
 
 import { GameMapServiceToken } from "./GameMapService";
 import { PaginationOptions } from "./PaginationService";
 import EntityService from "./EntityService";
 import { IService } from "./Service";
-import { IMapEntity, MapEntityProperties } from "../entities/MapEntity";
 
 export const MapServiceToken = new Token<IMapService>("MapService")
 
 export type MapIndexImportOptions = {
   update?: boolean
+}
+
+export type MapRegenImportOptions = {
+  override?: boolean
 }
 
 export type MapOptions = PaginationOptions & {
@@ -52,7 +56,7 @@ export type IMapService = IService & {
 
   importMapIndex(path: string, options?: MapIndexImportOptions): Promise<any>
   importMapSettings(mapId: number, path: string): Promise<any>
-  importMapRegen(mapId: number, path: string): Promise<any>
+  importMapRegen(mapId: number, path: string, options?: MapRegenImportOptions): Promise<any>
 }
 
 export default class MapService extends EntityService<MapServiceOptions> implements IMapService {
@@ -127,7 +131,7 @@ export default class MapService extends EntityService<MapServiceOptions> impleme
 
     const orders = this.getPaginationColumnOptions({ key: 'id', column: 'map_entity.map_entity_id' })
 
-    const filter: MapEntityProperties= {}
+    const filter: MapEntityProperties = {}
     const { where, order } = this.getPaginationQueryOptions({ orderId, offset, orders })
 
     if (id) filter["map_entity.map_entity_id"] = id
@@ -171,13 +175,21 @@ export default class MapService extends EntityService<MapServiceOptions> impleme
     })
   }
 
-  async importMapRegen(mapId: number, path: string) {
+  async importMapRegen(mapId: number, path: string, options?: MapRegenImportOptions) {
+    const { override } = options || {}
+
     this.log("importMapRegen", { mapId, path })
 
     const gameMapService = Container.get(GameMapServiceToken)
     const mapRepository = Container.get(MapRepositoryToken)
 
     const entities = await gameMapService.readMapRegen(path)
+
+    if (override) {
+      await mapRepository.deleteMapEntities({
+        filter: { map_entity_map_id: mapId }
+      })
+    }
 
     const entityChunks = chunks(entities, 500)
     const entityPromises = entityChunks.map(entities => mapRepository.createMapEntities({

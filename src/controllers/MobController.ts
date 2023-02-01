@@ -6,7 +6,7 @@ import { getEnumValues } from "../helpers/Enum"
 
 import { HttpStatusCode } from "../interfaces/HttpStatusCode"
 import { ErrorMessage } from "../interfaces/ErrorMessage"
-import { Authorization, AuthorizationAction } from "../interfaces/Auth"
+import { Authorization } from "../interfaces/Auth"
 import { GameMobProtoFormat } from "../interfaces/GameMob"
 
 import { IHttpRouterContext } from "../entities/HttpRouterContext"
@@ -192,7 +192,7 @@ export default class MobController extends Controller implements IMobController 
 
   async handleMobsPostRequest(context: IHttpRouterContext) {
     const auth = context.getAuth()
-    auth.verifyAuthorization(Authorization.MOBS, AuthorizationAction.WRITE)
+    auth.verifyAuthorization(Authorization.MOBS_IMPORT)
 
     let { action } = context.body;
     [action] = getEnumValues(MobRequestAction, action)
@@ -226,7 +226,7 @@ export default class MobController extends Controller implements IMobController 
 
   async handleMobItemsPostRequest(context: IHttpRouterContext) {
     const auth = context.getAuth()
-    auth.verifyAuthorization(Authorization.MOBS, AuthorizationAction.WRITE)
+    auth.verifyAuthorization(Authorization.MOBS_IMPORT)
 
     let { action } = context.body;
     [action] = getEnumValues(MobRequestAction, action)
@@ -256,7 +256,7 @@ export default class MobController extends Controller implements IMobController 
 
   async handleMobGroupsPostRequest(context: IHttpRouterContext) {
     const auth = context.getAuth()
-    auth.verifyAuthorization(Authorization.MOBS, AuthorizationAction.WRITE)
+    auth.verifyAuthorization(Authorization.MOBS_IMPORT)
 
     let { action } = context.body;
     [action] = getEnumValues(MobRequestAction, action)
