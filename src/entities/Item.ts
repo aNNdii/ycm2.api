@@ -58,6 +58,17 @@ export type IItem = IEntity & {
   attributeType: number
   icon: string
   model: string
+  blendAttributeId: number
+  blendAttributeValue0: number
+  blendAttributeValue1: number
+  blendAttributeValue2: number
+  blendAttributeValue3: number
+  blendAttributeValue4: number
+  blendAttributeDuration0: number
+  blendAttributeDuration1: number
+  blendAttributeDuration2: number
+  blendAttributeDuration3: number
+  blendAttributeDuration4: number
   createdDate: string
   modifiedDate: string
 }
@@ -270,6 +281,50 @@ export default class Item extends Entity<ItemProperties> implements IItem {
 
   get model() {
     return this.getProperty("item.item_model")
+  }
+
+  get blendAttributeId() {
+    return this.getProperty("item.item_blend_apply_type")
+  }
+
+  get blendAttributeValue0() {
+    return this.getProperty("item.item_blend_apply_value0")
+  }
+
+  get blendAttributeDuration0 () {
+    return this.getProperty("item.item_blend_apply_duration0")
+  }
+
+  get blendAttributeValue1() {
+    return this.getProperty("item.item_blend_apply_value1")
+  }
+
+  get blendAttributeDuration1() {
+    return this.getProperty("item.item_blend_apply_duration1")
+  }
+
+  get blendAttributeValue2() {
+    return this.getProperty("item.item_blend_apply_value2")
+  }
+
+  get blendAttributeDuration2() {
+    return this.getProperty("item.item_blend_apply_duration2")
+  }
+
+  get blendAttributeValue3() {
+    return this.getProperty("item.item_blend_apply_value3")
+  }
+
+  get blendAttributeDuration3() {
+    return this.getProperty("item.item_blend_apply_duration3")
+  }
+
+  get blendAttributeValue4() {
+    return this.getProperty("item.item_blend_apply_value4")
+  }
+
+  get blendAttributeDuration4() {
+    return this.getProperty("item.item_blend_apply_duration4")
   }
 
   get createdDate() {

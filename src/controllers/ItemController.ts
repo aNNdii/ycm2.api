@@ -63,6 +63,7 @@ export default class ItemController extends Controller implements IItemControlle
 
     const itemListPromise = gameItemService.createItemList(items)
     const itemProtoPromise = gameItemService.createItemProto(items)
+    const itemBlendPromise = gameItemService.createItemBlend(items)
     const itemNamePromise = gameItemService.createItemNames<IItem>(items, {
       transform: (item: IItem) => item.localeName ? [item.id, item.localeName] : undefined 
     })
@@ -70,12 +71,14 @@ export default class ItemController extends Controller implements IItemControlle
     const itemList = await itemListPromise
     const itemProto = await itemProtoPromise
     const itemNames = await itemNamePromise
+    const itemBlend = await itemBlendPromise
 
     const zip = new JSZip();
 
     zip.file("item_proto.txt", itemProto)
     zip.file("item_names.txt", itemNames)
     zip.file("item_list.txt", itemList)
+    zip.file("blend.txt", itemBlend)
 
     const content = zip.generateNodeStream({ streamFiles: true })
 

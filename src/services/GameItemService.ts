@@ -50,6 +50,7 @@ export type IGameItemService = IService & {
   createItemDescriptions(items: ILocaleItem[]): Promise<Buffer>
   createItemList(items: IItem[]): Promise<Buffer>
   createItemProto(items: IItem[]): Promise<Buffer>
+  createItemBlend(items: IItem[]): Promise<Buffer>
 }
 
 export default class GameItemService extends Service<any> implements IGameItemService {
@@ -250,6 +251,24 @@ export default class GameItemService extends Service<any> implements IGameItemSe
     })
 
     return items
+  }
+
+  async createItemBlend(items: IItem[]) {
+    let content = ""
+
+    items.map(item => {
+      if (item.typeId !== ItemType.BLEND || !item.blendAttributeId) return
+
+      content += `section\n`
+      content += `\titem_vnum\t${item.id}\n`
+      content += `\tapply_type\t${ItemAttribute[item.blendAttributeId]}\n`
+      content += `\tapply_value\t${item.blendAttributeValue0}\t${item.blendAttributeValue1}\t${item.blendAttributeValue2}\t${item.blendAttributeValue3}\t${item.blendAttributeValue4}\n`
+      content += `\tapply_duration\t${item.blendAttributeDuration0}\t${item.blendAttributeDuration1}\t${item.blendAttributeDuration2}\t${item.blendAttributeDuration3}\t${item.blendAttributeDuration4}\n`
+      content += `end\n`
+
+    })
+
+    return iconv.encode(content, KoreanEncoding)
   }
 
   private getItemProtoHeadersByFormat(format: GameItemProtoFormat) {
