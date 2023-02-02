@@ -47,6 +47,7 @@ export type IItemService = IEntityService & {
   importItemProto(path: string, options?: ItemProtoImportOptions): Promise<any>
   importItemNames(path: string, options?: ItemImportOptions): Promise<any>
   importItemList(path: string, options?: ItemImportOptions): Promise<any>
+  importItemBlend(path: string, options?: ItemImportOptions): Promise<any>
 }
 
 export default class ItemService extends EntityService<ItemServiceOptions> implements IItemService {
@@ -129,7 +130,7 @@ export default class ItemService extends EntityService<ItemServiceOptions> imple
         'item_shop_sell_price',
         'item_refine_id',
         'item_refine_item_id',
-        'item_attribute_chance_percent',
+        'item_attribute_probability',
         'item_limit_type0',
         'item_limit_value0',
         'item_limit_type1',
@@ -213,7 +214,37 @@ export default class ItemService extends EntityService<ItemServiceOptions> imple
     }))
 
     return Promise.all(itemPromises)
+  }
 
+  async importItemBlend(path: string, options?: ItemImportOptions) {
+    const { update } = options || {}
+
+    this.log("importItemBlend", { path, update })
+
+    const gameItemService = Container.get(GameItemServiceToken)
+    const itemRepository = Container.get(ItemRepositoryToken)
+
+    const items = await gameItemService.readItemBlend(path)
+
+    const itemChunks = chunks(items, 500)
+    const itemPromises = itemChunks.map(entities => itemRepository.createItems({
+      entities,
+      duplicate: update ? [
+        'item_blend_apply_type',
+        'item_blend_apply_value0',
+        'item_blend_apply_duration0',
+        'item_blend_apply_value1',
+        'item_blend_apply_duration1',
+        'item_blend_apply_value2',
+        'item_blend_apply_duration2',
+        'item_blend_apply_value3',
+        'item_blend_apply_duration3',
+        'item_blend_apply_value4',
+        'item_blend_apply_duration4',
+      ] : undefined
+    }))
+
+    return Promise.all(itemPromises)
   }
 
 }

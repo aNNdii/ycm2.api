@@ -29,6 +29,7 @@ export enum ItemRequestAction {
   IMPORT_ITEM_PROTO,
   IMPORT_ITEM_NAMES,
   IMPORT_ITEM_LIST,
+  IMPORT_ITEM_BLEND,
 }
 
 export type IItemController = IController & {
@@ -108,6 +109,10 @@ export default class ItemController extends Controller implements IItemControlle
         await this.handleItemListImportRequest(context.body)
         break
 
+      case ItemRequestAction.IMPORT_ITEM_BLEND:
+        await this.handleItemBlendImportRequest(context.body)
+        break
+
       default:
         throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
 
@@ -160,6 +165,20 @@ export default class ItemController extends Controller implements IItemControlle
 
     const itemService = Container.get(ItemServiceToken)
     await itemService.importItemList(file.path, { update })
+  }
+
+  async handleItemBlendImportRequest(options: any) {
+    let { file, update } = options;
+
+    [file] = file || [];
+    update = ~~(update)
+
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+
+    this.log("importItemBlend", { file: file.path, update })
+
+    const itemService = Container.get(ItemServiceToken)
+    await itemService.importItemBlend(file.path, { update })
   }
 
 

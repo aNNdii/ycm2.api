@@ -16,7 +16,7 @@ export type ItemTable = EntityTable & {
   item_shop_sell_price: number
   item_refine_id: number
   item_refine_item_id: number
-  item_attribute_chance_percent: number
+  item_attribute_probability: number
   item_limit_type0: ItemLimitType
   item_limit_value0: number
   item_limit_type1: ItemLimitType
@@ -53,6 +53,17 @@ export type ItemTable = EntityTable & {
   item_rare_attribute_item_id: number
   item_icon: string
   item_model: string
+  item_blend_apply_type: ItemAttribute
+  item_blend_apply_value0: number
+  item_blend_apply_duration0: number
+  item_blend_apply_value1: number
+  item_blend_apply_duration1: number
+  item_blend_apply_value2: number
+  item_blend_apply_duration2: number
+  item_blend_apply_value3: number
+  item_blend_apply_duration3: number
+  item_blend_apply_value4: number
+  item_blend_apply_duration4: number
   item_created_date: string
   item_modified_date: string
 }
@@ -507,8 +518,8 @@ export enum ItemAttribute {
   INT = 4,
   STR = 5,
   DEX = 6,
-  ATT_SPEED = 7,
-  MOV_SPEED = 8,
+  ATTACK_SPEED = 7,
+  MOVE_SPEED = 8,
   CAST_SPEED = 9,
   HP_REGEN = 10,
   SP_REGEN = 11,
@@ -552,18 +563,18 @@ export enum ItemAttribute {
   IMMUNE_SLOW = 49,
   IMMUNE_FALL = 50,
   SKILL = 51,
-  BOW_DISTANCE = 52,
-  ATT_GRADE_BONUS = 53,
-  DEF_GRADE_BONUS = 54,
+  ADD_BOW_DISTANCE = 52,
+  ATT_BONUS = 53,
+  DEF_BONUS = 54,
   MAGIC_ATT_GRADE = 55,
   MAGIC_DEF_GRADE = 56,
   CURSE_PCT = 57,
   MAX_STAMINA = 58,
-  ATTBONUS_WARRIOR = 59,
-  ATTBONUS_ASSASSIN = 60,
-  ATTBONUS_SURA = 61,
-  ATTBONUS_SHAMAN = 62,
-  ATTBONUS_MONSTER = 63,
+  ATT_BONUS_TO_WARRIOR = 59,
+  ATT_BONUS_TO_ASSASSIN = 60,
+  ATT_BONUS_TO_SURA = 61,
+  ATT_BONUS_TO_SHAMAN = 62,
+  ATT_BONUS_TO_MONSTER = 63,
   MALL_ATTBONUS = 64,
   MALL_DEFBONUS = 65,
   MALL_EXPBONUS = 66,
@@ -576,8 +587,8 @@ export enum ItemAttribute {
   SKILL_DEFEND_BONUS = 73,
   NORMAL_HIT_DEFEND_BONUS = 74,
   EXTRACT_HP_PCT = 75,
-  PC_BANG_EXP_BONUS = 76,
-  PC_BANG_DROP_BONUS = 77,
+  PCBANG_EXP_BONUS = 76,
+  PCBANG_DROP_BONUS = 77,
   RESIST_WARRIOR = 78,
   RESIST_ASSASSIN = 79,
   RESIST_SURA = 80,
@@ -590,8 +601,8 @@ export enum ItemAttribute {
   RESIST_ICE = 87,
   RESIST_EARTH = 88,
   RESIST_DARK = 89,
-  ANTI_CRITICAL_PCT = 90,
-  ANTI_PENETRATE_PCT = 91,
+  RESIST_CRITICAL = 90,
+  RESIST_PENETRATE = 91,
   BLEEDING_REDUCE = 92,
   BLEEDING_PCT = 93,
   ATTBONUS_WOLFMAN = 94,

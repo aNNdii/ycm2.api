@@ -1,10 +1,11 @@
-import { parseStream, writeToString } from "fast-csv";
+import { writeToString } from "fast-csv";
 import { createReadStream } from "fs";
 import iconv from "iconv-lite";
 
 import { Token } from "../infrastructures/Container";
 
 import { DefaultEncoding, getFlagIdByFlags, getFlagsByFlagId, KoreanEncoding, parseProtoStream } from "../helpers/Game";
+import { readStreamToBuffer } from "../helpers/Stream";
 
 import { getEnumValues } from "../helpers/Enum";
 
@@ -37,11 +38,13 @@ export type IGameItemService = IService & {
   readItemDescriptions<T = any>(path: string, options?: ItemDescriptionParseOptions<T>): Promise<T[]>
   readItemList<T = any>(path: string, options?: ItemParseOptions<T>): Promise<T[]>
   readItemProto(path: string, options?: ItemProtoParseOptions): Promise<Partial<ItemTable>[]>
+  readItemBlend(path: string): Promise<Partial<ItemTable>[]>
 
   parseItemNames<T = any>(stream: NodeJS.ReadableStream, options?: ItemParseOptions<T>): Promise<T[]>
   parseItemDescriptions<T = any>(stream: NodeJS.ReadableStream, options?: ItemDescriptionParseOptions<T>): Promise<T[]>
   parseItemList<T = any>(stream: NodeJS.ReadableStream, options?: ItemParseOptions<T>): Promise<T[]>
   parseItemProto(stream: NodeJS.ReadableStream, options?: ItemProtoParseOptions): Promise<Partial<ItemTable>[]>
+  parseItemBlend(stream: NodeJS.ReadableStream): Promise<Partial<ItemTable>[]>
 
   createItemNames<T = any>(items: T[], options?: CSVWriteOptions): Promise<Buffer>
   createItemDescriptions(items: ILocaleItem[]): Promise<Buffer>
@@ -203,6 +206,52 @@ export default class GameItemService extends Service<any> implements IGameItemSe
     })
   }
 
+  async readItemBlend(path: string) {
+    const stream = createReadStream(path).pipe(iconv.decodeStream(KoreanEncoding))
+    return this.parseItemBlend(stream)
+  }
+
+  async parseItemBlend(stream: NodeJS.ReadableStream) {
+    const buffer = await readStreamToBuffer(stream)
+    const content = buffer.toString()
+
+    const items: Partial<ItemTable>[] = []
+
+    const matches = content.match(/section(.*?)end/gis)
+    matches?.map(match => {
+
+      const [itemMatch] = [...match.matchAll(/\item_vnum\s+(\d+)/gmi)]
+      const [typeMatch] = [...match.matchAll(/\apply_type\s+(\w+)/gmi)]
+      const [valueMatches] = [...match.matchAll(/\apply_value\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/gmi)]
+      const [durationMatches] = [...match.matchAll(/\apply_duration\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/gmi)]
+
+      let [_1, itemId] = itemMatch || []
+      let [_2, type] = typeMatch || []
+      let [_3, value0, value1, value2, value3, value4] = valueMatches || []
+      let [_4, duration0, duration1, duration2, duration3, duration4] = durationMatches || []
+      
+      const typeId = ItemAttribute[type as any] as any
+      if (!itemId || !typeId) return
+
+      items.push({
+        item_id: ~~(itemId),
+        item_blend_apply_type: typeId,
+        item_blend_apply_value0: ~~(value0),
+        item_blend_apply_value1: ~~(value1),
+        item_blend_apply_value2: ~~(value2),
+        item_blend_apply_value3: ~~(value3),
+        item_blend_apply_value4: ~~(value4),
+        item_blend_apply_duration0: ~~(duration0),
+        item_blend_apply_duration1: ~~(duration1),
+        item_blend_apply_duration2: ~~(duration2),
+        item_blend_apply_duration3: ~~(duration3),
+        item_blend_apply_duration4: ~~(duration4),
+      })
+    })
+
+    return items
+  }
+
   private getItemProtoHeadersByFormat(format: GameItemProtoFormat) {
     switch (format) {
 
@@ -283,7 +332,7 @@ export default class GameItemService extends Service<any> implements IGameItemSe
       item_shop_sell_price: ~~(row.shopSellPrice),
       item_refine_item_id: ~~(row.refineItemId),
       item_refine_id: ~~(row.refineId),
-      item_attribute_chance_percent: ~~(row.magicChancePercent),
+      item_attribute_probability: ~~(row.magicChancePercent),
       item_limit_type0: limitType0 || ItemLimitType.NONE as any,
       item_limit_value0: ~~(row.limitValue0),
       item_limit_type1: limitType1 || ItemLimitType.NONE as any,
@@ -323,7 +372,7 @@ export default class GameItemService extends Service<any> implements IGameItemSe
 
       item.item_rare_attribute_item_id = ~~(row["67AttributeMaterial"])
     }
-    
+
     if (format === GameItemProtoFormat.VERSION_2017 || format === GameItemProtoFormat.VERSION_2022) {
       item.item_mask_type = maskType
       item.item_mask_subtype = maskSubType
@@ -340,7 +389,7 @@ export default class GameItemService extends Service<any> implements IGameItemSe
 
     const subTypes = GameItemProtoTypeSubTypes[item.typeId] || {} as any
     const subTypeId = subTypes[item.subTypeId]
-    
+
     const typeId = subTypeId ? GameItemProtoType[item.typeId] : undefined
 
     const maskSubTypes = GameItemProtoMaskTypeSubTypes[item.maskTypeId] || {} as any
@@ -369,7 +418,7 @@ export default class GameItemService extends Service<any> implements IGameItemSe
       item.refineItemId,
       item.refineId,
       // item.rareAttributeItemId,
-      item.attributeChance,
+      item.attributeProbability,
       GameItemProtoLimitType[item.limitType0] || "LIMIT_NONE",
       item.limitValue0,
       GameItemProtoLimitType[item.limitType1] || "LIMIT_NONE",

@@ -89,9 +89,9 @@ const GraphQLItem: GraphQLObjectType = new GraphQLObjectType({
         return item.refineItemId ? itemController.getItemById(item.refineItemId, context) : null
       }
     },
-    attributeChance: {
+    attributeProbability: {
       type: GraphQLInt,
-      resolve: (item: IItem) => item.attributeChance
+      resolve: (item: IItem) => item.attributeProbability
     },
     rareAttributeItem: {
       type: GraphQLItem,

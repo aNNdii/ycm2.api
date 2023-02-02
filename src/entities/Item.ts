@@ -25,7 +25,7 @@ export type IItem = IEntity & {
   refineElementBonus: number
   refineId: number
   refineItemId: number
-  attributeChance: number
+  attributeProbability: number
   rareAttributeItemId: number
   limitType0: number
   limitValue0: number
@@ -144,8 +144,8 @@ export default class Item extends Entity<ItemProperties> implements IItem {
     return this.getProperty("item.item_rare_attribute_item_id")
   }
 
-  get attributeChance() {
-    return this.getProperty("item.item_attribute_chance_percent")
+  get attributeProbability() {
+    return this.getProperty("item.item_attribute_probability")
   }
 
   get limitType0() {
