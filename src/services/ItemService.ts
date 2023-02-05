@@ -2,10 +2,10 @@ import Container, { Token } from "../infrastructures/Container";
 
 import { chunks } from "../helpers/Array"
 
-import { EntityFilter } from "../interfaces/Entity";
+import { EntityFilter, EntityFilterMethod } from "../interfaces/Entity";
 
 import { GameItemProtoFormat } from "../interfaces/GameItem";
-import { ItemAttribute, ItemTable } from "../interfaces/Item";
+import { ItemAttribute, ItemSpecialActionTable, ItemTable } from "../interfaces/Item";
 
 import { ItemRepositoryToken } from "../repositories/ItemRepository";
 
@@ -14,12 +14,13 @@ import { IItem, ItemProperties } from "../entities/Item";
 
 import EntityService, { EntityOptions, IEntityService } from "./EntityService";
 import { GameItemServiceToken } from './GameItemService';
-import { PaginationOptions } from "./PaginationService"; 
+import { PaginationOptions } from "./PaginationService";
 
 export const ItemServiceToken = new Token<IItemService>("ItemService")
 
 export type ItemImportOptions = {
   update?: boolean
+  override?: boolean
 }
 
 export type ItemProtoImportOptions = ItemImportOptions & {
@@ -48,6 +49,7 @@ export type IItemService = IEntityService & {
   importItemNames(path: string, options?: ItemImportOptions): Promise<any>
   importItemList(path: string, options?: ItemImportOptions): Promise<any>
   importItemBlend(path: string, options?: ItemImportOptions): Promise<any>
+  importItemSpecialGroup(path: string, options?: ItemImportOptions): Promise<any>
 }
 
 export default class ItemService extends EntityService<ItemServiceOptions> implements IItemService {
@@ -59,7 +61,7 @@ export default class ItemService extends EntityService<ItemServiceOptions> imple
   getItems(options?: ItemOptions) {
     const {
       id,
-      name, 
+      name,
       orderId,
       offset,
       limit
@@ -135,14 +137,14 @@ export default class ItemService extends EntityService<ItemServiceOptions> imple
         'item_limit_value0',
         'item_limit_type1',
         'item_limit_value1',
-        'item_apply_type0',
-        'item_apply_value0',
-        'item_apply_type1',
-        'item_apply_value1',
-        'item_apply_type2',
-        'item_apply_value2',
-        'item_apply_type3',
-        'item_apply_value3',
+        'item_attribute0',
+        'item_attribute1',
+        'item_attribute2',
+        'item_attribute3',
+        'item_attribute_value0',
+        'item_attribute_value1',
+        'item_attribute_value2',
+        'item_attribute_value3',
         'item_value0',
         'item_value1',
         'item_value2',
@@ -230,21 +232,133 @@ export default class ItemService extends EntityService<ItemServiceOptions> imple
     const itemPromises = itemChunks.map(entities => itemRepository.createItems({
       entities,
       duplicate: update ? [
-        'item_blend_apply_type',
-        'item_blend_apply_value0',
-        'item_blend_apply_duration0',
-        'item_blend_apply_value1',
-        'item_blend_apply_duration1',
-        'item_blend_apply_value2',
-        'item_blend_apply_duration2',
-        'item_blend_apply_value3',
-        'item_blend_apply_duration3',
-        'item_blend_apply_value4',
-        'item_blend_apply_duration4',
+        'item_blend_attribute',
+        'item_blend_attribute_value0',
+        'item_blend_attribute_value1',
+        'item_blend_attribute_value2',
+        'item_blend_attribute_value3',
+        'item_blend_attribute_value4',
+        'item_blend_attribute_duration0',
+        'item_blend_attribute_duration1',
+        'item_blend_attribute_duration2',
+        'item_blend_attribute_duration3',
+        'item_blend_attribute_duration4',
       ] : undefined
     }))
 
     return Promise.all(itemPromises)
+  }
+
+  async importItemSpecialGroup(path: string, options?: ItemImportOptions) {
+    const { override } = options || {}
+
+    this.log("importItemSpecialGroup", { path, override })
+
+    const gameItemService = Container.get(GameItemServiceToken)
+    const itemRepository = Container.get(ItemRepositoryToken)
+
+    if (override) await itemRepository.truncateItemSpecialActions()
+
+    const [items, actions, actionsByItemName] = await gameItemService.readItemSpecialGroup(path)
+
+    return Promise.all([
+      items?.length ? this.importItemSpecialGroupItems(items) : null,
+      actions?.length ? this.importItemSpecialGroupActions(actions) : null,
+      actionsByItemName?.length ? this.importItemSpecialGroupActionsByItemName(actionsByItemName) : null
+    ])
+  }
+
+  private async importItemSpecialGroupItems(items: any[]) {
+    this.log("importItemSpecialGroupItems", { items })
+
+    const itemRepository = Container.get(ItemRepositoryToken)
+
+    const entities: Partial<ItemTable>[] = []
+
+    items.map(item => {
+      const { itemId, specialTypeId, effect } = item
+
+      entities.push({
+        item_id: itemId,
+        item_special_type: specialTypeId,
+        item_special_effect: effect
+      })
+    })
+
+    const itemChunks = chunks(entities, 500)
+    const itemCreatePromises = itemChunks.map((entities: any) => itemRepository.createItems({
+      duplicate: ['item_special_type', 'item_special_effect'],
+      entities
+    }))
+
+    return Promise.all(itemCreatePromises)
+
+  }
+
+  private async importItemSpecialGroupActions(actions: any[]) {
+    this.log("importItemSpecialGroupActions", { actions })
+
+    const itemRepository = Container.get(ItemRepositoryToken)
+
+    const entities: Partial<ItemSpecialActionTable>[] = []
+
+    actions.map(action => {
+      const { parentItemId, typeId, itemId, mobId, mobGroupId, attributeId, quantity, probability, rareProbability } = action
+
+      entities.push({
+        item_special_action_parent_item_id: parentItemId,
+        item_special_action_type: typeId,
+        item_special_action_item_id: itemId,
+        item_special_action_mob_id: mobId,
+        item_special_action_mob_group_id: mobGroupId,
+        item_special_action_attribute: attributeId,
+        item_special_action_quantity: quantity,
+        item_special_action_probability: probability,
+        item_special_action_rare_probability: rareProbability
+      })
+    })
+
+    const actionChunks = chunks(entities, 500)
+    const actionCreatePromises = actionChunks.map((entities: any) => itemRepository.createItemSpecialActions({ entities }))
+
+    return Promise.all(actionCreatePromises)
+  }
+
+  private async importItemSpecialGroupActionsByItemName(actionsByItemName: any[]) {
+    this.log("importItemSpecialGroupActionsByItemName", { actionsByItemName })
+
+    const actions: any[] = []
+
+    const itemRepository = Container.get(ItemRepositoryToken)
+    
+    const itemNames = actionsByItemName.map(action => action.itemName)
+    const items = await itemRepository.getItems({
+      filter: { "item.item_name": [EntityFilterMethod.IN, itemNames] }
+    })
+
+    console.log(items)
+
+    const itemsByName = items.reduce((items: any, item) => {
+      items[item.name] = items[item.name] || item
+      return items
+    }, {})
+
+    actionsByItemName.map(action => {
+      const { itemName } = action
+
+      const item = itemName ? itemsByName[itemName] : undefined
+      if (!item) {
+        this.log("importItemSpecialGroupActionsByItemNameItemNotFound", { ...action })
+        return
+      }
+
+      actions.push({
+        ...action,
+        itemId: item.id,
+      })
+    })
+
+    return this.importItemSpecialGroupActions(actions)
   }
 
 }

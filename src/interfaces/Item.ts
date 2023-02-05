@@ -21,14 +21,14 @@ export type ItemTable = EntityTable & {
   item_limit_value0: number
   item_limit_type1: ItemLimitType
   item_limit_value1: number
-  item_apply_type0: ItemAttribute
-  item_apply_value0: number
-  item_apply_type1: ItemAttribute
-  item_apply_value1: number
-  item_apply_type2: ItemAttribute
-  item_apply_value2: number
-  item_apply_type3: ItemAttribute
-  item_apply_value3: number
+  item_attribute0: ItemAttribute
+  item_attribute_value0: number
+  item_attribute1: ItemAttribute
+  item_attribute_value1: number
+  item_attribute2: ItemAttribute
+  item_attribute_value2: number
+  item_attribute3: ItemAttribute
+  item_attribute_value3: number
   item_value0: number
   item_value1: number
   item_value2: number
@@ -53,19 +53,55 @@ export type ItemTable = EntityTable & {
   item_rare_attribute_item_id: number
   item_icon: string
   item_model: string
-  item_blend_apply_type: ItemAttribute
-  item_blend_apply_value0: number
-  item_blend_apply_duration0: number
-  item_blend_apply_value1: number
-  item_blend_apply_duration1: number
-  item_blend_apply_value2: number
-  item_blend_apply_duration2: number
-  item_blend_apply_value3: number
-  item_blend_apply_duration3: number
-  item_blend_apply_value4: number
-  item_blend_apply_duration4: number
+  item_blend_attribute: ItemAttribute
+  item_blend_attribute_value0: number
+  item_blend_attribute_duration0: number
+  item_blend_attribute_value1: number
+  item_blend_attribute_duration1: number
+  item_blend_attribute_value2: number
+  item_blend_attribute_duration2: number
+  item_blend_attribute_value3: number
+  item_blend_attribute_duration3: number
+  item_blend_attribute_value4: number
+  item_blend_attribute_duration4: number
+  item_special_type: ItemSpecialType
+  item_special_effect: string
   item_created_date: string
   item_modified_date: string
+}
+
+export type ItemSpecialActionTable = EntityTable & {
+  item_special_action_id: number
+  item_special_action_parent_item_id: number
+  item_special_action_type: number
+  item_special_action_item_id: number
+  item_special_action_mob_id: number
+  item_special_action_mob_group_id: number
+  item_special_action_attribute: number
+  item_special_action_quantity: number
+  item_special_action_probability: number
+  item_special_action_rare_probability: number
+  item_special_action_created_date: string
+  item_special_action_modified_date: string
+}
+
+export enum ItemSpecialType {
+  DEFAULT = 1,
+  MULTIPLE,
+  QUEST,
+  SPECIAL,
+  ATTRIBUTE
+}
+
+export enum ItemSpecialActionType {
+  ITEM = 1,
+  EXP,
+  MOB,
+  MOB_GROUP,
+  SLOW,
+  POISON,
+  DRAIN_HP,
+  ATTRIBUTE
 }
 
 /*****************************************************************************

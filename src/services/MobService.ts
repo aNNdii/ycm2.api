@@ -747,7 +747,7 @@ export default class MobService extends EntityService<MobServiceOptions> impleme
     })
 
     const itemsByName = items.reduce((items: any, item) => {
-      items[item.name] = item
+      items[item.name] = items[item.name] || item
       return items
     }, {})
 
@@ -808,7 +808,7 @@ export default class MobService extends EntityService<MobServiceOptions> impleme
     })
 
     const itemsByName = items.reduce((items: any, item) => {
-      items[item.name] = item
+      items[item.name] = items[item.name] || item
       return items
     }, {})
 

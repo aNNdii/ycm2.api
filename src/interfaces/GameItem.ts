@@ -1,9 +1,27 @@
-import { ItemAntiFlag, ItemAttribute, ItemFlag, ItemImmuneFlag, ItemLimitType, ItemMaskType, ItemMaskTypeCostume, ItemMaskTypeDragonStone, ItemMaskTypeEquipmentArmor, ItemMaskTypeEquipmentJewelry, ItemMaskTypeEquipmentWeapon, ItemMaskTypeEtc, ItemMaskTypeFishingPick, ItemMaskTypeMountPet, ItemMaskTypePotion, ItemMaskTypeSkill, ItemMaskTypeTuning, ItemMaskTypeUnique, ItemType, ItemTypeArmor, ItemTypeCostume, ItemTypeDragonSoul, ItemTypeExtract, ItemTypeFish, ItemTypeGacha, ItemTypeGiftbox, ItemTypeLottery, ItemTypeMaterial, ItemTypeMedium, ItemTypeMercenary, ItemTypeMetin, ItemTypePassive, ItemTypePet, ItemTypeQuest, ItemTypeResource, ItemTypeSoul, ItemTypeSpecial, ItemTypeUnique, ItemTypeUse, ItemTypeWeapon, ItemWearFlag } from "./Item";
+import { ItemAntiFlag, ItemAttribute, ItemFlag, ItemImmuneFlag, ItemLimitType, ItemMaskType, ItemMaskTypeCostume, ItemMaskTypeDragonStone, ItemMaskTypeEquipmentArmor, ItemMaskTypeEquipmentJewelry, ItemMaskTypeEquipmentWeapon, ItemMaskTypeEtc, ItemMaskTypeFishingPick, ItemMaskTypeMountPet, ItemMaskTypePotion, ItemMaskTypeSkill, ItemMaskTypeTuning, ItemMaskTypeUnique, ItemSpecialActionType, ItemSpecialType, ItemType, ItemTypeArmor, ItemTypeCostume, ItemTypeDragonSoul, ItemTypeExtract, ItemTypeFish, ItemTypeGacha, ItemTypeGiftbox, ItemTypeLottery, ItemTypeMaterial, ItemTypeMedium, ItemTypeMercenary, ItemTypeMetin, ItemTypePassive, ItemTypePet, ItemTypeQuest, ItemTypeResource, ItemTypeSoul, ItemTypeSpecial, ItemTypeUnique, ItemTypeUse, ItemTypeWeapon, ItemWearFlag } from "./Item";
 
 export enum GameItemProtoFormat {
   DEFAULT,
   VERSION_2017,
   VERSION_2022
+}
+
+export enum GameItemSpecialType {
+  NORMAL = ItemSpecialType.DEFAULT,
+  PCT = ItemSpecialType.MULTIPLE,
+  QUEST = ItemSpecialType.QUEST,
+  SPECIAL = ItemSpecialType.SPECIAL,
+  ATTR = ItemSpecialType.ATTRIBUTE
+}
+
+export enum GameItemSpecialActionType {
+  EXP = ItemSpecialActionType.EXP,
+  "경험치" = ItemSpecialActionType.EXP,
+  MOB = ItemSpecialActionType.MOB,
+  GROUP = ItemSpecialActionType.MOB_GROUP,
+  SLOW = ItemSpecialActionType.SLOW,
+  POISON = ItemSpecialActionType.POISON,
+  DRAIN_HP = ItemSpecialActionType.DRAIN_HP,
 }
 
 /*****************************************************************************

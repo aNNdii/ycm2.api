@@ -29,6 +29,7 @@ export enum ItemRequestAction {
   IMPORT_ITEM_PROTO,
   IMPORT_ITEM_NAMES,
   IMPORT_ITEM_LIST,
+  IMPORT_ITEM_SPECIAL_GROUP,
   IMPORT_ITEM_BLEND,
 }
 
@@ -116,6 +117,10 @@ export default class ItemController extends Controller implements IItemControlle
         await this.handleItemBlendImportRequest(context.body)
         break
 
+      case ItemRequestAction.IMPORT_ITEM_SPECIAL_GROUP:
+        await this.handleItemSpecialGroupImportRequest(context.body)
+        break
+
       default:
         throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
 
@@ -182,6 +187,20 @@ export default class ItemController extends Controller implements IItemControlle
 
     const itemService = Container.get(ItemServiceToken)
     await itemService.importItemBlend(file.path, { update })
+  }
+
+  async handleItemSpecialGroupImportRequest(options: any) {
+    let { file, override } = options;
+
+    [file] = file || [];
+    override = ~~(override)
+
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+
+    this.log("importItemSpecialGroup", { file: file.path, override })
+
+    const itemService = Container.get(ItemServiceToken)
+    await itemService.importItemSpecialGroup(file.path, { override })
   }
 
 

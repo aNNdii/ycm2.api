@@ -2,7 +2,7 @@ import { Token } from "../infrastructures/Container"
 
 import { merge } from "../helpers/Object"
 
-import { ItemTable } from "../interfaces/Item"
+import { ItemSpecialActionTable, ItemTable } from "../interfaces/Item"
 
 import ItemAttribute, { IItemAttribute, ItemAttributeProperties } from "../entities/ItemAttribute"
 import Item, { IItem, ItemProperties } from "../entities/Item"
@@ -18,8 +18,11 @@ export type IItemRepository = IGameRepository & {
   getItemRareAttributes<Entity = IItemAttribute, Filter = ItemAttributeProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   
   createItems<Entity = ItemTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>): Promise<Response>
+  createItemSpecialActions<Entity = ItemSpecialActionTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>): Promise<Response>
   
   importDatabaseItemProto(options: any): Promise<any>
+
+  truncateItemSpecialActions(): Promise<any>
 }
 
 export default class ItemRepository extends GameRepository implements IItemRepository {
@@ -42,6 +45,16 @@ export default class ItemRepository extends GameRepository implements IItemRepos
 
     return this.createEntities<Entity, Response>(merge({
       table: `${cmsDatabase}.item`
+    }, options))
+  }
+
+  createItemSpecialActions<Entity = ItemSpecialActionTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>) {
+    this.log("createItemSpecialActions", options)
+
+    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+
+    return this.createEntities<Entity, Response>(merge({
+      table: `${cmsDatabase}.item_special_action`
     }, options))
   }
 
@@ -99,14 +112,14 @@ export default class ItemRepository extends GameRepository implements IItemRepos
                       item_limit_value_0,
                       item_limit_type_1,
                       item_limit_value_1,
-                      item_apply_type_0,
-                      item_apply_value_0,
-                      item_apply_type_1,
-                      item_apply_value_1,
-                      item_apply_type_2,
-                      item_apply_value_2,
-                      item_apply_type_3,
-                      item_apply_value_3,
+                      item_attribute_0,
+                      item_attribute_value_0,
+                      item_attribute1,
+                      item_attribute_value_1,
+                      item_attribute2,
+                      item_attribute_value_2,
+                      item_attribute3,
+                      item_attribute_value_3,
                       item_value_0,
                       item_value_1,
                       item_value_2,
@@ -182,5 +195,13 @@ export default class ItemRepository extends GameRepository implements IItemRepos
 
     return this.query(query)
   }
+
+  truncateItemSpecialActions() {
+    this.log("truncateItemSpecialActions")
+
+    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    return this.truncateTable(`${cmsDatabase}.item_special_action`)
+  }
+
 
 }

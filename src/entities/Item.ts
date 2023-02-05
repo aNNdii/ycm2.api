@@ -176,35 +176,35 @@ export default class Item extends Entity<ItemProperties> implements IItem {
   }
 
   get attributeId0() {
-    return this.getProperty("item.item_apply_type0")
+    return this.getProperty("item.item_attribute0")
   }
 
   get attributeValue0() {
-    return this.getProperty("item.item_apply_value0")
+    return this.getProperty("item.item_attribute_value0")
   }
 
   get attributeId1() {
-    return this.getProperty("item.item_apply_type1")
+    return this.getProperty("item.item_attribute1")
   }
 
   get attributeValue1() {
-    return this.getProperty("item.item_apply_value1")
+    return this.getProperty("item.item_attribute_value1")
   }
 
   get attributeId2() {
-    return this.getProperty("item.item_apply_type2")
+    return this.getProperty("item.item_attribute2")
   }
 
   get attributeValue2() {
-    return this.getProperty("item.item_apply_value2")
+    return this.getProperty("item.item_attribute_value2")
   }
 
   get attributeId3() {
-    return this.getProperty("item.item_apply_type3")
+    return this.getProperty("item.item_attribute3")
   }
 
   get attributeValue3() {
-    return this.getProperty("item.item_apply_value3")
+    return this.getProperty("item.item_attribute_value3")
   }
 
   get value0() {
@@ -284,47 +284,47 @@ export default class Item extends Entity<ItemProperties> implements IItem {
   }
 
   get blendAttributeId() {
-    return this.getProperty("item.item_blend_apply_type")
+    return this.getProperty("item.item_blend_attribute")
   }
 
   get blendAttributeValue0() {
-    return this.getProperty("item.item_blend_apply_value0")
+    return this.getProperty("item.item_blend_attribute_value0")
   }
 
   get blendAttributeDuration0 () {
-    return this.getProperty("item.item_blend_apply_duration0")
+    return this.getProperty("item.item_blend_attribute_duration0")
   }
 
   get blendAttributeValue1() {
-    return this.getProperty("item.item_blend_apply_value1")
+    return this.getProperty("item.item_blend_attribute_value1")
   }
 
   get blendAttributeDuration1() {
-    return this.getProperty("item.item_blend_apply_duration1")
+    return this.getProperty("item.item_blend_attribute_duration1")
   }
 
   get blendAttributeValue2() {
-    return this.getProperty("item.item_blend_apply_value2")
+    return this.getProperty("item.item_blend_attribute_value2")
   }
 
   get blendAttributeDuration2() {
-    return this.getProperty("item.item_blend_apply_duration2")
+    return this.getProperty("item.item_blend_attribute_duration2")
   }
 
   get blendAttributeValue3() {
-    return this.getProperty("item.item_blend_apply_value3")
+    return this.getProperty("item.item_blend_attribute_value3")
   }
 
   get blendAttributeDuration3() {
-    return this.getProperty("item.item_blend_apply_duration3")
+    return this.getProperty("item.item_blend_attribute_duration3")
   }
 
   get blendAttributeValue4() {
-    return this.getProperty("item.item_blend_apply_value4")
+    return this.getProperty("item.item_blend_attribute_value4")
   }
 
   get blendAttributeDuration4() {
-    return this.getProperty("item.item_blend_apply_duration4")
+    return this.getProperty("item.item_blend_attribute_duration4")
   }
 
   get createdDate() {

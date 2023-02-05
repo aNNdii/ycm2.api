@@ -7,10 +7,11 @@ import { Token } from "../infrastructures/Container";
 import { DefaultEncoding, getFlagIdByFlags, getFlagsByFlagId, KoreanEncoding, parseProtoStream } from "../helpers/Game";
 import { readStreamToBuffer } from "../helpers/Stream";
 
+import { isNumber } from "../helpers/Number";
 import { getEnumValues } from "../helpers/Enum";
 
-import { GameItemProtoAntiFlag, GameItemProtoApplyType, GameItemProtoFlag, GameItemProtoFormat, GameItemProtoImmuneFlag, GameItemProtoLimitType, GameItemProtoMaskType, GameItemProtoMaskTypeCostume, GameItemProtoMaskTypeDragonStone, GameItemProtoMaskTypeEquipmentArmor, GameItemProtoMaskTypeEquipmentJewelry, GameItemProtoMaskTypeEquipmentWeapon, GameItemProtoMaskTypeEtc, GameItemProtoMaskTypeFishingPick, GameItemProtoMaskTypeMountPet, GameItemProtoMaskTypePotion, GameItemProtoMaskTypeSkill, GameItemProtoMaskTypeSubTypes, GameItemProtoMaskTypeTuning, GameItemProtoMaskTypeUnique, GameItemProtoType, GameItemProtoTypeArmor, GameItemProtoTypeCostume, GameItemProtoTypeDragonSoul, GameItemProtoTypeExtract, GameItemProtoTypeFish, GameItemProtoTypeGacha, GameItemProtoTypeGiftbox, GameItemProtoTypeLottery, GameItemProtoTypeMaterial, GameItemProtoTypeMedium, GameItemProtoTypeMercenary, GameItemProtoTypeMetin, GameItemProtoTypePassive, GameItemProtoTypePet, GameItemProtoTypeQuest, GameItemProtoTypeResource, GameItemProtoTypeSoul, GameItemProtoTypeSpecial, GameItemProtoTypeSubTypes, GameItemProtoTypeUnique, GameItemProtoTypeUse, GameItemProtoTypeWeapon, GameItemProtoWearFlag } from "../interfaces/GameItem";
-import { ItemAttribute, ItemLimitType, ItemMaskType, ItemTable, ItemType } from "../interfaces/Item";
+import { GameItemProtoAntiFlag, GameItemProtoApplyType, GameItemProtoFlag, GameItemProtoFormat, GameItemProtoImmuneFlag, GameItemProtoLimitType, GameItemProtoMaskType, GameItemProtoMaskTypeCostume, GameItemProtoMaskTypeDragonStone, GameItemProtoMaskTypeEquipmentArmor, GameItemProtoMaskTypeEquipmentJewelry, GameItemProtoMaskTypeEquipmentWeapon, GameItemProtoMaskTypeEtc, GameItemProtoMaskTypeFishingPick, GameItemProtoMaskTypeMountPet, GameItemProtoMaskTypePotion, GameItemProtoMaskTypeSkill, GameItemProtoMaskTypeSubTypes, GameItemProtoMaskTypeTuning, GameItemProtoMaskTypeUnique, GameItemProtoType, GameItemProtoTypeArmor, GameItemProtoTypeCostume, GameItemProtoTypeDragonSoul, GameItemProtoTypeExtract, GameItemProtoTypeFish, GameItemProtoTypeGacha, GameItemProtoTypeGiftbox, GameItemProtoTypeLottery, GameItemProtoTypeMaterial, GameItemProtoTypeMedium, GameItemProtoTypeMercenary, GameItemProtoTypeMetin, GameItemProtoTypePassive, GameItemProtoTypePet, GameItemProtoTypeQuest, GameItemProtoTypeResource, GameItemProtoTypeSoul, GameItemProtoTypeSpecial, GameItemProtoTypeSubTypes, GameItemProtoTypeUnique, GameItemProtoTypeUse, GameItemProtoTypeWeapon, GameItemProtoWearFlag, GameItemSpecialActionType, GameItemSpecialType } from "../interfaces/GameItem";
+import { ItemAttribute, ItemLimitType, ItemMaskType, ItemSpecialActionType, ItemTable, ItemType } from "../interfaces/Item";
 
 import { ILocaleItem } from "../entities/LocaleItem";
 import { IItem } from "../entities/Item";
@@ -39,12 +40,14 @@ export type IGameItemService = IService & {
   readItemList<T = any>(path: string, options?: ItemParseOptions<T>): Promise<T[]>
   readItemProto(path: string, options?: ItemProtoParseOptions): Promise<Partial<ItemTable>[]>
   readItemBlend(path: string): Promise<Partial<ItemTable>[]>
+  readItemSpecialGroup(path: string): Promise<any>
 
   parseItemNames<T = any>(stream: NodeJS.ReadableStream, options?: ItemParseOptions<T>): Promise<T[]>
   parseItemDescriptions<T = any>(stream: NodeJS.ReadableStream, options?: ItemDescriptionParseOptions<T>): Promise<T[]>
   parseItemList<T = any>(stream: NodeJS.ReadableStream, options?: ItemParseOptions<T>): Promise<T[]>
   parseItemProto(stream: NodeJS.ReadableStream, options?: ItemProtoParseOptions): Promise<Partial<ItemTable>[]>
   parseItemBlend(stream: NodeJS.ReadableStream): Promise<Partial<ItemTable>[]>
+  parseItemSpecialGroup(stream: NodeJS.ReadableStream): Promise<any>
 
   createItemNames<T = any>(items: T[], options?: CSVWriteOptions): Promise<Buffer>
   createItemDescriptions(items: ILocaleItem[]): Promise<Buffer>
@@ -68,19 +71,6 @@ export default class GameItemService extends Service<any> implements IGameItemSe
     return iconv.encode(content, DefaultEncoding)
   }
 
-  async readItemNames<T = any>(path: string, options?: ItemParseOptions<T>) {
-    const stream = createReadStream(path).pipe(iconv.decodeStream(DefaultEncoding))
-    return this.parseItemNames(stream, options)
-  }
-
-  async parseItemNames<T = any>(stream: NodeJS.ReadableStream, options?: ItemParseOptions<T>) {
-    return parseProtoStream<T>(stream, {
-      headers: ['id', 'name'],
-      skipRows: 1,
-      ...options,
-    })
-  }
-
   async createItemDescriptions(items: ILocaleItem[]) {
     const content = await writeToString(items, {
       delimiter: '\t',
@@ -88,18 +78,6 @@ export default class GameItemService extends Service<any> implements IGameItemSe
     })
 
     return iconv.encode(content, DefaultEncoding)
-  }
-
-  async readItemDescriptions(path: string, options?: ItemDescriptionParseOptions<any>) {
-    const stream = createReadStream(path).pipe(iconv.decodeStream(DefaultEncoding))
-    return this.parseItemDescriptions(stream, options)
-  }
-
-  async parseItemDescriptions<T = any>(stream: NodeJS.ReadableStream, options?: ItemDescriptionParseOptions<T>) {
-    return parseProtoStream<T>(stream, {
-      headers: ['id', 'name', 'description', 'category'],
-      ...options
-    })
   }
 
   async createItemProto(items: IItem[]) {
@@ -163,23 +141,6 @@ export default class GameItemService extends Service<any> implements IGameItemSe
     return iconv.encode(content, KoreanEncoding)
   }
 
-  async readItemProto(path: string, options?: ItemProtoParseOptions) {
-    const stream = createReadStream(path).pipe(iconv.decodeStream(KoreanEncoding))
-    return this.parseItemProto(stream, options)
-  }
-
-  async parseItemProto(stream: NodeJS.ReadableStream, options?: ItemProtoParseOptions) {
-    const {
-      format = GameItemProtoFormat.DEFAULT
-    } = options || {}
-
-    return parseProtoStream<Partial<ItemTable>>(stream, {
-      headers: this.getItemProtoHeadersByFormat(format),
-      skipRows: 1,
-      transform: (row: any) => this.transformItemProtoRowToItem(format, row),
-    })
-  }
-
   async createItemList(items: IItem[]) {
     const content = await writeToString(items, {
       delimiter: '\t',
@@ -195,9 +156,79 @@ export default class GameItemService extends Service<any> implements IGameItemSe
     return iconv.encode(content, DefaultEncoding)
   }
 
+  async createItemBlend(items: IItem[]) {
+    let content = ""
+
+    items.map(item => {
+      if (item.typeId !== ItemType.BLEND || !item.blendAttributeId) return
+
+      content += `section\n`
+      content += `\titem_vnum\t${item.id}\n`
+      content += `\tapply_type\t${ItemAttribute[item.blendAttributeId]}\n`
+      content += `\tapply_value\t${item.blendAttributeValue0}\t${item.blendAttributeValue1}\t${item.blendAttributeValue2}\t${item.blendAttributeValue3}\t${item.blendAttributeValue4}\n`
+      content += `\tapply_duration\t${item.blendAttributeDuration0}\t${item.blendAttributeDuration1}\t${item.blendAttributeDuration2}\t${item.blendAttributeDuration3}\t${item.blendAttributeDuration4}\n`
+      content += `end\n`
+
+    })
+
+    return iconv.encode(content, KoreanEncoding)
+  }
+
+  async readItemNames<T = any>(path: string, options?: ItemParseOptions<T>) {
+    const stream = createReadStream(path).pipe(iconv.decodeStream(DefaultEncoding))
+    return this.parseItemNames(stream, options)
+  }
+
+  async readItemDescriptions(path: string, options?: ItemDescriptionParseOptions<any>) {
+    const stream = createReadStream(path).pipe(iconv.decodeStream(DefaultEncoding))
+    return this.parseItemDescriptions(stream, options)
+  }
+
+  async readItemProto(path: string, options?: ItemProtoParseOptions) {
+    const stream = createReadStream(path).pipe(iconv.decodeStream(KoreanEncoding))
+    return this.parseItemProto(stream, options)
+  }
+
   async readItemList<T = any>(path: string, options?: ItemParseOptions<T>) {
     const stream = createReadStream(path).pipe(iconv.decodeStream(DefaultEncoding))
     return this.parseItemList(stream, options)
+  }
+
+  async readItemBlend(path: string) {
+    const stream = createReadStream(path).pipe(iconv.decodeStream(KoreanEncoding))
+    return this.parseItemBlend(stream)
+  }
+
+  async readItemSpecialGroup(path: string) {
+    const stream = createReadStream(path).pipe(iconv.decodeStream(KoreanEncoding))
+    return this.parseItemSpecialGroup(stream)
+  }
+
+  async parseItemNames<T = any>(stream: NodeJS.ReadableStream, options?: ItemParseOptions<T>) {
+    return parseProtoStream<T>(stream, {
+      headers: ['id', 'name'],
+      skipRows: 1,
+      ...options,
+    })
+  }
+
+  async parseItemDescriptions<T = any>(stream: NodeJS.ReadableStream, options?: ItemDescriptionParseOptions<T>) {
+    return parseProtoStream<T>(stream, {
+      headers: ['id', 'name', 'description', 'category'],
+      ...options
+    })
+  }
+
+  async parseItemProto(stream: NodeJS.ReadableStream, options?: ItemProtoParseOptions) {
+    const {
+      format = GameItemProtoFormat.DEFAULT
+    } = options || {}
+
+    return parseProtoStream<Partial<ItemTable>>(stream, {
+      headers: this.getItemProtoHeadersByFormat(format),
+      skipRows: 1,
+      transform: (row: any) => this.transformItemProtoRowToItem(format, row),
+    })
   }
 
   async parseItemList<T = any>(stream: NodeJS.ReadableStream, options?: ItemParseOptions<T>) {
@@ -205,11 +236,6 @@ export default class GameItemService extends Service<any> implements IGameItemSe
       headers: ['id', 'type', 'icon', 'model', '_'],
       ...options
     })
-  }
-
-  async readItemBlend(path: string) {
-    const stream = createReadStream(path).pipe(iconv.decodeStream(KoreanEncoding))
-    return this.parseItemBlend(stream)
   }
 
   async parseItemBlend(stream: NodeJS.ReadableStream) {
@@ -230,45 +256,123 @@ export default class GameItemService extends Service<any> implements IGameItemSe
       let [_2, type] = typeMatch || []
       let [_3, value0, value1, value2, value3, value4] = valueMatches || []
       let [_4, duration0, duration1, duration2, duration3, duration4] = durationMatches || []
-      
-      const typeId = ItemAttribute[type as any] as any
+
+      const [typeId] = getEnumValues(ItemAttribute, type)
       if (!itemId || !typeId) return
 
       items.push({
         item_id: ~~(itemId),
-        item_blend_apply_type: typeId,
-        item_blend_apply_value0: ~~(value0),
-        item_blend_apply_value1: ~~(value1),
-        item_blend_apply_value2: ~~(value2),
-        item_blend_apply_value3: ~~(value3),
-        item_blend_apply_value4: ~~(value4),
-        item_blend_apply_duration0: ~~(duration0),
-        item_blend_apply_duration1: ~~(duration1),
-        item_blend_apply_duration2: ~~(duration2),
-        item_blend_apply_duration3: ~~(duration3),
-        item_blend_apply_duration4: ~~(duration4),
+        item_blend_attribute: typeId,
+        item_blend_attribute_value0: ~~(value0),
+        item_blend_attribute_value1: ~~(value1),
+        item_blend_attribute_value2: ~~(value2),
+        item_blend_attribute_value3: ~~(value3),
+        item_blend_attribute_value4: ~~(value4),
+        item_blend_attribute_duration0: ~~(duration0),
+        item_blend_attribute_duration1: ~~(duration1),
+        item_blend_attribute_duration2: ~~(duration2),
+        item_blend_attribute_duration3: ~~(duration3),
+        item_blend_attribute_duration4: ~~(duration4),
       })
     })
 
     return items
   }
 
-  async createItemBlend(items: IItem[]) {
-    let content = ""
+  async parseItemSpecialGroup(stream: NodeJS.ReadableStream) {
+    const buffer = await readStreamToBuffer(stream)
+    const content = buffer.toString()
 
-    items.map(item => {
-      if (item.typeId !== ItemType.BLEND || !item.blendAttributeId) return
+    const items: any[] = []
+    const actionsById: any[] = []
+    const actionsByItemName: any[] = []
 
-      content += `section\n`
-      content += `\titem_vnum\t${item.id}\n`
-      content += `\tapply_type\t${ItemAttribute[item.blendAttributeId]}\n`
-      content += `\tapply_value\t${item.blendAttributeValue0}\t${item.blendAttributeValue1}\t${item.blendAttributeValue2}\t${item.blendAttributeValue3}\t${item.blendAttributeValue4}\n`
-      content += `\tapply_duration\t${item.blendAttributeDuration0}\t${item.blendAttributeDuration1}\t${item.blendAttributeDuration2}\t${item.blendAttributeDuration3}\t${item.blendAttributeDuration4}\n`
-      content += `end\n`
+    const matches = content.match(/Group.*?{(.*?)}/gis)
+    matches?.map(match => {
 
+      const [itemMatch] = [...match.matchAll(/Vnum\s+(\d+)/gmi)]
+      const [typeMatch] = [...match.matchAll(/Type\s+(pct|quest|special|attr)/gmi)]
+      const [effectMatch] = [...match.matchAll(/effect\s+"(.*?)"/gmi)]
+
+      let [_1, itemId] = itemMatch || []
+      let [_2, type] = typeMatch || [null, GameItemSpecialType[GameItemSpecialType.NORMAL]]
+      let [_3, effect] = effectMatch || []
+
+      itemId = ~~(itemId) as any
+      const [specialTypeId] = getEnumValues(GameItemSpecialType, type)
+
+      if (!itemId || !specialTypeId) return
+
+      items.push({ itemId, specialTypeId, effect })
+
+      const actions = [...match.matchAll(/^\s+\d+\s+(.+?)\s+(\d+)\s+(\d+)(\s+(\d+))?$/gmi)]
+      actions?.map(action => {
+        const [_1, itemIdOrNameOrType, quantityOrEntityId, probability, _3, rareProbability] = action
+
+        let actionTypeId = undefined
+        let actionAttributeId = undefined
+        let actionItemId = undefined  
+        let actionItemName = undefined
+        let actionMobId = undefined
+        let actionMobGroupId = undefined
+        let actionQuantity = undefined
+
+        let actions = actionsById
+
+        if (isNumber(itemIdOrNameOrType)) {
+          actionTypeId = specialTypeId === GameItemSpecialType.ATTR ? ItemSpecialActionType.ATTRIBUTE : ItemSpecialActionType.ITEM
+          actionItemId = specialTypeId === GameItemSpecialType.ATTR ? undefined : itemIdOrNameOrType
+          actionAttributeId = specialTypeId === GameItemSpecialType.ATTR ? itemIdOrNameOrType : undefined
+          actionQuantity = quantityOrEntityId
+
+        } else {
+
+          const [actionType] = getEnumValues(GameItemSpecialActionType, itemIdOrNameOrType) as any
+          switch (actionType) {
+            
+            case ItemSpecialActionType.MOB:
+              actionTypeId = ItemSpecialActionType.MOB
+              actionMobId = quantityOrEntityId
+              break
+          
+            case ItemSpecialActionType.MOB_GROUP:
+              actionTypeId = ItemSpecialActionType.MOB_GROUP
+              actionMobGroupId = quantityOrEntityId
+              break
+
+            case ItemSpecialActionType.EXP:
+            case ItemSpecialActionType.SLOW:
+            case ItemSpecialActionType.POISON:
+            case ItemSpecialActionType.DRAIN_HP:
+              actionTypeId = actionType
+              actionQuantity = quantityOrEntityId
+              break
+            
+            default:
+              actions = actionsByItemName
+              actionTypeId = ItemSpecialActionType.ITEM
+              actionItemName = itemIdOrNameOrType
+              actionQuantity = quantityOrEntityId
+
+          }
+        }
+
+        actions.push({
+          parentItemId: itemId,
+          typeId: actionTypeId,
+          itemId: actionItemId ? ~~(actionItemId) : undefined,
+          itemName: actionItemName,
+          mobId: actionMobId ? ~~(actionMobId) : undefined,
+          mobGroupId: actionMobGroupId ? ~~(actionMobGroupId) : undefined,
+          attributeId: actionAttributeId ? ~~(actionAttributeId) : undefined,
+          quantity: actionQuantity ? ~~(actionQuantity) : undefined,
+          probability: probability ? ~~(probability) : undefined,
+          rareProbability: rareProbability ? ~~(rareProbability) : 0
+        })
+      })
     })
-
-    return iconv.encode(content, KoreanEncoding)
+    
+    return [items, actionsById, actionsByItemName]
   }
 
   private getItemProtoHeadersByFormat(format: GameItemProtoFormat) {
@@ -356,12 +460,12 @@ export default class GameItemService extends Service<any> implements IGameItemSe
       item_limit_value0: ~~(row.limitValue0),
       item_limit_type1: limitType1 || ItemLimitType.NONE as any,
       item_limit_value1: ~~(row.limitValue1),
-      item_apply_type0: applyType0 || ItemAttribute.NONE as any,
-      item_apply_value0: ~~(row.applyValue0),
-      item_apply_type1: applyType1 || ItemAttribute.NONE as any,
-      item_apply_value1: ~~(row.applyValue1),
-      item_apply_type2: applyType2 || ItemAttribute.NONE as any,
-      item_apply_value2: ~~(row.applyValue2),
+      item_attribute0: applyType0 || ItemAttribute.NONE as any,
+      item_attribute_value0: ~~(row.applyValue0),
+      item_attribute1: applyType1 || ItemAttribute.NONE as any,
+      item_attribute_value1: ~~(row.applyValue1),
+      item_attribute2: applyType2 || ItemAttribute.NONE as any,
+      item_attribute_value2: ~~(row.applyValue2),
       item_value0: ~~(row.value0),
       item_value1: ~~(row.value1),
       item_value2: ~~(row.value2),
@@ -374,8 +478,8 @@ export default class GameItemService extends Service<any> implements IGameItemSe
     }
 
     if (format === GameItemProtoFormat.VERSION_2022) {
-      item.item_apply_type3 = applyType3 || ItemAttribute.NONE as any
-      item.item_apply_value3 = ~~(row.applyValue3)
+      item.item_attribute3 = applyType3 || ItemAttribute.NONE as any
+      item.item_attribute_value3 = ~~(row.applyValue3)
 
       item.item_socket0 = ~~(row.socket0)
       item.item_socket1 = ~~(row.socket1)
