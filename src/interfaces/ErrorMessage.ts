@@ -42,6 +42,9 @@ export enum ErrorMessage {
   LOCALE_MOB_INVALID_ID = "invalid_locale_mob_id",
   LOCALE_MOB_NOT_FOUND = "locale_mob_not_found",
 
+  ITEM_SPECIAL_ACTION_INVALID_ID = "invalid_item_special_action_id",
+  ITEM_SPECIAL_ACTION_NOT_FOUND = "item_special_action_not_found",
+
   MOB_NOT_FOUND = "mob_not_found",
 
   MOP_GROUP_INVALID_ID = "invalid_mob_group_id",

@@ -86,7 +86,7 @@ export type ItemSpecialActionTable = EntityTable & {
 }
 
 export enum ItemSpecialType {
-  DEFAULT = 1,
+  DEFAULT,
   MULTIPLE,
   QUEST,
   SPECIAL,

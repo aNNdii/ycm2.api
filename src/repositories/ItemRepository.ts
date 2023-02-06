@@ -5,6 +5,7 @@ import { merge } from "../helpers/Object"
 import { ItemSpecialActionTable, ItemTable } from "../interfaces/Item"
 
 import ItemAttribute, { IItemAttribute, ItemAttributeProperties } from "../entities/ItemAttribute"
+import ItemSpecialAction, { IItemSpecialAction, ItemSpecialActionProperties } from "../entities/ItemSpecialAction"
 import Item, { IItem, ItemProperties } from "../entities/Item"
 
 import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions } from "./MariaRepository"
@@ -16,7 +17,8 @@ export type IItemRepository = IGameRepository & {
   getItems<Entity = IItem, Filter = ItemProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   getItemAttributes<Entity = IItemAttribute, Filter = ItemAttributeProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   getItemRareAttributes<Entity = IItemAttribute, Filter = ItemAttributeProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
-  
+  getItemSpecialActions<Entity = IItemSpecialAction, Filter = ItemSpecialActionProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
+
   createItems<Entity = ItemTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>): Promise<Response>
   createItemSpecialActions<Entity = ItemSpecialActionTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>): Promise<Response>
   
@@ -35,26 +37,6 @@ export default class ItemRepository extends GameRepository implements IItemRepos
     return this.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new Item(row),
       table: `${cmsDatabase}.item`
-    }, options))
-  }
-
-  createItems<Entity = ItemTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>) {
-    this.log("createItems", options)
-
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
-
-    return this.createEntities<Entity, Response>(merge({
-      table: `${cmsDatabase}.item`
-    }, options))
-  }
-
-  createItemSpecialActions<Entity = ItemSpecialActionTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>) {
-    this.log("createItemSpecialActions", options)
-
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
-
-    return this.createEntities<Entity, Response>(merge({
-      table: `${cmsDatabase}.item_special_action`
     }, options))
   }
 
@@ -80,6 +62,40 @@ export default class ItemRepository extends GameRepository implements IItemRepos
 
     return this.getItemAttributes<Entity, Filter>(merge({
       table: `${playerDatabase}.item_attr_rare as item_attr`
+    }, options))
+  }
+
+  getItemSpecialActions<Entity = IItemSpecialAction, Filter = ItemSpecialActionProperties>(options?: MariaRepositorySelectOptions<Filter>) {
+    this.log("getItemSpecialActions", options)
+  
+    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+
+    return this.getEntities<Entity, Filter>(merge({
+      parser: (row: any) => new ItemSpecialAction(row),
+      table: `${cmsDatabase}.item_special_action`,
+      joins: [
+        `LEFT JOIN ${cmsDatabase}.item ON item.item_id = item_special_action.item_special_action_parent_item_id`
+      ]
+    }, options))
+  }
+
+  createItems<Entity = ItemTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>) {
+    this.log("createItems", options)
+
+    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+
+    return this.createEntities<Entity, Response>(merge({
+      table: `${cmsDatabase}.item`
+    }, options))
+  }
+
+  createItemSpecialActions<Entity = ItemSpecialActionTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>) {
+    this.log("createItemSpecialActions", options)
+
+    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+
+    return this.createEntities<Entity, Response>(merge({
+      table: `${cmsDatabase}.item_special_action`
     }, options))
   }
 
@@ -202,6 +218,5 @@ export default class ItemRepository extends GameRepository implements IItemRepos
     const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
     return this.truncateTable(`${cmsDatabase}.item_special_action`)
   }
-
 
 }

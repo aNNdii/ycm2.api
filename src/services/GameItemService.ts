@@ -11,12 +11,13 @@ import { isNumber } from "../helpers/Number";
 import { getEnumValues } from "../helpers/Enum";
 
 import { GameItemProtoAntiFlag, GameItemProtoApplyType, GameItemProtoFlag, GameItemProtoFormat, GameItemProtoImmuneFlag, GameItemProtoLimitType, GameItemProtoMaskType, GameItemProtoMaskTypeCostume, GameItemProtoMaskTypeDragonStone, GameItemProtoMaskTypeEquipmentArmor, GameItemProtoMaskTypeEquipmentJewelry, GameItemProtoMaskTypeEquipmentWeapon, GameItemProtoMaskTypeEtc, GameItemProtoMaskTypeFishingPick, GameItemProtoMaskTypeMountPet, GameItemProtoMaskTypePotion, GameItemProtoMaskTypeSkill, GameItemProtoMaskTypeSubTypes, GameItemProtoMaskTypeTuning, GameItemProtoMaskTypeUnique, GameItemProtoType, GameItemProtoTypeArmor, GameItemProtoTypeCostume, GameItemProtoTypeDragonSoul, GameItemProtoTypeExtract, GameItemProtoTypeFish, GameItemProtoTypeGacha, GameItemProtoTypeGiftbox, GameItemProtoTypeLottery, GameItemProtoTypeMaterial, GameItemProtoTypeMedium, GameItemProtoTypeMercenary, GameItemProtoTypeMetin, GameItemProtoTypePassive, GameItemProtoTypePet, GameItemProtoTypeQuest, GameItemProtoTypeResource, GameItemProtoTypeSoul, GameItemProtoTypeSpecial, GameItemProtoTypeSubTypes, GameItemProtoTypeUnique, GameItemProtoTypeUse, GameItemProtoTypeWeapon, GameItemProtoWearFlag, GameItemSpecialActionType, GameItemSpecialType } from "../interfaces/GameItem";
-import { ItemAttribute, ItemLimitType, ItemMaskType, ItemSpecialActionType, ItemTable, ItemType } from "../interfaces/Item";
+import { ItemAttribute, ItemLimitType, ItemMaskType, ItemSpecialActionType, ItemSpecialType, ItemTable, ItemType } from "../interfaces/Item";
 
 import { ILocaleItem } from "../entities/LocaleItem";
 import { IItem } from "../entities/Item";
 
 import Service, { IService } from "./Service";
+import { IItemSpecialAction } from "../entities/ItemSpecialAction";
 
 export const GameItemServiceToken = new Token<IGameItemService>("GameItemService")
 
@@ -54,6 +55,7 @@ export type IGameItemService = IService & {
   createItemList(items: IItem[]): Promise<Buffer>
   createItemProto(items: IItem[]): Promise<Buffer>
   createItemBlend(items: IItem[]): Promise<Buffer>
+  createItemSpecialGroup(actions: IItemSpecialAction[]): Promise<Buffer>
 }
 
 export default class GameItemService extends Service<any> implements IGameItemService {
@@ -169,6 +171,74 @@ export default class GameItemService extends Service<any> implements IGameItemSe
       content += `\tapply_duration\t${item.blendAttributeDuration0}\t${item.blendAttributeDuration1}\t${item.blendAttributeDuration2}\t${item.blendAttributeDuration3}\t${item.blendAttributeDuration4}\n`
       content += `end\n`
 
+    })
+
+    return iconv.encode(content, KoreanEncoding)
+  }
+
+  async createItemSpecialGroup(actions: IItemSpecialAction[]) {
+    let content = ""
+
+    const itemSpecials: any[] = []
+
+    actions.map(action => {
+      itemSpecials[action.parentItemId] = itemSpecials[action.parentItemId] || { itemId: action.parentItemId, typeId: action.parentItemSpecialTypeId, effect: action.parentItemSpecialEffect, actions: [] }
+      itemSpecials[action.parentItemId]['actions'].push(action)
+    })
+
+    itemSpecials?.map(itemSpecial => {
+      const { itemId, typeId, effect, actions } = itemSpecial
+
+      content += `Group\t${itemId}\n`
+      content += `{\n`
+
+      content += `\tVnum\t${itemId}\n`
+      if (typeId) content += `\tType\t${GameItemSpecialType[typeId]?.toLowerCase()}\n`
+
+      actions?.map((action: any, index: number) => {
+        let entities: any[] = []
+
+        switch (action.typeId) {
+
+          case ItemSpecialActionType.ITEM:
+            entities = [action.itemId, action.quantity, action.probability, action.rareProbability]
+            break 
+
+          case ItemSpecialActionType.EXP:
+            entities = ["exp", action.quantity, action.probability]
+            break
+
+          case ItemSpecialActionType.MOB:
+            entities = ["mob", action.mobId, action.probability]
+            break
+
+          case ItemSpecialActionType.MOB_GROUP:
+            entities = ["group", action.mobGroupId, action.probability]
+            break
+
+          case ItemSpecialActionType.DRAIN_HP:
+            entities = ["drain_hp", action.quantity, action.probability]
+            break
+
+          case ItemSpecialActionType.POISON:
+            entities = ["poison", action.quantity, action.probability]
+            break
+
+          case ItemSpecialActionType.SLOW:
+            entities = ["slow", action.quantity, action.probability]
+            break
+
+          case ItemSpecialActionType.ATTRIBUTE:
+            entities = [action.attributeId, action.quantity]
+            break
+
+        }
+
+        content += `\t${index+1}\t${entities.join(`\t`)}\n`
+      })
+
+      if (typeId === ItemSpecialType.ATTRIBUTE && effect) content += `\teffect\t${effect}\n`
+      content += `}\n`
     })
 
     return iconv.encode(content, KoreanEncoding)
@@ -301,17 +371,17 @@ export default class GameItemService extends Service<any> implements IGameItemSe
       itemId = ~~(itemId) as any
       const [specialTypeId] = getEnumValues(GameItemSpecialType, type)
 
-      if (!itemId || !specialTypeId) return
+      if (!itemId || specialTypeId === undefined) return
 
       items.push({ itemId, specialTypeId, effect })
 
-      const actions = [...match.matchAll(/^\s+\d+\s+(.+?)\s+(\d+)\s+(\d+)(\s+(\d+))?$/gmi)]
+      const actions = [...match.matchAll(/^\s+\d+\s+(.+?)\s+(\d+)\s+((\d+)(\s+(\d+))?)?$$/gmi)]
       actions?.map(action => {
-        const [_1, itemIdOrNameOrType, quantityOrEntityId, probability, _3, rareProbability] = action
+        const [_1, itemIdOrNameOrType, quantityOrEntityId, _2, probability, _3, rareProbability] = action
 
         let actionTypeId = undefined
         let actionAttributeId = undefined
-        let actionItemId = undefined  
+        let actionItemId = undefined
         let actionItemName = undefined
         let actionMobId = undefined
         let actionMobGroupId = undefined
@@ -329,12 +399,12 @@ export default class GameItemService extends Service<any> implements IGameItemSe
 
           const [actionType] = getEnumValues(GameItemSpecialActionType, itemIdOrNameOrType) as any
           switch (actionType) {
-            
+
             case ItemSpecialActionType.MOB:
               actionTypeId = ItemSpecialActionType.MOB
               actionMobId = quantityOrEntityId
               break
-          
+
             case ItemSpecialActionType.MOB_GROUP:
               actionTypeId = ItemSpecialActionType.MOB_GROUP
               actionMobGroupId = quantityOrEntityId
@@ -347,7 +417,7 @@ export default class GameItemService extends Service<any> implements IGameItemSe
               actionTypeId = actionType
               actionQuantity = quantityOrEntityId
               break
-            
+
             default:
               actions = actionsByItemName
               actionTypeId = ItemSpecialActionType.ITEM
@@ -371,7 +441,7 @@ export default class GameItemService extends Service<any> implements IGameItemSe
         })
       })
     })
-    
+
     return [items, actionsById, actionsByItemName]
   }
 

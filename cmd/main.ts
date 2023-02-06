@@ -140,6 +140,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const MAP_ENTITY_OBFUSCATION_SALT = process.env.MAP_ENTITY_OBFUSCATION_SALT || OBFUSCATION_SALT
   const GUILD_OBFUSCATION_SALT = process.env.GUILD_OBFUSCATION_SALT || OBFUSCATION_SALT
   const GUILD_MESSAGE_OBFUSCATION_SALT = process.env.GUILD_MESSAGE_OBFUSCATION_SALT || OBFUSCATION_SALT
+  const ITEM_SPECIAL_ACTION_OBFUSCATION_SALT = process.env.ITEM_SPECIAL_ACTION_OBFUSCATION_SALT || OBFUSCATION_SALT
   const MOB_ITEM_OBFUSCATION_SALT = process.env.MOB_ITEM_OBFUSCATION_SALT || OBFUSCATION_SALT
   const MOB_RANK_ITEM_OBFUSCATION_SALT = process.env.MOB_RANK_ITEM_OBFUSCATION_SALT || OBFUSCATION_SALT
   const MOB_GROUP_OBFUSCATION_SALT = process.env.MOB_GROUP_OBFUSCATION_SALT || OBFUSCATION_SALT
@@ -294,7 +295,9 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
     guildMessageObfuscationSalt: GUILD_MESSAGE_OBFUSCATION_SALT
   }))
 
-  Container.set(ItemServiceToken, new ItemService({}))
+  Container.set(ItemServiceToken, new ItemService({
+    itemSpecialActionObfuscationSalt: ITEM_SPECIAL_ACTION_OBFUSCATION_SALT
+  }))
 
   Container.set(MobServiceToken, new MobService({
     mobItemObfuscationSalt: MOB_ITEM_OBFUSCATION_SALT,

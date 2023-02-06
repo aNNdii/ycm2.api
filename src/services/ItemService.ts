@@ -15,6 +15,8 @@ import { IItem, ItemProperties } from "../entities/Item";
 import EntityService, { EntityOptions, IEntityService } from "./EntityService";
 import { GameItemServiceToken } from './GameItemService';
 import { PaginationOptions } from "./PaginationService";
+import { ErrorMessage } from "../interfaces/ErrorMessage";
+import { IItemSpecialAction, ItemSpecialActionProperties } from "../entities/ItemSpecialAction";
 
 export const ItemServiceToken = new Token<IItemService>("ItemService")
 
@@ -37,13 +39,24 @@ export type ItemAttributeOptions = PaginationOptions & {
   rare?: boolean
 }
 
-export type ItemServiceOptions = EntityOptions & {}
+export type ItemSpecialActionOptions = PaginationOptions & {
+  id?: EntityFilter<number>
+}
+
+export type ItemServiceOptions = EntityOptions & {
+  itemSpecialActionObfuscationSalt: string
+}
 
 export type IItemService = IEntityService & {
+  obfuscateItemSpecialActionId(id: any): string
+  deobfuscateItemSpecialActionId(value: string | string[]): number[]
+
   getItemPaginationOptions(args: any): PaginationOptions
+  getItemSpecialActionPaginationOptions(args: any): PaginationOptions
 
   getItems(options?: ItemOptions): Promise<IItem[]>
   getItemAttributes(options?: ItemAttributeOptions): Promise<IItemAttribute[]>
+  getItemSpecialActions(options?: ItemSpecialActionOptions): Promise<IItemSpecialAction[]>
 
   importItemProto(path: string, options?: ItemProtoImportOptions): Promise<any>
   importItemNames(path: string, options?: ItemImportOptions): Promise<any>
@@ -54,8 +67,23 @@ export type IItemService = IEntityService & {
 
 export default class ItemService extends EntityService<ItemServiceOptions> implements IItemService {
 
+  obfuscateItemSpecialActionId(id: any) {
+    return this.obfuscateId(id, { salt: this.options.itemSpecialActionObfuscationSalt })
+  }
+
+  deobfuscateItemSpecialActionId(value: string | string[]) {
+    return this.deobfuscateId(value, {
+      error: ErrorMessage.ITEM_SPECIAL_ACTION_INVALID_ID,
+      salt: this.options.itemSpecialActionObfuscationSalt,
+    })
+  }
+
   getItemPaginationOptions(args: any) {
     return this.getPaginationOptions(args, { offsetHandler: offset => [parseInt(offset)] })
+  }
+
+  getItemSpecialActionPaginationOptions(args: any) {
+    return this.getPaginationOptions(args, { offsetHandler: offset => this.deobfuscateItemSpecialActionId(offset) })
   }
 
   getItems(options?: ItemOptions) {
@@ -82,7 +110,7 @@ export default class ItemService extends EntityService<ItemServiceOptions> imple
     return itemRepository.getItems({ filter, where, order, limit })
   }
 
-  async getItemAttributes(options?: ItemAttributeOptions) {
+  getItemAttributes(options?: ItemAttributeOptions) {
     const {
       id,
       rare,
@@ -103,6 +131,28 @@ export default class ItemService extends EntityService<ItemServiceOptions> imple
     if (id) filter["item_attr.apply"] = id
 
     return rare ? itemRepository.getItemRareAttributes({ filter, where, order, limit }) : itemRepository.getItemAttributes({ filter, where, order, limit })
+  }
+
+  getItemSpecialActions(options?: ItemSpecialActionOptions) {
+    const {
+      id,
+      orderId,
+      offset,
+      limit
+    } = options || {}
+
+    this.log("getItemSpecialActions", options)
+
+    const itemRepository = Container.get(ItemRepositoryToken)
+
+    const orders = this.getPaginationColumnOptions({ key: 'id', column: 'item_special_action.item_special_action_id' })
+
+    const filter: ItemSpecialActionProperties = {}
+    const { where, order } = this.getPaginationQueryOptions({ orderId, offset, orders })
+
+    if (id) filter["item_special_action.item_special_action_id"] = id
+
+    return itemRepository.getItemSpecialActions({ filter, where, order, limit })
   }
 
   async importItemProto(path: string, options?: ItemProtoImportOptions) {
@@ -330,13 +380,11 @@ export default class ItemService extends EntityService<ItemServiceOptions> imple
     const actions: any[] = []
 
     const itemRepository = Container.get(ItemRepositoryToken)
-    
+
     const itemNames = actionsByItemName.map(action => action.itemName)
     const items = await itemRepository.getItems({
       filter: { "item.item_name": [EntityFilterMethod.IN, itemNames] }
     })
-
-    console.log(items)
 
     const itemsByName = items.reduce((items: any, item) => {
       items[item.name] = items[item.name] || item
