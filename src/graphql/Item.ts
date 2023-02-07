@@ -4,7 +4,7 @@ import Container from "../infrastructures/Container";
 
 import { getFlagsByFlagId } from "../helpers/Game";
 
-import { ItemAntiFlag, ItemFlag, ItemImmuneFlag, ItemLimitType, ItemMaskType, ItemMaskTypeSubTypes, ItemType, ItemTypeSubTypes, ItemWearFlag } from "../interfaces/Item";
+import { ItemAntiFlag, ItemFlag, ItemImmuneFlag, ItemLimitType, ItemMaskType, ItemMaskTypeSubTypes, ItemSpecialType, ItemType, ItemTypeSubTypes, ItemWearFlag } from "../interfaces/Item";
 import { Authorization } from "../interfaces/Auth";
 
 import { ItemControllerToken } from "../controllers/ItemController";
@@ -15,6 +15,7 @@ import { IItem } from "../entities/Item";
 import GraphQLCharacterItemAttribute from "./CharacterItemAttribute";
 import GraphQLLocaleItem from "./LocaleItem";
 import GraphQLItemSource from "./ItemSource";
+import GraphQLItemSpecial from "./ItemSpecial";
 
 const GraphQLItem: GraphQLObjectType = new GraphQLObjectType({
   name: 'Item',
@@ -181,6 +182,10 @@ const GraphQLItem: GraphQLObjectType = new GraphQLObjectType({
     },
     source: {
       type: GraphQLItemSource,
+      resolve: (item: IItem) => item
+    },
+    special: {
+      type: GraphQLItemSpecial,
       resolve: (item: IItem) => item
     },
     createdDate: {

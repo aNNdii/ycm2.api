@@ -22,6 +22,7 @@ import { IItemAttribute } from "../entities/ItemAttribute";
 import { IItem } from "../entities/Item";
 
 import Controller, { IController } from "./Controller";
+import { IItemSpecialAction } from "../entities/ItemSpecialAction";
 
 export const ItemControllerToken = new Token<IItemController>("ItemController")
 
@@ -42,6 +43,9 @@ export type IItemController = IController & {
 
   getItemRareAttributes(options: any, context: IHttpRouterContext): Promise<IItemAttribute[]>
   getItemRareAttributeById(id: number, context: IHttpRouterContext): Promise<IItemAttribute>
+
+  getItemSpecialActions(options: any, context: IHttpRouterContext): Promise<IItemSpecialAction[]>
+  getItemSpecialActionById(id: number, context: IHttpRouterContext): Promise<IItemSpecialAction>
 }
 
 export default class ItemController extends Controller implements IItemController {
@@ -211,7 +215,7 @@ export default class ItemController extends Controller implements IItemControlle
   }
 
 
-  async getItems(options: any, context: IHttpRouterContext) {
+  getItems(options: any, context: IHttpRouterContext) {
     this.log("getItems", options)
 
     const itemService = Container.get(ItemServiceToken)
@@ -232,7 +236,7 @@ export default class ItemController extends Controller implements IItemControlle
   }
 
 
-  async getItemAttributes(options: any, context: IHttpRouterContext) {
+   getItemAttributes(options: any, context: IHttpRouterContext) {
     this.log("getItemAttributes", options)
 
     const itemService = Container.get(ItemServiceToken)
@@ -253,7 +257,7 @@ export default class ItemController extends Controller implements IItemControlle
   }
 
   
-  async getItemRareAttributes(options: any, context: IHttpRouterContext) {
+  getItemRareAttributes(options: any, context: IHttpRouterContext) {
     this.log("getItemRareAttributes", options)
 
     return this.getItemAttributes({
@@ -270,5 +274,28 @@ export default class ItemController extends Controller implements IItemControlle
 
     return attribute
   }
+
+  
+  getItemSpecialActions(options: any, context: IHttpRouterContext) {
+    this.log("getItemSpecialActions", options)
+
+    const itemService = Container.get(ItemServiceToken)
+    const paginationOptions = itemService.getItemSpecialActionPaginationOptions(options)
+
+    return context.dataLoaderService.getItemSpecialActions({
+      ...paginationOptions,
+    })
+  }
+
+  async getItemSpecialActionById(id: number, context: IHttpRouterContext) {
+    this.log("getItemSpecialActionById", { id })
+
+    const [action] = await context.dataLoaderService.getItemSpecialActionsById(id)
+    if (!action) throw new HttpRouterError(HttpStatusCode.NOT_FOUND, ErrorMessage.ITEM_SPECIAL_ACTION_NOT_FOUND)
+
+    return action
+  }
+
+
 
 }

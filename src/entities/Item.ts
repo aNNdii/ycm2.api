@@ -69,6 +69,8 @@ export type IItem = IEntity & {
   blendAttributeDuration2: number
   blendAttributeDuration3: number
   blendAttributeDuration4: number
+  specialTypeId: number
+  specialEffect: string
   createdDate: string
   modifiedDate: string
 }
@@ -325,6 +327,14 @@ export default class Item extends Entity<ItemProperties> implements IItem {
 
   get blendAttributeDuration4() {
     return this.getProperty("item.item_blend_attribute_duration4")
+  }
+
+  get specialTypeId() {
+    return this.getProperty("item.item_special_type")
+  }
+
+  get specialEffect() {
+    return this.getProperty("item.item_special_effect")
   }
 
   get createdDate() {

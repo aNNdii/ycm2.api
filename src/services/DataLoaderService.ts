@@ -8,7 +8,7 @@ import { AccountGroupAccountOptions, AccountGroupAuthorizationOptions, AccountGr
 import { GuildGradeOptions, GuildMessageOptions, GuildOptions, GuildServiceToken } from "./GuildService";
 import { LocaleItemOptions, LocaleMobOptions, LocaleOptions, LocaleServiceToken } from "./LocaleService";
 import { CharacterServiceToken, CharacterOptions, CharacterItemOptions } from "./CharacterService";
-import { ItemAttributeOptions, ItemOptions, ItemServiceToken } from "./ItemService";
+import { ItemAttributeOptions, ItemOptions, ItemServiceToken, ItemSpecialActionOptions } from "./ItemService";
 import { MapEntityOptions, MapOptions, MapServiceToken } from "./MapService";
 import Service, { IService, ServiceOptions } from "./Service";
 
@@ -35,6 +35,7 @@ import { IGuild } from "../entities/Guild";
 import { IItem } from "../entities/Item";
 import { IMap } from "../entities/Map";
 import { IMob } from "../entities/Mob";
+import { IItemSpecialAction } from "../entities/ItemSpecialAction";
 
 export type DataLoaderServiceOptions = ServiceOptions & {}
 
@@ -80,6 +81,13 @@ export type IDataLoaderService = IService & {
   getItemAttributes(options?: ItemAttributeOptions): Promise<IItemAttribute[]>
   getItemAttributesById(id: number | number[]): Promise<IItemAttribute[]>
   getItemRareAttributesById(id: number | number[]): Promise<IItemAttribute[]>
+
+  getItemSpecialActions(options?: ItemSpecialActionOptions): Promise<IItemSpecialAction[]>
+  getItemSpecialActionsById(id: number | number[]): Promise<IItemSpecialAction[]>
+  getItemSpecialActionsByItemId(id: number | number[]): Promise<IItemSpecialAction[]>
+  getItemSpecialActionsByMobId(id: number | number[]): Promise<IItemSpecialAction[]>
+  getItemSpecialActionsByMobGroupId(id: number | number[]): Promise<IItemSpecialAction[]>
+  getItemSpecialActionsByParentItemId(id: number | number[]): Promise<IItemSpecialAction[]>
 
   getMobs(options?: MobOptions): Promise<IMob[]>
   getMobsById(id: number | number[]): Promise<IMob[]>
@@ -288,6 +296,36 @@ export default class DataLoaderService extends Service<DataLoaderServiceOptions>
   getItemRareAttributesById(id: number | number[]) {
     const func = this.getLoaderBatchFunc(ids => this.getItemAttributes({ id: [EntityFilterMethod.IN, ids], rare: true }))
     return this.getLoader('getItemRareAttributesById', func, { batch: true }).load(id)
+  }
+
+
+  getItemSpecialActions(options?: ItemSpecialActionOptions) {
+    return this.getLoader('getItemSpecialActions', options => Container.get(ItemServiceToken).getItemSpecialActions(options)).load(options)
+  }
+
+  getItemSpecialActionsById(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getItemSpecialActions({ id: [EntityFilterMethod.IN, ids] }))
+    return this.getLoader('getItemSpecialActionsById', func, { batch: true }).load(id)
+  }
+
+  getItemSpecialActionsByParentItemId(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getItemSpecialActions({ parentItemId: [EntityFilterMethod.IN, ids] }), { key: 'parentItemId' })
+    return this.getLoader('getItemSpecialActionsByParentItemId', func, { batch: true }).load(id)
+  }
+
+  getItemSpecialActionsByItemId(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getItemSpecialActions({ itemId: [EntityFilterMethod.IN, ids] }), { key: 'itemId' })
+    return this.getLoader('getItemSpecialActionsByItemId', func, { batch: true }).load(id)
+  }
+
+  getItemSpecialActionsByMobId(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getItemSpecialActions({ mobId: [EntityFilterMethod.IN, ids] }), { key: 'mobId' })
+    return this.getLoader('getItemSpecialActionsByMobId', func, { batch: true }).load(id)
+  }
+
+  getItemSpecialActionsByMobGroupId(id: number | number[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getItemSpecialActions({ mobGroupId: [EntityFilterMethod.IN, ids] }), { key: 'mobGroupId' })
+    return this.getLoader('getItemSpecialActionsByMobGroupId', func, { batch: true }).load(id)
   }
 
 

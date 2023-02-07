@@ -41,6 +41,10 @@ export type ItemAttributeOptions = PaginationOptions & {
 
 export type ItemSpecialActionOptions = PaginationOptions & {
   id?: EntityFilter<number>
+  parentItemId?: EntityFilter<number>
+  itemId?: EntityFilter<number>
+  mobId?: EntityFilter<number>
+  mobGroupId?: EntityFilter<number>
 }
 
 export type ItemServiceOptions = EntityOptions & {
@@ -136,6 +140,10 @@ export default class ItemService extends EntityService<ItemServiceOptions> imple
   getItemSpecialActions(options?: ItemSpecialActionOptions) {
     const {
       id,
+      parentItemId,
+      itemId,
+      mobId,
+      mobGroupId,
       orderId,
       offset,
       limit
@@ -151,6 +159,10 @@ export default class ItemService extends EntityService<ItemServiceOptions> imple
     const { where, order } = this.getPaginationQueryOptions({ orderId, offset, orders })
 
     if (id) filter["item_special_action.item_special_action_id"] = id
+    if (parentItemId) filter["item_special_action.item_special_action_parent_item_id"] = parentItemId
+    if (itemId) filter["item_special_action.item_special_action_item_id"] = itemId
+    if (mobId) filter["item_special_action.item_special_action_mob_id"] = mobId
+    if (mobGroupId) filter["item_special_action.item_special_action_mob_group_id"] = mobGroupId
 
     return itemRepository.getItemSpecialActions({ filter, where, order, limit })
   }
