@@ -21,12 +21,14 @@ An open source api for managing Metin2 game servers, written in Node.js and usin
   - item_names.txt
   - item_description.txt
   - item_lists.txt
+  - special_item_group.txt
   - mob_proto
   - mob_names.txt
   - mob_drop_item.txt
   - common_drop_item.txt
   - mob_group.txt
   - mob_group_group.txt
+  - blend.txt
   - Map (index, Settings.txt, regen.txt, boss.txt, stone.txt, npc.txt)
 
 
@@ -105,9 +107,7 @@ query {
 - Vote 4 Coins
 - Item Shop
 - Support for more game files such as
-  - special_item_group.txt
   - cube.txt
-  - blend.txt
 - And many, many more...
 
 
