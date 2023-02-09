@@ -26,12 +26,12 @@ export default class Controller extends Logger implements IController {
 
   protected patch(path: string, handler: HttpRouterHandler) {
     const router = Container.get(HttpRouterToken)
-    return router.get(path, handler)
+    return router.patch(path, handler)
   }
 
   protected delete(path: string, handler: HttpRouterHandler) {
     const router = Container.get(HttpRouterToken)
-    return router.get(path, handler)
+    return router.delete(path, handler)
   }
 
 }

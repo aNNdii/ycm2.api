@@ -11,7 +11,7 @@ import Captcha, { ICaptcha } from "../entities/Captcha"
 import { ObfuscationServiceToken } from "./ObfuscationService"
 import Service, { IService, ServiceOptions } from "./Service"
 
-export const CaptchaServiceToken = new Token<ICaptchaService>("Captcha")
+export const CaptchaServiceToken = new Token<ICaptchaService>("CaptchaService")
 
 export type CaptchaServiceOptions = ServiceOptions & {
   tokenSecret: string
