@@ -66,6 +66,7 @@ export type IItemService = IEntityService & {
   importItemNames(path: string, options?: ItemImportOptions): Promise<any>
   importItemList(path: string, options?: ItemImportOptions): Promise<any>
   importItemBlend(path: string, options?: ItemImportOptions): Promise<any>
+  importItemCube(path: string, options?: ItemImportOptions): Promise<any>
   importItemSpecialGroup(path: string, options?: ItemImportOptions): Promise<any>
 }
 
@@ -328,6 +329,19 @@ export default class ItemService extends EntityService<ItemServiceOptions> imple
       actions?.length ? this.importItemSpecialGroupActions(actions) : null,
       actionsByItemName?.length ? this.importItemSpecialGroupActionsByItemName(actionsByItemName) : null
     ])
+  }
+
+  async importItemCube(path: string, options?: ItemImportOptions) {
+    const { override } = options || {}
+
+    this.log("importItemCube", { path, override })
+
+    const gameItemService = Container.get(GameItemServiceToken)
+    const itemRepository = Container.get(ItemRepositoryToken)
+
+    const [cubes, cubeItems] = await gameItemService.readItemCube(path)
+
+
   }
 
   private async importItemSpecialGroupItems(items: any[]) {

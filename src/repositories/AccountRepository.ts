@@ -1,4 +1,4 @@
-import { Token } from "../infrastructures/Container";
+import Container, { Token } from "../infrastructures/Container";
 
 import { merge } from "../helpers/Object";
 
@@ -9,12 +9,13 @@ import AccountGroupAccount, { AccountGroupAccountProperties, IAccountGroupAccoun
 import AccountGroup, { AccountGroupProperties, IAccountGroup } from "../entities/AccountGroup";
 import Account, { AccountProperties, IAccount } from "../entities/Account";
 
-import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions, MariaRepositoryUpdateOptions } from "./MariaRepository";
-import GameRepository, { IGameRepository, GameDatabase } from "./GameRepository";
+import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions, MariaRepositoryToken, MariaRepositoryUpdateOptions } from "./MariaRepository";
+import Repository, { IRepository } from "./Repository";
+import { GameRepositoryToken } from "./GameRepository";
 
 export const AccountRepositoryToken = new Token<IAccountRepository>("AccountRepository")
 
-export type IAccountRepository = IGameRepository & {
+export type IAccountRepository = IRepository & {
   getAccounts<Entity = IAccount, Filter = AccountProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   getAccountGroups<Entity = IAccountGroup, Filter = AccountGroupProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   getAccountGroupAccounts<Entity = IAccountGroupAccount, Filter = AccountGroupAccountProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
@@ -33,15 +34,18 @@ export type IAccountRepository = IGameRepository & {
   deleteAccountGroupAuthorizations<Response = any, Table = AccountGroupAccountTable>(options: MariaRepositoryUpdateOptions<Table>): Promise<Response>
 }
 
-export default class AccountRepository extends GameRepository implements IAccountRepository {
+export default class AccountRepository extends Repository implements IAccountRepository {
 
   getAccounts<Entity = IAccount, Filter = AccountProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getAccounts", options)
 
-    const accountDatabase = this.getDatabaseName(GameDatabase.ACCOUNT)
-    const playerDatabase = this.getDatabaseName(GameDatabase.PLAYER)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const accountDatabase = gameRepository.getAccountDatabaseName()
+    const playerDatabase = gameRepository.getPlayerDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new Account(row),
       table: `${accountDatabase}.account`,
       joins: [
@@ -53,9 +57,12 @@ export default class AccountRepository extends GameRepository implements IAccoun
   getAccountGroups<Entity = IAccountGroup, Filter = AccountGroupProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getAccountGroups", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new AccountGroup(row),
       table: `${cmsDatabase}.account_group`,
     }, options))
@@ -64,9 +71,12 @@ export default class AccountRepository extends GameRepository implements IAccoun
   getAccountGroupAccounts<Entity = IAccountGroupAccount, Filter = AccountGroupAccountProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getAccountGroupAccounts", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new AccountGroupAccount(row),
       table: `${cmsDatabase}.account_group_account`,
     }, options))
@@ -75,9 +85,12 @@ export default class AccountRepository extends GameRepository implements IAccoun
   getAccountGroupAuthorizations<Entity = IAccountGroupAuthorization, Filter = AccountGroupAuthorizationProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getAccountGroupAuthorizations", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new AccountGroupAuthorization(row),
       table: `${cmsDatabase}.account_group_authorization`,
     }, options))
@@ -87,9 +100,12 @@ export default class AccountRepository extends GameRepository implements IAccoun
   createAccounts<Response = any, Table = AccountTable>(options: MariaRepositoryInsertOptions<Table>) {
     this.log("createAccounts", options)
 
-    const accountDatabase = this.getDatabaseName(GameDatabase.ACCOUNT)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Table, Response>(merge({
+    const accountDatabase = gameRepository.getAccountDatabaseName()
+
+    return mariaRepository.createEntities<Table, Response>(merge({
       table: `${accountDatabase}.account`
     }, options))
   }
@@ -97,9 +113,12 @@ export default class AccountRepository extends GameRepository implements IAccoun
   createAccountGroups<Response = any, Table = AccountGroupTable>(options: MariaRepositoryInsertOptions<Table>) {
     this.log("createAccountGroups", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Table, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Table, Response>(merge({
       table: `${cmsDatabase}.account_group`
     }, options))
   }
@@ -107,9 +126,12 @@ export default class AccountRepository extends GameRepository implements IAccoun
   createAccountGroupAccounts<Response = any, Table = AccountGroupAccountTable>(options: MariaRepositoryInsertOptions<Table>) {
     this.log("createAccountGroupAccounts", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Table, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Table, Response>(merge({
       table: `${cmsDatabase}.account_group_account`
     }, options))
   }
@@ -117,9 +139,12 @@ export default class AccountRepository extends GameRepository implements IAccoun
   createAccountGroupAuthorizations<Response = any, Table = AccountGroupAuthorizationTable>(options: MariaRepositoryInsertOptions<Table>) {
     this.log("createAccountGroupAuthorizations", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Table, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Table, Response>(merge({
       table: `${cmsDatabase}.account_group_authorization`
     }, options))
   }
@@ -127,9 +152,12 @@ export default class AccountRepository extends GameRepository implements IAccoun
   updateAccounts<Response = any, Table = AccountTable>(options: MariaRepositoryUpdateOptions<Table>) {
     this.log("updateAccounts", options)
 
-    const accountDatabase = this.getDatabaseName(GameDatabase.ACCOUNT)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.updateEntities<Table, Response>(merge({
+    const accountDatabase = gameRepository.getAccountDatabaseName()
+
+    return mariaRepository.updateEntities<Table, Response>(merge({
       table: `${accountDatabase}.account`
     }, options))
   }
@@ -137,9 +165,12 @@ export default class AccountRepository extends GameRepository implements IAccoun
   updateAccountGroups<Response = any, Table = AccountGroupTable>(options: MariaRepositoryUpdateOptions<Table>) {
     this.log("updateAccounts", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.updateEntities<Table, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.updateEntities<Table, Response>(merge({
       table: `${cmsDatabase}.account_group`
     }, options))
   }
@@ -147,9 +178,12 @@ export default class AccountRepository extends GameRepository implements IAccoun
   deleteAccountGroups<Response = any, Table = AccountGroupTable>(options: MariaRepositoryUpdateOptions<Table>) {
     this.log("deleteAccountGroups", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.deleteEntities<Table, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.deleteEntities<Table, Response>(merge({
       table: `${cmsDatabase}.account_group`
     }, options))
   }
@@ -157,9 +191,12 @@ export default class AccountRepository extends GameRepository implements IAccoun
   deleteAccountGroupAccounts<Response = any, Table = AccountGroupAccountTable>(options: MariaRepositoryUpdateOptions<Table>) {
     this.log("deleteAccountGroupAccounts", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.deleteEntities<Table, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.deleteEntities<Table, Response>(merge({
       table: `${cmsDatabase}.account_group_account`
     }, options))
   }
@@ -167,9 +204,12 @@ export default class AccountRepository extends GameRepository implements IAccoun
   deleteAccountGroupAuthorizations<Response = any, Table = AccountGroupAccountTable>(options: MariaRepositoryUpdateOptions<Table>) {
     this.log("deleteAccountGroupAuthorizations", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.deleteEntities<Table, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.deleteEntities<Table, Response>(merge({
       table: `${cmsDatabase}.account_group_authorization`
     }, options))
   }

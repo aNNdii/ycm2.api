@@ -1,30 +1,34 @@
-import { Token } from "../infrastructures/Container";
+import Container, { Token } from "../infrastructures/Container";
 
 import { merge } from "../helpers/Object";
 
 import CharacterItem, { CharacterItemProperties, ICharacterItem } from "../entities/CharacterItem";
 import Character, { ICharacter, CharacterProperties } from "../entities/Character";
 
-import GameRepository, { GameDatabase, IGameRepository } from "./GameRepository";
-import { MariaRepositorySelectOptions } from "./MariaRepository";
+import { MariaRepositorySelectOptions, MariaRepositoryToken } from "./MariaRepository";
+import Repository, { IRepository } from "./Repository";
+import { GameRepositoryToken } from "./GameRepository";
 
 export const CharacterRepositoryToken = new Token<ICharacterRepository>("CharacterRepository")
 
-export type ICharacterRepository = IGameRepository & {
+export type ICharacterRepository = IRepository & {
   getCharacters<Entity = ICharacter, Filter = CharacterProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   getCharacterItems<Entity = ICharacterItem, Filter = CharacterItemProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
 }
 
-export default class CharacterRepository extends GameRepository implements ICharacterRepository {
+export default class CharacterRepository extends Repository implements ICharacterRepository {
 
   getCharacters<Entity = ICharacter, Filter = CharacterProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getCharacters", options)
 
-    const accountDatabase = this.getDatabaseName(GameDatabase.ACCOUNT)
-    const playerDatabase = this.getDatabaseName(GameDatabase.PLAYER)
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const accountDatabase = gameRepository.getAccountDatabaseName()
+    const playerDatabase = gameRepository.getPlayerDatabaseName()
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new Character(row),
       table: `${playerDatabase}.player`,
       joins: [
@@ -40,16 +44,15 @@ export default class CharacterRepository extends GameRepository implements IChar
   getCharacterItems<Entity = ICharacterItem, Filter = CharacterItemProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]> {
     this.log("getCharacterItems", options)
 
-    const playerDatabase = this.getDatabaseName(GameDatabase.PLAYER)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const playerDatabase = gameRepository.getPlayerDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new CharacterItem(row),
-      table: `${playerDatabase}.item`,
-      joins: [
-
-      ]
+      table: `${playerDatabase}.item`
     }, options))
-
   }
 
 }

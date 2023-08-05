@@ -1,13 +1,9 @@
 import ExpiryMap from "expiry-map"
 import CoreDataLoader from "dataloader"
-import nodeObjectHash from "node-object-hash"
 
-const nodeObjectHasher = nodeObjectHash({ sort: true, coerce: true });
+import { isObject } from "../helpers/Object"
 
-const getDataLoaderCacheKey = (key: any) => {
-  if (key && typeof key === 'object') return nodeObjectHasher.hash(key)
-  return key
-}
+const getDataLoaderCacheKey = (key: any) => isObject(key) ? JSON.stringify(key) : key
 
 export type DataLoaderOptions = {
   batch?: boolean
@@ -28,7 +24,7 @@ export default class DataLoader<Key = any, Value = any> implements IDataLoader<K
       {
         batch: options?.batch || false,
         cacheKeyFn: getDataLoaderCacheKey,
-        cacheMap: options?.ttl ? new ExpiryMap(options.ttl * 1000) : new Map()
+        cacheMap: options?.ttl ? new ExpiryMap(options.ttl * 1000) : null
       }
     )
   }

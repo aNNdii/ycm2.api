@@ -1,5 +1,4 @@
 import KoaRouter, { RouterContext as KoaRouterContext } from "koa-router"
-import { nanoid } from "nanoid"
 
 import { HttpStatusCode } from "../interfaces/HttpStatusCode"
 
@@ -8,6 +7,7 @@ import HttpRouterError from "../entities/HttpRouterError"
 
 import { Token } from "./Container"
 import Logger from "./Logger"
+import { randomUUID } from "crypto"
 
 export const HttpRouterToken = new Token<IHttpRouter>("HttpRouter")
 
@@ -68,7 +68,7 @@ export default class HttpRouter<T extends KoaRouter = KoaRouter> extends Logger 
 
     this.router[method](path, async (ctx: KoaRouterContext) => {
       const requestStart = Date.now()
-      const requestId = nanoid()
+      const requestId = randomUUID()
 
       const context = new HttpRouterContext({ context: ctx })
 

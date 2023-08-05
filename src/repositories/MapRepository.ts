@@ -1,4 +1,4 @@
-import { Token } from "../infrastructures/Container";
+import Container, { Token } from "../infrastructures/Container";
 
 import { merge } from "../helpers/Object";
 
@@ -7,12 +7,13 @@ import { MapEntityTable, MapTable } from "../interfaces/Map";
 import MapEntity, { IMapEntity, MapEntityProperties } from "../entities/MapEntity";
 import Map, { IMap, MapProperties } from "../entities/Map";
 
-import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions, MariaRepositoryUpdateOptions } from "./MariaRepository";
-import GameRepository, { GameDatabase, IGameRepository } from "./GameRepository";
+import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions, MariaRepositoryToken, MariaRepositoryUpdateOptions } from "./MariaRepository";
+import Repository, { IRepository } from "./Repository";
+import { GameRepositoryToken } from "./GameRepository";
 
 export const MapRepositoryToken = new Token<IMapRepository>("MapRepository")
 
-export type IMapRepository = IGameRepository & {
+export type IMapRepository = IRepository & {
   getMaps<Entity = IMap, Filter = MapProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   getMapEntities<Entity = IMapEntity, Filter = MapEntityProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
 
@@ -24,14 +25,17 @@ export type IMapRepository = IGameRepository & {
   deleteMapEntities<Table = MapEntityTable, Response = any>(options?: MariaRepositoryUpdateOptions<Table>): Promise<Response>
 }
 
-export default class MapRepository extends GameRepository implements IMapRepository {
+export default class MapRepository extends Repository implements IMapRepository {
 
   getMaps<Entity = IMap, Filter = MapProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getMaps", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new Map(row),
       table: `${cmsDatabase}.map`
     }, options))
@@ -40,9 +44,12 @@ export default class MapRepository extends GameRepository implements IMapReposit
   getMapEntities<Entity = IMapEntity, Filter = MapEntityProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getMapEntities", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new MapEntity(row),
       table: `${cmsDatabase}.map_entity`
     }, options))
@@ -51,9 +58,12 @@ export default class MapRepository extends GameRepository implements IMapReposit
   createMaps<Entity = MapTable, Response = any>(options: MariaRepositoryInsertOptions<Entity>) {
     this.log("createMaps", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Entity, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Entity, Response>(merge({
       table: `${cmsDatabase}.map`
     }, options))
   }
@@ -61,9 +71,12 @@ export default class MapRepository extends GameRepository implements IMapReposit
   createMapEntities<Entity = MapEntityTable, Response = any>(options: MariaRepositoryInsertOptions<Entity>) {
     this.log("createMapEntities", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Entity, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Entity, Response>(merge({
       table: `${cmsDatabase}.map_entity`
     }, options))
   }
@@ -71,9 +84,12 @@ export default class MapRepository extends GameRepository implements IMapReposit
   updateMaps<Table = MapTable, Response = any>(options: MariaRepositoryUpdateOptions<Table>) {
     this.log("updateMaps", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.updateEntities<Table, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.updateEntities<Table, Response>(merge({
       table: `${cmsDatabase}.map`
     }, options))
   }
@@ -81,9 +97,12 @@ export default class MapRepository extends GameRepository implements IMapReposit
   deleteMapEntities<Table = MapEntityTable, Response = any>(options?: MariaRepositoryUpdateOptions<Table>) {
     this.log("deleteMapEntities", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.deleteEntities<Table, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.deleteEntities<Table, Response>(merge({
       table: `${cmsDatabase}.map_entity`
     }, options))
   }

@@ -1,54 +1,46 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Token } from "../infrastructures/Container";
 
-import { ErrorMessage } from "../interfaces/ErrorMessage";
-import { HttpStatusCode } from "../interfaces/HttpStatusCode";
+import Repository, { RepositoryOptions } from "./Repository";
 
-import HttpRouterError from "../entities/HttpRouterError";
+export const GameRepositoryToken = new Token<IGameRepository>("GameRepository")
 
-import MariaRepository, { IMariaRepository } from "./MariaRepository";
-
-export const AccountDatabaseToken = new Token<string>("AccountDatabase")
-export const CommonDatabaseToken = new Token<string>("CommonDatabase")
-export const PlayerDatabaseToken = new Token<string>("PlayerDatabase")
-export const LogDatabaseToken = new Token<string>("LogDatabase")
-export const CmsDatabaseToken = new Token<string>("CmsDatabase")
-
-export enum GameDatabase {
-  ACCOUNT,
-  COMMON,
-  PLAYER,
-  LOG,
-  CMS
+export type GameRepositoryOptions = RepositoryOptions & {
+  accountDatabaseName: string
+  commonDatabaseName: string
+  logDatabaseName: string
+  playerDatabaseName: string
+  cmsDatabaseName: string
 }
 
-export type IGameRepository = IMariaRepository & {
-  getDatabaseName(database: GameDatabase): string
+export type IGameRepository = {
+  getAccountDatabaseName(): string
+  getCommonDatabaseName(): string
+  getLogDatabaseName(): string
+  getPlayerDatabaseName(): string
+  getCmsDatabaseName(): string
 }
 
-export default class GameRepository extends MariaRepository implements IGameRepository {
+export default class GameRepository extends Repository<GameRepositoryOptions> implements IGameRepository {
 
-  getDatabaseName(database: GameDatabase) {
-    
-    switch (database) {
-
-      case GameDatabase.ACCOUNT:
-        return Container.get(AccountDatabaseToken)
-
-      case GameDatabase.COMMON:
-        return Container.get(CommonDatabaseToken)
-
-      case GameDatabase.LOG:
-        return Container.get(LogDatabaseToken)
-
-      case GameDatabase.PLAYER:
-        return Container.get(PlayerDatabaseToken)
-
-      case GameDatabase.CMS:
-        return Container.get(CmsDatabaseToken)
-
-    }
-
-    throw new HttpRouterError(HttpStatusCode.INTERNAL_SERVER_ERROR, ErrorMessage.GAME_DATABASE_INVALID)
+  getAccountDatabaseName() {
+    return this.options?.accountDatabaseName || 'account'
   }
+
+  getCommonDatabaseName() {
+    return this.options?.commonDatabaseName || 'common'
+  }
+
+  getLogDatabaseName() {
+    return this.options?.logDatabaseName || 'log'
+  }
+
+  getPlayerDatabaseName() {
+    return this.options?.playerDatabaseName || 'player'
+  }
+
+  getCmsDatabaseName() {
+    return this.options?.cmsDatabaseName || 'ycm2'
+  }
+
 
 }

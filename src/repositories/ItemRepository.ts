@@ -1,4 +1,4 @@
-import { Token } from "../infrastructures/Container"
+import Container, { Token } from "../infrastructures/Container"
 
 import { merge } from "../helpers/Object"
 
@@ -8,12 +8,13 @@ import ItemAttribute, { IItemAttribute, ItemAttributeProperties } from "../entit
 import ItemSpecialAction, { IItemSpecialAction, ItemSpecialActionProperties } from "../entities/ItemSpecialAction"
 import Item, { IItem, ItemProperties } from "../entities/Item"
 
-import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions } from "./MariaRepository"
-import GameRepository, { GameDatabase, IGameRepository } from "./GameRepository"
+import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions, MariaRepositoryToken } from "./MariaRepository"
+import Repository, { IRepository } from "./Repository"
+import { GameRepositoryToken } from "./GameRepository"
 
 export const ItemRepositoryToken = new Token<IItemRepository>("ItemRepository")
 
-export type IItemRepository = IGameRepository & {
+export type IItemRepository = IRepository & {
   getItems<Entity = IItem, Filter = ItemProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   getItemAttributes<Entity = IItemAttribute, Filter = ItemAttributeProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   getItemRareAttributes<Entity = IItemAttribute, Filter = ItemAttributeProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
@@ -27,14 +28,17 @@ export type IItemRepository = IGameRepository & {
   truncateItemSpecialActions(): Promise<any>
 }
 
-export default class ItemRepository extends GameRepository implements IItemRepository {
+export default class ItemRepository extends Repository implements IItemRepository {
 
   getItems<Entity = IItem, Filter = ItemProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getItems", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new Item(row),
       table: `${cmsDatabase}.item`
     }, options))
@@ -43,9 +47,12 @@ export default class ItemRepository extends GameRepository implements IItemRepos
   getItemAttributes<Entity = IItemAttribute, Filter = ItemAttributeProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getItemAttributes", options)
   
-    const playerDatabase = this.getDatabaseName(GameDatabase.PLAYER)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const playerDatabase = gameRepository.getPlayerDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       columns: [
         '*',
         'apply+0 as id',
@@ -58,7 +65,9 @@ export default class ItemRepository extends GameRepository implements IItemRepos
   getItemRareAttributes<Entity = IItemAttribute, Filter = ItemAttributeProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getItemRareAttributes", options)
   
-    const playerDatabase = this.getDatabaseName(GameDatabase.PLAYER)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const playerDatabase = gameRepository.getPlayerDatabaseName()
 
     return this.getItemAttributes<Entity, Filter>(merge({
       table: `${playerDatabase}.item_attr_rare as item_attr`
@@ -68,9 +77,12 @@ export default class ItemRepository extends GameRepository implements IItemRepos
   getItemSpecialActions<Entity = IItemSpecialAction, Filter = ItemSpecialActionProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getItemSpecialActions", options)
   
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new ItemSpecialAction(row),
       table: `${cmsDatabase}.item_special_action`,
       joins: [
@@ -82,9 +94,12 @@ export default class ItemRepository extends GameRepository implements IItemRepos
   createItems<Entity = ItemTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>) {
     this.log("createItems", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Entity, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Entity, Response>(merge({
       table: `${cmsDatabase}.item`
     }, options))
   }
@@ -92,9 +107,12 @@ export default class ItemRepository extends GameRepository implements IItemRepos
   createItemSpecialActions<Entity = ItemSpecialActionTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>) {
     this.log("createItemSpecialActions", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Entity, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Entity, Response>(merge({
       table: `${cmsDatabase}.item_special_action`
     }, options))
   }
@@ -104,8 +122,11 @@ export default class ItemRepository extends GameRepository implements IItemRepos
 
     this.log("importDatabaseItemProto", { ignore, update })
 
-    const playerDatabase = this.getDatabaseName(GameDatabase.PLAYER)
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const playerDatabase = gameRepository.getPlayerDatabaseName()
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
 
     const query = ` INSERT ${ignore ? 'IGNORE' : ''} INTO ${cmsDatabase}.item
                     ( 
@@ -209,14 +230,18 @@ export default class ItemRepository extends GameRepository implements IItemRepos
                     FROM    ${playerDatabase}.item_proto 
                     `
 
-    return this.query(query)
+    return mariaRepository.query(query)
   }
 
   truncateItemSpecialActions() {
     this.log("truncateItemSpecialActions")
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
-    return this.truncateTable(`${cmsDatabase}.item_special_action`)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.truncateEntities(`${cmsDatabase}.item_special_action`)
   }
 
 }

@@ -2,7 +2,6 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { GraphQLObjectType, GraphQLSchema } from "graphql"
 import { ApolloServer } from '@apollo/server'
 import { createPool } from "mariadb"
-import { program } from "commander"
 import * as dotenv from "dotenv"
 import * as http from "http"
 import debug from "debug"
@@ -20,7 +19,8 @@ import GraphQLServer, { GraphQLServerToken } from '../src/infrastructures/GraphQ
 import HttpRouter, { HttpRouterToken } from '../src/infrastructures/HttpRouter'
 import Container from "../src/infrastructures/Container"
 
-import { AccountDatabaseToken, CmsDatabaseToken, CommonDatabaseToken, LogDatabaseToken, PlayerDatabaseToken } from "../src/repositories/GameRepository"
+import MariaRepository, { MariaRepositoryToken } from "../src/repositories/MariaRepository"
+import GameRepository, { GameRepositoryToken } from "../src/repositories/GameRepository"
 import CharacterRepository, { CharacterRepositoryToken } from "../src/repositories/CharacterRepository"
 import AccountRepository, { AccountRepositoryToken } from "../src/repositories/AccountRepository"
 import LocaleRepository, { LocaleRepositoryToken } from "../src/repositories/LocaleRepository"
@@ -82,17 +82,14 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   /*****************************************************************************
    * Load execution parameter
    *****************************************************************************/
-  program.option('-c, --config <string>', 'Path to config file')
-  program.option('-d, --debug', 'Enable debug mode', false)
-  program.parse()
+  const [nodePath, cmdPath, configPath] = process.argv || []
+  configPath?.length && dotenv.config({ path: configPath })
 
-  const argv = program.opts()
-  argv.config && dotenv.config({ path: argv.config })
 
   /*****************************************************************************
    * Constants
    *****************************************************************************/
-  const LOG_FILTER = process.env.LOG_FILTER || ''
+  const DEBUG_FILTER = process.env.DEBUG_FILTER || ''
 
   const HTTP_PORT = ~~(process.env.HTTP_PORT || 4000)
   const HTTP_CORS_MAX_AGE = ~~(process.env.HTTP_CORS_MAX_AGE || 24 * 60 * 60)
@@ -111,8 +108,8 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
 
   const OBFUSCATION = Boolean(~~(process.env.OBFUSCATION || 1))
   const OBFUSCATION_SALT = process.env.OBFUSCATION_SALT || ''
-  const OBFUSCATION_ALPHABET = process.env.OBFUSCATION_ALPHABET
-  const OBFUSCATION_MIN_LENGTH = ~~(process.env.OBFUSCATION_MIN_LENGTH || 0)
+  const OBFUSCATION_ALPHABET = process.env.OBFUSCATION_ALPHABET || '-_abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  const OBFUSCATION_MIN_LENGTH = ~~(process.env.OBFUSCATION_MIN_LENGTH || 8)
 
   const PAGINATION_LIMIT_DEFAULT = ~~(process.env.PAGINATION_LIMIT_DEFAULT || 10)
   const PAGINATION_LIMIT_MAX = ~~(process.env.PAGINATION_LIMIT_MAX || 50)
@@ -147,6 +144,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const MOB_GROUP_MOB_OBFUSCATION_SALT = process.env.MOB_GROUP_MOB_OBFUSCATION_SALT || OBFUSCATION_SALT
   const MOB_GROUP_GROUP_OBFUSCATION_SALT = process.env.MOB_GROUP_GROUP_OBFUSCATION_SALT || OBFUSCATION_SALT
   const MOB_GROUP_GROUP_MOB_GROUP_OBFUSCATION_SALT = process.env.MOB_GROUP_GROUP_MOB_GROUP_OBFUSCATION_SALT || OBFUSCATION_SALT
+
 
   /*****************************************************************************
    * Third parties
@@ -201,8 +199,8 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   })
 
   const apolloServer = new ApolloServer<IGraphQLContext>({
-    nodeEnv: argv.debug ? '' : 'production',
-    introspection: argv.debug,
+    nodeEnv: DEBUG_FILTER ? '' : 'production',
+    introspection: Boolean(DEBUG_FILTER),
     schema: new GraphQLSchema({
       query: queries,
       mutation: mutations
@@ -232,6 +230,16 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   /*****************************************************************************
    * Repositories
    *****************************************************************************/
+  Container.set(MariaRepositoryToken, new MariaRepository())
+
+  Container.set(GameRepositoryToken, new GameRepository({
+    accountDatabaseName: DATABASE_ACCOUNT,
+    commonDatabaseName: DATABASE_COMMON,
+    logDatabaseName: DATABASE_LOG,
+    playerDatabaseName: DATABASE_PLAYER,
+    cmsDatabaseName: DATABASE_CMS
+  }))
+
   Container.set(CharacterRepositoryToken, new CharacterRepository())
   Container.set(AccountRepositoryToken, new AccountRepository())
   Container.set(LocaleRepositoryToken, new LocaleRepository())
@@ -309,10 +317,15 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   }))
 
   Container.set(GameServiceToken, new GameService({}))
+
   Container.set(GameCharacterServiceToken, new GameCharacterService({}))
+
   Container.set(GameGuildServiceToken, new GameGuildService({}))
+
   Container.set(GameItemServiceToken, new GameItemService({}))
+
   Container.set(GameMobServiceToken, new GameMobService({}))
+
   Container.set(GameMapServiceToken, new GameMapService({}))
 
   Container.set(CaptchaServiceToken, new CaptchaService({
@@ -324,6 +337,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
     length: CAPTCHA_LENGTH,
   }))
 
+  
   /*****************************************************************************
    * Controllers
    *****************************************************************************/
@@ -342,14 +356,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   /*****************************************************************************
    * Execution
    *****************************************************************************/
-
-  debug.enable(LOG_FILTER)
-
-  Container.set(AccountDatabaseToken, DATABASE_ACCOUNT)
-  Container.set(PlayerDatabaseToken, DATABASE_PLAYER)
-  Container.set(CommonDatabaseToken, DATABASE_COMMON)
-  Container.set(LogDatabaseToken, DATABASE_LOG)
-  Container.set(CmsDatabaseToken, DATABASE_CMS)
+  debug.enable(DEBUG_FILTER)
 
   Container.get(GraphQLControllerToken).init()
 

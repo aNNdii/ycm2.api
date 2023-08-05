@@ -32,6 +32,7 @@ export enum ItemRequestAction {
   IMPORT_ITEM_LIST,
   IMPORT_ITEM_SPECIAL_GROUP,
   IMPORT_ITEM_BLEND,
+  IMPORT_ITEM_CUBE
 }
 
 export type IItemController = IController & {
@@ -132,6 +133,10 @@ export default class ItemController extends Controller implements IItemControlle
         await this.handleItemSpecialGroupImportRequest(context.body)
         break
 
+      case ItemRequestAction.IMPORT_ITEM_CUBE:
+        await this.handleItemCubeImportRequest(context.body)
+        break
+
       default:
         throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
 
@@ -212,6 +217,20 @@ export default class ItemController extends Controller implements IItemControlle
 
     const itemService = Container.get(ItemServiceToken)
     await itemService.importItemSpecialGroup(file.path, { override })
+  }
+
+  async handleItemCubeImportRequest(options: any) {
+    let { file, override } = options;
+
+    [file] = file || [];
+    override = ~~(override)
+
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+
+    this.log("importItemCube", { file: file.path, override })
+
+    const itemService = Container.get(ItemServiceToken)
+    await itemService.importItemCube(file.path, { override })
   }
 
 

@@ -1,5 +1,4 @@
 import { BinaryToTextEncoding, createHash } from "crypto";
-import nodeObjectHash from "node-object-hash";
 
 import { Token } from "../infrastructures/Container";
 import Service, { IService, ServiceOptions } from "./Service";
@@ -10,13 +9,8 @@ export type HashServiceSha1Options = {
   encoding?: BinaryToTextEncoding
 }
 
-export type HashObjectOptions = {
-  sort?: boolean
-  coerce?: boolean
-}
-
 export type IHashService = IService & {
-  hashObject(object: any, options?: HashObjectOptions): string
+  hashObject(object: any): string
   sha1(value: string, options?: any): Buffer | string
   mysql41Password(value: string): string
 }
@@ -25,13 +19,8 @@ export type HashServiceOptions = ServiceOptions & {}
 
 export default class HashService extends Service<any> implements IHashService {
 
-  hashObject(value: any, options?: HashObjectOptions) {
-    const {
-      sort = true,
-      coerce = true
-    } = options || {}
-
-    return nodeObjectHash({ sort, coerce }).hash(value || {})
+  hashObject(value: any) {
+    return JSON.stringify(value)
   }
 
   sha1(value: string, options?: HashServiceSha1Options) {

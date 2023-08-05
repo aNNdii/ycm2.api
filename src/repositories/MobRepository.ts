@@ -1,4 +1,4 @@
-import { Token } from "../infrastructures/Container"
+import Container, { Token } from "../infrastructures/Container"
 
 import { merge } from "../helpers/Object"
 
@@ -13,12 +13,13 @@ import GameMob, { GameMobProperties, IGameMob } from "../entities/GameMob"
 import MobItem, { IMobItem, MobItemProperties } from "../entities/MobItem"
 import Mob, { IMob, MobProperties } from "../entities/Mob"
 
-import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions, MariaRepositoryUpdateOptions } from "./MariaRepository"
-import GameRepository, { GameDatabase, IGameRepository } from "./GameRepository"
+import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions, MariaRepositoryToken, MariaRepositoryUpdateOptions } from "./MariaRepository"
+import Repository, { IRepository } from "./Repository";
+import { GameRepositoryToken } from "./GameRepository";
 
 export const MobRepositoryToken = new Token<IMobRepository>("MobRepository")
 
-export type IMobRepository = IGameRepository & {
+export type IMobRepository = IRepository & {
   getMobs<Entity = IMob, Filter = MobProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   getMobItems<Entity = IMobItem, Filter = MobItemProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   getMobRankItems<Entity = IMobRankItem, Filter = MobRankItemProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
@@ -45,14 +46,17 @@ export type IMobRepository = IGameRepository & {
   truncateMobGroupGroupMobGroups(): Promise<any>
 }
 
-export default class MobRepository extends GameRepository implements IMobRepository {
+export default class MobRepository extends Repository implements IMobRepository {
 
   getMobs<Entity = IMob, Filter = MobProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getMobs", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new Mob(row),
       table: `${cmsDatabase}.mob`
     }, options))
@@ -61,9 +65,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   getGameMobs<Entity = IGameMob, Filter = GameMobProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getGameMobs", options)
 
-    const playerDatabase = this.getDatabaseName(GameDatabase.PLAYER)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const playerDatabase = gameRepository.getPlayerDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new GameMob(row),
       table: `${playerDatabase}.mob_proto`
     }, options))
@@ -72,9 +79,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   getMobItems<Entity = IMobItem, Filter = MobItemProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getMobItems", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new MobItem(row),
       table: `${cmsDatabase}.mob_item`
     }, options))
@@ -83,9 +93,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   getMobRankItems<Entity = any, Filter = any>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getMobRankItems", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new MobRankItem(row),
       table: `${cmsDatabase}.mob_rank_item`
     }, options))
@@ -94,9 +107,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   getMobGroups<Entity = IMobGroup, Filter = MobGroupProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getMobGroups", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new MobGroup(row),
       table: `${cmsDatabase}.mob_group`
     }, options))
@@ -105,9 +121,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   getMobGroupMobs<Entity = IMobGroupMob, Filter = MobGroupMobProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getMobGroupMobs", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new MobGroupMob(row),
       table: `${cmsDatabase}.mob_group_mob`,
       joins: [
@@ -119,9 +138,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   getMobGroupGroups<Entity = IMobGroupGroup, Filter = MobGroupGroupProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getMobGroups", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new MobGroupGroup(row),
       table: `${cmsDatabase}.mob_group_group`
     }, options))
@@ -130,9 +152,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   getMobGroupGroupMobGroups<Entity = IMobGroupGroupMobGroup, Filter = MobGroupGroupMobGroupProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getMobGroupGroupMobGroups", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.getEntities<Entity, Filter>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new MobGroupGroupMobGroup(row),
       table: `${cmsDatabase}.mob_group_group_mob_group`,
       joins: [
@@ -144,9 +169,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   createMobs<Entity = MobTable, Response = any>(options: MariaRepositoryInsertOptions<Entity>) {
     this.log("createMobs", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Entity, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Entity, Response>(merge({
       table: `${cmsDatabase}.mob`
     }, options))
   }
@@ -154,9 +182,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   createMobItems<Entity = MobItemTable, Response = any>(options: MariaRepositoryInsertOptions<Entity>) {
     this.log("createMobItems", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Entity, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Entity, Response>(merge({
       table: `${cmsDatabase}.mob_item`
     }, options))
   }
@@ -164,9 +195,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   createMobRankItems<Entity = MobRankItemTable, Response = any>(options: MariaRepositoryInsertOptions<Entity>) {
     this.log("createMobRankItems", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Entity, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Entity, Response>(merge({
       table: `${cmsDatabase}.mob_rank_item`
     }, options))
   }
@@ -174,9 +208,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   createMobGroups<Entity = MobGroupTable, Response = any>(options: MariaRepositoryInsertOptions<Entity>) {
     this.log("createMobGroupMembers", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Entity, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Entity, Response>(merge({
       table: `${cmsDatabase}.mob_group`
     }, options))
   }
@@ -184,9 +221,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   createMobGroupMobs<Entity = MobGroupMobTable, Response = any>(options: MariaRepositoryUpdateOptions<Entity>) {
     this.log("createMobGroupMembers", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Entity, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Entity, Response>(merge({
       table: `${cmsDatabase}.mob_group_mob`
     }, options))
   }
@@ -194,9 +234,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   createMobGroupGroups<Entity = MobGroupGroupTable, Response = any>(options: MariaRepositoryInsertOptions<Entity>) {
     this.log("createMobGroupGroups", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Entity, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Entity, Response>(merge({
       table: `${cmsDatabase}.mob_group_group`
     }, options))
   }
@@ -204,9 +247,12 @@ export default class MobRepository extends GameRepository implements IMobReposit
   createMobGroupGroupMobGroups<Entity = MobGroupGroupTable, Response = any>(options: MariaRepositoryInsertOptions<Entity>) {
     this.log("createMobGroupGroupMobGroups", options)
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
-    return this.createEntities<Entity, Response>(merge({
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Entity, Response>(merge({
       table: `${cmsDatabase}.mob_group_group_mob_group`
     }, options))
   }
@@ -214,43 +260,67 @@ export default class MobRepository extends GameRepository implements IMobReposit
   truncateMobItems() {
     this.log("truncateMobItems")
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
-    return this.truncateTable(`${cmsDatabase}.mob_item`)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.truncateEntities(`${cmsDatabase}.mob_item`)
   }
 
   truncateMobRankItems() {
     this.log("truncateMobRankItems")
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
-    return this.truncateTable(`${cmsDatabase}.mob_rank_item`)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.truncateEntities(`${cmsDatabase}.mob_rank_item`)
   }
 
   truncateMobGroups() {
     this.log("truncateMobGroups")
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
-    return this.truncateTable(`${cmsDatabase}.mob_group`)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.truncateEntities(`${cmsDatabase}.mob_group`)
   }
 
   truncateMobGroupMobs() {
     this.log("truncateMobGroupMobs")
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
-    return this.truncateTable(`${cmsDatabase}.mob_group_mob`)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.truncateEntities(`${cmsDatabase}.mob_group_mob`)
   }
 
   truncateMobGroupGroups() {
     this.log("truncateMobGroupGroups")
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
-    return this.truncateTable(`${cmsDatabase}.mob_group_group`)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.truncateEntities(`${cmsDatabase}.mob_group_group`)
   }
 
   truncateMobGroupGroupMobGroups() {
     this.log("truncateMobGroupGroupMobGroups")
 
-    const cmsDatabase = this.getDatabaseName(GameDatabase.CMS)
-    return this.truncateTable(`${cmsDatabase}.mob_group_group_mob_group`)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.truncateEntities(`${cmsDatabase}.mob_group_group_mob_group`)
   }
 
 }

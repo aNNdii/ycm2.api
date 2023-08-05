@@ -42,6 +42,7 @@ export type IGameItemService = IService & {
   readItemProto(path: string, options?: ItemProtoParseOptions): Promise<Partial<ItemTable>[]>
   readItemBlend(path: string): Promise<Partial<ItemTable>[]>
   readItemSpecialGroup(path: string): Promise<any>
+  readItemCube(path: string): Promise<any>
 
   parseItemNames<T = any>(stream: NodeJS.ReadableStream, options?: ItemParseOptions<T>): Promise<T[]>
   parseItemDescriptions<T = any>(stream: NodeJS.ReadableStream, options?: ItemDescriptionParseOptions<T>): Promise<T[]>
@@ -49,6 +50,7 @@ export type IGameItemService = IService & {
   parseItemProto(stream: NodeJS.ReadableStream, options?: ItemProtoParseOptions): Promise<Partial<ItemTable>[]>
   parseItemBlend(stream: NodeJS.ReadableStream): Promise<Partial<ItemTable>[]>
   parseItemSpecialGroup(stream: NodeJS.ReadableStream): Promise<any>
+  parseItemCube(stream: NodeJS.ReadableStream): Promise<any>
 
   createItemNames<T = any>(items: T[], options?: CSVWriteOptions): Promise<Buffer>
   createItemDescriptions(items: ILocaleItem[]): Promise<Buffer>
@@ -274,6 +276,11 @@ export default class GameItemService extends Service<any> implements IGameItemSe
     return this.parseItemSpecialGroup(stream)
   }
 
+  async readItemCube(path: string) {
+    const stream = createReadStream(path).pipe(iconv.decodeStream(KoreanEncoding))
+    return this.parseItemCube(stream)
+  }
+
   async parseItemNames<T = any>(stream: NodeJS.ReadableStream, options?: ItemParseOptions<T>) {
     return parseProtoStream<T>(stream, {
       headers: ['id', 'name'],
@@ -443,6 +450,37 @@ export default class GameItemService extends Service<any> implements IGameItemSe
     })
 
     return [items, actionsById, actionsByItemName]
+  }
+
+  async parseItemCube(stream: NodeJS.ReadableStream) {
+    const buffer = await readStreamToBuffer(stream)
+    const content = buffer.toString()
+
+    const cubes: any[] = []
+    const cubeItems: any[] = []
+
+    const matches = content.match(/section(.*?)end/gis)
+    matches?.map(match => {
+
+      const [npcMatch] = [...match.matchAll(/npc\s+(\d+)/gmi)]
+      const [itemMatch] = [...match.matchAll(/reward\s+(\d+)/gmi)]
+      const [moneyMatch] = [...match.matchAll(/gold\s+(\d+)/gmi)]
+      const [probabilityMatch] = [...match.matchAll(/percent\s+(\d+)/gmi)]
+
+      const [_1, npcId] = npcMatch || []
+      const [_2, itemId] = itemMatch || []
+      const [_3, money] = moneyMatch || []
+      const [_4, probability] = probabilityMatch || []
+
+      const key = `${npcId}:${itemId}`
+
+      
+
+      console.log(npcId, itemId, money, probability)
+
+    })
+
+    return []
   }
 
   private getItemProtoHeadersByFormat(format: GameItemProtoFormat) {

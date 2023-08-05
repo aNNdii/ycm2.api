@@ -2,13 +2,15 @@ import { escape, escapeId } from "sqlstring";
 
 import { IMariaDatabaseConnection } from "../infrastructures/MariaDatabaseConnection";
 import { MariaDatabaseToken } from "../infrastructures/MariaDatabase";
-import Container from "../infrastructures/Container";
+import Container, { Token } from "../infrastructures/Container";
 
 import { EntityFilterMethod, EntityTable } from "../interfaces/Entity";
 
 import Entity from "../entities/Entity";
 
 import Repository, { IRepository } from "./Repository";
+
+export const MariaRepositoryToken = new Token<IMariaRepository>("MariaRepository")
 
 export enum MariaRepositorySortOrder {
   ASC = "asc",
@@ -49,12 +51,20 @@ export type MariaRepositoryUpdateOptions<T> = MariaRepositoryQueryOptions & Mari
 }
 
 export type IMariaRepository = IRepository & {
+  query(query: string, values?: any, options?: any): Promise<any>
+  
+  getEntities<Entity, Filter>(options: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
+  createEntities<Table = EntityTable, Response = any>(options: MariaRepositoryInsertOptions<Partial<Table>>): Promise<Response>
+  updateEntities<Table = EntityTable, Response = any>(options: MariaRepositoryUpdateOptions<Partial<Table>>): Promise<Response> 
+  deleteEntities<Table = EntityTable, Response = any>(options: MariaRepositoryUpdateOptions<Partial<Table>>): Promise<Response> 
+  truncateEntities(table: string): Promise<any>
+
   parseEntityFilter(column: string, filter: any): string
 }
 
 export default class MariaRepository extends Repository implements IMariaRepository {
 
-  protected query(query: string, values?: any, options?: any) {
+  async query(query: string, values?: any, options?: any) {
     const { connection } = options || {}
 
     const mariaDatabase = Container.get(MariaDatabaseToken)
@@ -63,11 +73,11 @@ export default class MariaRepository extends Repository implements IMariaReposit
     return mariaConnection.query(query, values)
   }
 
-  protected async truncateTable(table: string): Promise<any> {
+  async truncateEntities(table: string): Promise<any> {
     return this.query(`TRUNCATE TABLE ${table}`)
   }
 
-  protected async getEntities<Entity, Filter>(options: MariaRepositorySelectOptions<Filter>): Promise<Entity[]> {
+  async getEntities<Entity, Filter>(options: MariaRepositorySelectOptions<Filter>): Promise<Entity[]> {
     let {
       connection,
       parser = (row: any) => new Entity(row),
@@ -79,7 +89,7 @@ export default class MariaRepository extends Repository implements IMariaReposit
     return rows.map(parser)
   }
 
-  protected async createEntities<Table = EntityTable, Response = any>(options: MariaRepositoryInsertOptions<Table>): Promise<Response> {
+  async createEntities<Table = EntityTable, Response = any>(options: MariaRepositoryInsertOptions<Table>): Promise<Response> {
     let {
       connection,
     } = options || {}
@@ -88,7 +98,7 @@ export default class MariaRepository extends Repository implements IMariaReposit
     return this.query(query, undefined, { connection })
   }
 
-  protected async updateEntities<Table = EntityTable, Response = any>(options: MariaRepositoryUpdateOptions<Table>): Promise<Response> {
+  async updateEntities<Table = EntityTable, Response = any>(options: MariaRepositoryUpdateOptions<Table>): Promise<Response> {
     let {
       connection,
     } = options || {}
@@ -97,7 +107,7 @@ export default class MariaRepository extends Repository implements IMariaReposit
     return this.query(query, values, { connection })
   }
 
-  protected async deleteEntities<Table = EntityTable, Response = any>(options: MariaRepositoryUpdateOptions<Table>): Promise<Response> {
+  async deleteEntities<Table = EntityTable, Response = any>(options: MariaRepositoryUpdateOptions<Table>): Promise<Response> {
     let {
       connection,
     } = options || {}
