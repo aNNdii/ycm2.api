@@ -7,7 +7,7 @@ import { AccountStatus } from "../interfaces/Account";
 import { EntityFilter } from "../interfaces/Entity";
 
 import { AccountRepositoryToken } from "../repositories/AccountRepository";
-import { GameDatabase } from "../repositories/GameRepository";
+import { GameRepositoryToken } from "../repositories/GameRepository";
 
 import { AccountGroupProperties, IAccountGroup } from "../entities/AccountGroup";
 import { AccountProperties, IAccount } from "../entities/Account";
@@ -17,6 +17,7 @@ import { PaginationOptions } from "./PaginationService";
 import { HashServiceToken } from "./HashService";
 import { AccountGroupAccountProperties, IAccountGroupAccount } from "../entities/AccountGroupAccount";
 import { AccountGroupAuthorizationProperties, IAccountGroupAuthorization } from "../entities/AccountGroupAuthorization";
+import { MariaRepositoryToken } from "../repositories/MariaRepository";
 
 export const AccountServiceToken = new Token<IAccountService>("AccountService")
 
@@ -182,6 +183,8 @@ export default class AccountService extends EntityService<AccountServiceOptions>
     this.log("getAccountGroupAccounts", options)
 
     const accountRepository = Container.get(AccountRepositoryToken)
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
 
     const filter: AccountGroupAuthorizationProperties = {}
     const { where, order } = this.getPaginationQueryOptions({ orderId, offset, orders: {} })
@@ -191,8 +194,8 @@ export default class AccountService extends EntityService<AccountServiceOptions>
     if (accountId) {
       where.push(`account_group_authorization.account_group_authorization_account_group_id IN (
         SELECT account_group_account.account_group_account_account_group_id 
-        FROM ${accountRepository.getDatabaseName(GameDatabase.CMS)}.account_group_account
-        WHERE ${accountRepository.parseEntityFilter('account_group_account.account_group_account_account_id', accountId)} 
+        FROM ${gameRepository.getCmsDatabaseName()}.account_group_account
+        WHERE ${mariaRepository.parseEntityFilter('account_group_account.account_group_account_account_id', accountId)} 
       )`)
     }
 
@@ -205,8 +208,6 @@ export default class AccountService extends EntityService<AccountServiceOptions>
       password, 
       deleteCode = randomNumber(1_000_000, 9_999_999)
     } = options
-
-    console.log(this)
 
     this.log("createAccount", options)
 

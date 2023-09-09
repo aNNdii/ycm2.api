@@ -11,7 +11,8 @@ export enum ErrorMessage {
   PAGINATION_ORDER_INVALID = "invalid_pagination_order",
 
   AUTH_INSUFFICIENT_PERMISSION = "auth_insufficient_permission",
-  AUTH_TOKEN_NOT_FOUND = "auth_token_not_found",
+  AUTH_NOT_FOUND = "auth_not_found",
+  AUTH_INVALID_METHOD = "invalid_auth_method",
   AUTH_INVALID_TOKEN = "invalid_auth_token",
 
   ACCOUNT_INVALID_ID = "invalid_account_id",

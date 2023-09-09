@@ -29,6 +29,7 @@ An open source api for managing Metin2 game servers, written in Node.js and usin
   - mob_group.txt
   - mob_group_group.txt
   - blend.txt
+  - cube.txt
   - Map (index, Settings.txt, regen.txt, boss.txt, stone.txt, npc.txt)
 
 
@@ -106,8 +107,6 @@ query {
 - Analytics
 - Vote 4 Coins
 - Item Shop
-- Support for more game files such as
-  - cube.txt
 - And many, many more...
 
 
@@ -116,4 +115,4 @@ I'm still in the early stages of development and am looking for contributions fr
 
 
 ## Support
-For support, send me a message on Discord ``aNNdii#3846``.
+For support, send me a message on Discord ``anndii``.

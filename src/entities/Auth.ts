@@ -24,7 +24,6 @@ export type IAuth = IEntity & {
   accountHashId: string
   
   authorizations: Authorization[]
-  payload: any
 
   accessToken: string
   refreshToken: string
@@ -48,28 +47,21 @@ export default class Auth extends Entity<AuthProperties> implements IAuth {
     return this.getProperty("authorizations") || []
   }
 
-  get payload() {
-    return {
-      accountId: this.accountHashId,
-      authorizations: this.authorizations
-    }
-  }
-
   get accessToken() {
     const authService = Container.get(AuthServiceToken)
 
-    return authService.getJwtToken({
-      ...this.payload,
+    return authService.getJsonWebToken({
       typ: AuthenticationTokenType.ACCESS,
+      accountId: this.accountHashId,
     })
   }
 
   get refreshToken() {
     const authService = Container.get(AuthServiceToken)
 
-    return authService.getJwtToken({
-      ...this.payload,
+    return authService.getJsonWebToken({
       typ: AuthenticationTokenType.REFRESH,
+      accountId: this.accountHashId,
     })
   }
 

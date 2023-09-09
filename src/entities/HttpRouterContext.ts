@@ -12,6 +12,11 @@ import { AuthServiceToken } from "../services/AuthService"
 import HttpRouterError from "./HttpRouterError"
 import { IAuth } from "./Auth"
 
+export enum AuthenticationScheme {
+  BASIC = "basic",
+  BEARER = "bearer"
+}
+
 export type HttpRouterContextResponse = {
   status?: HttpStatusCode
   error?: any
@@ -26,6 +31,7 @@ export type IHttpRouterContext = {
   dataLoaderService: IDataLoaderService
 
   method: string
+  ip: string
   url: string
   headers: any
   body: any
@@ -39,6 +45,12 @@ export type IHttpRouterContext = {
   setBody(body: any): void
 
   getAuth(): IAuth
+
+  getAuthenticationScheme(): string
+
+  getBasicAuthentication(): { username: string, password: string }
+  getBearerAuthenticationToken(): string
+  
 }
 
 export default class HttpRouterContext<T extends KoaRouterContext = KoaRouterContext> implements IHttpRouterContext {
@@ -76,7 +88,7 @@ export default class HttpRouterContext<T extends KoaRouterContext = KoaRouterCon
   }
 
   get ip() {
-    return this.headers["X-Forwarded-For"] || this.context.ip
+    return (this.headers["X-Forwarded-For"] || this.context.ip)?.toString()
   }
 
   setResponse(response: HttpRouterContextResponse) {
@@ -105,16 +117,37 @@ export default class HttpRouterContext<T extends KoaRouterContext = KoaRouterCon
   }
 
   getAuth() {
+    const token = this.getBearerAuthenticationToken()
+
+    const authService = Container.get(AuthServiceToken)
+    const auth = authService.getAuthByToken(token, { types: [AuthenticationTokenType.ACCESS] })
+
+    return auth
+  }
+
+  getAuthenticationScheme() {
+    const [scheme] = this.getHeader('Authorization')?.split(' ')
+    return scheme?.toLowerCase()
+  }
+
+  getBasicAuthentication() {
     const authorization = this.getHeader('Authorization')
-    if (!authorization) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_TOKEN_NOT_FOUND)
+    if (!authorization) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_NOT_FOUND)
+
+    const [scheme, b64auth] = authorization.split(' ')
+    const [username, password] = Buffer.from(b64auth || '', 'base64').toString().split(':')
+
+    return { username, password }
+  }
+
+  getBearerAuthenticationToken() {
+    const authorization = this.getHeader('Authorization')
+    if (!authorization) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_NOT_FOUND)
 
     const match = authorization.match(/^Bearer ([a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+\.?[a-zA-Z0-9\-_]*)$/)
     if (!match) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_INVALID_TOKEN)
 
-    const authService = Container.get(AuthServiceToken)
-    const auth = authService.getAuthByToken(match[1], { types: [AuthenticationTokenType.ACCESS] })
-
-    return auth
+    return match[1]
   }
 
 }

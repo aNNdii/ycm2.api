@@ -26,8 +26,8 @@ export type AuthServiceOptions = ServiceOptions & {
 }
 
 export type IAuthService = IService & {
-  getJwtToken(payload: any): string
-  getJwtPayload(token: string): any
+  getJsonWebToken(payload: any): string
+  getJsonWebTokenPayload(token: string): any
 
   getAuthByAccount(account: IAccount): Promise<IAuth>
   getAuthByToken(token: string, options?: AuthTokenOptions): IAuth
@@ -35,14 +35,14 @@ export type IAuthService = IService & {
 
 export default class AuthService extends Service<AuthServiceOptions> implements IAuthService {
 
-  getJwtToken(payload: any) {
+  getJsonWebToken(payload: any) {
     return jwt.sign(payload, this.options.jwtSecret, {
       algorithm: this.options.jwtAlgorithm as Algorithm,
       expiresIn: this.options.jwtTtl,
     })
   }
 
-  getJwtPayload(token: string) {
+  getJsonWebTokenPayload(token: string) {
     let payload = null
 
     try {
@@ -59,11 +59,11 @@ export default class AuthService extends Service<AuthServiceOptions> implements 
   async getAuthByAccount(account: IAccount) {
     const accountService = Container.get(AccountServiceToken)
 
-    const authorizations = await accountService.getAccountGroupAuthorizations({ accountId: account.id })
+    // const authorizations = await accountService.getAccountGroupAuthorizations({ accountId: account.id })
 
     return new Auth({
       accountId: account.id,
-      authorizations: authorizations?.map(authorization => authorization.authorizationId)
+      // authorizations: authorizations?.map(authorization => authorization.authorizationId)
     })
   }
 
@@ -74,7 +74,7 @@ export default class AuthService extends Service<AuthServiceOptions> implements 
 
     const accountService = Container.get(AccountServiceToken)
 
-    const payload = this.getJwtPayload(token)
+    const payload = this.getJsonWebTokenPayload(token)
     if (!types.includes(payload.typ)) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_INVALID_TOKEN)
 
     const [accountId] = accountService.deobfuscateAccountId(payload.accountId)

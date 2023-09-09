@@ -2,10 +2,12 @@ import Container, { Token } from "../infrastructures/Container"
 
 import { merge } from "../helpers/Object"
 
-import { ItemSpecialActionTable, ItemTable } from "../interfaces/Item"
+import { ItemCraftingItemTable, ItemCraftingTable, ItemSpecialActionTable, ItemTable } from "../interfaces/Item"
 
-import ItemAttribute, { IItemAttribute, ItemAttributeProperties } from "../entities/ItemAttribute"
 import ItemSpecialAction, { IItemSpecialAction, ItemSpecialActionProperties } from "../entities/ItemSpecialAction"
+import ItemCraftingItem, { IItemCraftingItem, ItemCraftingItemProperties } from "../entities/ItemCraftingItem"
+import ItemAttribute, { IItemAttribute, ItemAttributeProperties } from "../entities/ItemAttribute"
+import ItemCrafting, { IItemCrafting, ItemCraftingProperties } from "../entities/ItemCrafting"
 import Item, { IItem, ItemProperties } from "../entities/Item"
 
 import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions, MariaRepositoryToken } from "./MariaRepository"
@@ -19,13 +21,19 @@ export type IItemRepository = IRepository & {
   getItemAttributes<Entity = IItemAttribute, Filter = ItemAttributeProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   getItemRareAttributes<Entity = IItemAttribute, Filter = ItemAttributeProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   getItemSpecialActions<Entity = IItemSpecialAction, Filter = ItemSpecialActionProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
+  getItemCraftings<Entity = IItemCrafting, Filter = ItemCraftingProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
+  getItemCraftingItems<Entity = IItemCraftingItem, Filter = ItemCraftingItemProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
 
   createItems<Entity = ItemTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>): Promise<Response>
   createItemSpecialActions<Entity = ItemSpecialActionTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>): Promise<Response>
-  
+  createItemCraftings<Entity = ItemCraftingTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>): Promise<Response>
+  createItemCraftingItems<Entity = ItemCraftingItemTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>): Promise<Response>
+
   importDatabaseItemProto(options: any): Promise<any>
 
   truncateItemSpecialActions(): Promise<any>
+  truncateItemCraftings(): Promise<any>
+  truncateItemCraftingItems(): Promise<any>
 }
 
 export default class ItemRepository extends Repository implements IItemRepository {
@@ -91,6 +99,37 @@ export default class ItemRepository extends Repository implements IItemRepositor
     }, options))
   }
 
+  getItemCraftings<Entity = IItemCrafting, Filter = ItemCraftingProperties>(options?: MariaRepositorySelectOptions<Filter>) {
+    this.log("getItemCraftings", options)
+  
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
+      parser: (row: any) => new ItemCrafting(row),
+      table: `${cmsDatabase}.item_crafting`
+    }, options))
+  }
+
+  getItemCraftingItems<Entity = IItemCraftingItem, Filter = ItemCraftingItemProperties>(options?: MariaRepositorySelectOptions<Filter>) {
+    this.log("getItemCraftingItems", options)
+  
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.getEntities<Entity, Filter>(merge({
+      parser: (row: any) => new ItemCraftingItem(row),
+      table: `${cmsDatabase}.item_crafting_item`,
+      joins: [
+        `LEFT JOIN ${cmsDatabase}.item_crafting ON item_crafting.item_crafting_id = item_crafting_item.item_crafting_item_item_crafting_id`
+      ]
+    }, options))
+  }
+
   createItems<Entity = ItemTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>) {
     this.log("createItems", options)
 
@@ -114,6 +153,32 @@ export default class ItemRepository extends Repository implements IItemRepositor
 
     return mariaRepository.createEntities<Entity, Response>(merge({
       table: `${cmsDatabase}.item_special_action`
+    }, options))
+  }
+
+  createItemCraftings<Entity = ItemCraftingTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>) {
+    this.log("createItemCraftings", options)
+
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Entity, Response>(merge({
+      table: `${cmsDatabase}.item_crafting`
+    }, options))
+  }
+
+  createItemCraftingItems<Entity = ItemCraftingItemTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>) {
+    this.log("createItemCraftingItems", options)
+
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.createEntities<Entity, Response>(merge({
+      table: `${cmsDatabase}.item_crafting_item`
     }, options))
   }
 
@@ -242,6 +307,28 @@ export default class ItemRepository extends Repository implements IItemRepositor
     const cmsDatabase = gameRepository.getCmsDatabaseName()
 
     return mariaRepository.truncateEntities(`${cmsDatabase}.item_special_action`)
+  }
+
+  truncateItemCraftings() {
+    this.log("truncateItemCraftings")
+
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.truncateEntities(`${cmsDatabase}.item_crafting`)
+  }
+
+  truncateItemCraftingItems() {
+    this.log("truncateItemCraftingItems")
+
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
+
+    return mariaRepository.truncateEntities(`${cmsDatabase}.item_crafting_item`)
   }
 
 }

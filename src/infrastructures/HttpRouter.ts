@@ -1,4 +1,6 @@
 import KoaRouter, { RouterContext as KoaRouterContext } from "koa-router"
+import { RateLimiterAbstract, RateLimiterRes } from "rate-limiter-flexible"
+import { randomUUID } from "crypto"
 
 import { HttpStatusCode } from "../interfaces/HttpStatusCode"
 
@@ -7,7 +9,6 @@ import HttpRouterError from "../entities/HttpRouterError"
 
 import { Token } from "./Container"
 import Logger from "./Logger"
-import { randomUUID } from "crypto"
 
 export const HttpRouterToken = new Token<IHttpRouter>("HttpRouter")
 
@@ -25,8 +26,9 @@ export type HttpRouterResponse = {
 
 export type HttpRouterHandler = (context: IHttpRouterContext) => Promise<void>
 
-export type HttpRouterOptions<T> = {
-  router: T
+export type HttpRouterOptions = {
+  router: KoaRouter
+  rateLimiter: RateLimiterAbstract
   onError?: (error: Error) => void
 }
 
@@ -37,14 +39,18 @@ export type IHttpRouter = {
   delete(path: string, handler: HttpRouterHandler): void
 }
 
-export default class HttpRouter<T extends KoaRouter = KoaRouter> extends Logger implements IHttpRouter {
+export default class HttpRouter extends Logger implements IHttpRouter {
 
-  private router: T
+  private router: KoaRouter
+  private rateLimiter: RateLimiterAbstract
+
   private requestCount = 0
 
-  constructor(private options: HttpRouterOptions<T>) {
+  constructor(private options: HttpRouterOptions) {
     super()
+
     this.router = options.router
+    this.rateLimiter = options.rateLimiter
   }
 
   get(path: string, handler: HttpRouterHandler) {
@@ -71,23 +77,26 @@ export default class HttpRouter<T extends KoaRouter = KoaRouter> extends Logger 
       const requestId = randomUUID()
 
       const context = new HttpRouterContext({ context: ctx })
-
+      
       this.requestCount++
-
+      
       try {
         this.log("requestStart", { id: requestId, ip: context.ip, method: ctx.method, url: ctx.url, activeRequests: this.requestCount })
+        
+        await this.rateLimiter.consume(context.ip)
         await handler(context)
 
       } catch (e: Error | HttpRouterError | any) {
         const isApiError = e instanceof HttpRouterError
+        const isRateLimitError = e instanceof RateLimiterRes
 
-        const status = isApiError ? e.code : HttpStatusCode.INTERNAL_SERVER_ERROR
-        const message = isApiError ? e.message : HttpStatusCode[HttpStatusCode.INTERNAL_SERVER_ERROR].toLowerCase()
+        const status = isApiError ? e.code : isRateLimitError ? HttpStatusCode.TOO_MANY_REQUESTS : HttpStatusCode.INTERNAL_SERVER_ERROR
+        const message = isApiError ? e.message : isRateLimitError ? HttpStatusCode[HttpStatusCode.TOO_MANY_REQUESTS].toLowerCase() : HttpStatusCode[HttpStatusCode.INTERNAL_SERVER_ERROR].toLowerCase()
 
         context.setResponse({ status, error: { status, message } })
         
         this.log("requestError", { status, message })
-        if (!isApiError) console.error(e)
+        if (!isApiError && !isRateLimitError) console.error(e)
       }
 
       this.requestCount--

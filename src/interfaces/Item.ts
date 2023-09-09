@@ -85,6 +85,26 @@ export type ItemSpecialActionTable = EntityTable & {
   item_special_action_modified_date: string
 }
 
+export type ItemCraftingTable = EntityTable & {
+  item_crafting_id: number
+  item_crafting_mob_id: number
+  item_crafting_item_id: number
+  item_crafting_item_quantity: number
+  item_crafting_price: number
+  item_crafting_probability: number
+  item_crafting_created_date: string
+  item_crafting_modified_date: string
+}
+
+export type ItemCraftingItemTable = EntityTable & {
+  item_crafting_item_id: number
+  item_crafting_item_item_crafting_id: number
+  item_crafting_item_item_id: number
+  item_crafting_item_quantity: number
+  item_crafting_item_created_date: string
+  item_crafting_item_modified_date: string
+}
+
 export enum ItemSpecialType {
   DEFAULT,
   MULTIPLE,

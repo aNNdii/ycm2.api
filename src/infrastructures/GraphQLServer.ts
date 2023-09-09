@@ -25,7 +25,7 @@ export default class GraphQLServer extends Logger implements IGraphQLServer {
 
   private server: ApolloServer<IGraphQLContext>
 
-  constructor(options: GraphQLServerOptions) {
+  constructor(private options: GraphQLServerOptions) {
     super()
     this.server = options.server
   }
@@ -39,7 +39,7 @@ export default class GraphQLServer extends Logger implements IGraphQLServer {
     const { body, headers, status = HttpStatusCode.OK } = await this.server.executeHTTPGraphQLRequest({
       httpGraphQLRequest: {
         method: context.method,
-        headers: this.getRequestHeaders(context),
+        headers: this.getRequestHeaders(context) as any,
         search: parse(context.url).search ?? '',
         body: context.body
       },
@@ -51,7 +51,7 @@ export default class GraphQLServer extends Logger implements IGraphQLServer {
     return { status, headers, body: body.string }
   }
 
-  getRequestHeaders(context: IHttpRouterContext) {
+  private getRequestHeaders(context: IHttpRouterContext) {
     const headers = new Map<string, string>()
 
     for (const [key, value] of Object.entries(context.headers)) {

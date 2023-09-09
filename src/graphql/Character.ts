@@ -265,6 +265,17 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
         return character
       }
     },
+    playTime: {
+      type: GraphQLInt,
+      resolve: (character: ICharacter, args: any, context: IGraphQLContext) => {
+        const auth = context.getAuth()
+  
+        const hasPermissions = auth.hasAuthorization(Authorization.CHARACTERS_READ) || auth.accountId === character.accountId
+        if (!hasPermissions) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.AUTH_INSUFFICIENT_PERMISSION)
+
+        return character.playTime
+      }
+    },
     lastPlayDate: {
       type: GraphQLString,
       resolve: (character: ICharacter, args: any, context: IGraphQLContext) => {

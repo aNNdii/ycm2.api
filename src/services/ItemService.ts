@@ -3,20 +3,20 @@ import Container, { Token } from "../infrastructures/Container";
 import { chunks } from "../helpers/Array"
 
 import { EntityFilter, EntityFilterMethod } from "../interfaces/Entity";
+import { ErrorMessage } from "../interfaces/ErrorMessage";
 
+import { ItemAttribute, ItemCraftingItemTable, ItemCraftingTable, ItemSpecialActionTable, ItemTable } from "../interfaces/Item";
 import { GameItemProtoFormat } from "../interfaces/GameItem";
-import { ItemAttribute, ItemSpecialActionTable, ItemTable } from "../interfaces/Item";
 
 import { ItemRepositoryToken } from "../repositories/ItemRepository";
 
+import { IItemSpecialAction, ItemSpecialActionProperties } from "../entities/ItemSpecialAction";
 import { IItemAttribute, ItemAttributeProperties } from "../entities/ItemAttribute";
 import { IItem, ItemProperties } from "../entities/Item";
 
 import EntityService, { EntityOptions, IEntityService } from "./EntityService";
 import { GameItemServiceToken } from './GameItemService';
 import { PaginationOptions } from "./PaginationService";
-import { ErrorMessage } from "../interfaces/ErrorMessage";
-import { IItemSpecialAction, ItemSpecialActionProperties } from "../entities/ItemSpecialAction";
 
 export const ItemServiceToken = new Token<IItemService>("ItemService")
 
@@ -335,13 +335,86 @@ export default class ItemService extends EntityService<ItemServiceOptions> imple
     const { override } = options || {}
 
     this.log("importItemCube", { path, override })
-
+    
     const gameItemService = Container.get(GameItemServiceToken)
     const itemRepository = Container.get(ItemRepositoryToken)
 
+    if (override) await Promise.all([
+      itemRepository.truncateItemCraftings(),
+      itemRepository.truncateItemCraftingItems()
+    ])
+    
+    const cubeKeyToId: any = {}
     const [cubes, cubeItems] = await gameItemService.readItemCube(path)
 
+    const cubeResponses = await this.importItemCubes(cubes)
 
+    cubeResponses?.map(cubeResponse => {
+      cubeResponse?.map((cube: any) => {
+        const cubeKey = `${cube['item_crafting.item_crafting_mob_id']}:${cube['item_crafting.item_crafting_item_id']}`
+        cubeKeyToId[cubeKey] = cube['item_crafting.item_crafting_id']
+      })
+    })
+
+    await this.importItemCubeItems(cubeKeyToId, cubeItems)
+  }
+
+  private async importItemCubes(cubes: any[]) {
+    this.log("importItemCubes", { cubes })
+
+    const itemRepository = Container.get(ItemRepositoryToken)
+
+    const entities: Partial<ItemCraftingTable>[] = []
+
+    cubes.map(cube => {
+      const { mobId, itemId, itemQuantity, price, probability } = cube
+
+      entities.push({
+        item_crafting_mob_id: mobId,
+        item_crafting_item_id: itemId,
+        item_crafting_item_quantity: itemQuantity,
+        item_crafting_price: price,
+        item_crafting_probability: probability
+      })
+    })
+
+    const cubeChunks = chunks(entities, 500)
+    const cubeCreatePromises = cubeChunks.map((entities: any) => itemRepository.createItemCraftings({
+      duplicate: ['item_crafting_item_quantity', 'item_crafting_price', 'item_crafting_probability'],
+      returning: ['item_crafting_id', 'item_crafting_mob_id', 'item_crafting_item_id'],
+      entities
+    }))
+
+    return Promise.all(cubeCreatePromises)
+  }
+
+  private async importItemCubeItems(cubeKeyToId: any, cubeItems: any[]) {
+    this.log("importItemCubeItems", { cubeKeyToId, cubeItems })
+
+    const itemRepository = Container.get(ItemRepositoryToken)
+
+    const entities: Partial<ItemCraftingItemTable>[] = []
+
+    cubeItems.map(cubeItem => {
+      const { key, itemId, itemQuantity } = cubeItem
+
+      const cubeId = cubeKeyToId[key]
+      if (!cubeId) return
+
+      entities.push({
+        item_crafting_item_item_crafting_id: cubeId,
+        item_crafting_item_item_id: itemId,
+        item_crafting_item_quantity: itemQuantity,
+      })
+    })
+
+    const cubeItemChunks = chunks(entities, 500)
+    const cubeItemCreatePromises = cubeItemChunks.map((entities: any) => itemRepository.createItemCraftingItems({
+      duplicate: ['item_crafting_item_quantity'],
+      entities
+    }))
+
+    return Promise.all(cubeItemCreatePromises)
   }
 
   private async importItemSpecialGroupItems(items: any[]) {

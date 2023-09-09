@@ -10,10 +10,10 @@ import { PaginationOptions } from "../services/PaginationService";
 import { IHttpRouterContext } from "../entities/HttpRouterContext";
 import HttpRouterError from "../entities/HttpRouterError";
 
+import { IAccountGroup } from "../entities/AccountGroup";
 import { IAccount } from "../entities/Account";
 
 import Controller, { IController } from "./Controller";
-import { IAccountGroup } from "../entities/AccountGroup";
 
 export const AccountControllerToken = new Token<IAccountController>("AccountController")
 

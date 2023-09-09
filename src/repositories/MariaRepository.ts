@@ -185,7 +185,7 @@ export default class MariaRepository extends Repository implements IMariaReposit
     const columns = Object.keys(entities[0] || {})
     const rows = entities.map(entity => Object.values(entity || {}))
 
-    const duplicationColumns = duplicate?.map((column: any) => `${column} = VALUES(${column})`)
+    const duplicationColumns = duplicate?.map((column: any) => `${column} = IFNULL(VALUES(${column}), ${column})`)
 
     const query = `INSERT ${ignore ? 'IGNORE' : ''} INTO
                    ${table} (${columns.join(',')})

@@ -1,4 +1,5 @@
 import { GraphQLID, GraphQLObjectType, GraphQLString } from "graphql";
+
 import { IAuth } from "../entities/Auth";
 
 const GraphQLAuth = new GraphQLObjectType({

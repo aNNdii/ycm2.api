@@ -18,6 +18,7 @@ import { IItem } from "../entities/Item";
 
 import Service, { IService } from "./Service";
 import { IItemSpecialAction } from "../entities/ItemSpecialAction";
+import { IItemCraftingItem } from "../entities/ItemCraftingItem";
 
 export const GameItemServiceToken = new Token<IGameItemService>("GameItemService")
 
@@ -57,6 +58,7 @@ export type IGameItemService = IService & {
   createItemList(items: IItem[]): Promise<Buffer>
   createItemProto(items: IItem[]): Promise<Buffer>
   createItemBlend(items: IItem[]): Promise<Buffer>
+  createItemCube(itemCraftingItems: IItemCraftingItem[]): Promise<Buffer>
   createItemSpecialGroup(actions: IItemSpecialAction[]): Promise<Buffer>
 }
 
@@ -241,6 +243,37 @@ export default class GameItemService extends Service<any> implements IGameItemSe
 
       if (typeId === ItemSpecialType.ATTRIBUTE && effect) content += `\teffect\t${effect}\n`
       content += `}\n`
+    })
+
+    return iconv.encode(content, KoreanEncoding)
+  }
+
+  async createItemCube(itemCraftingItems: IItemCraftingItem[]) {
+    let content = ""
+
+    const itemCubes: any = {}
+
+    itemCraftingItems.map(itemCraftingItem => {
+      itemCubes[itemCraftingItem.itemCraftingId] = itemCubes[itemCraftingItem.itemCraftingId] || { itemId: itemCraftingItem.itemCraftingItemId, itemQuantity: itemCraftingItem.itemCraftingItemQuantity, mobId: itemCraftingItem.itemCraftingMobId, price: itemCraftingItem.itemCraftingPrice, probability: itemCraftingItem.itemCraftingProbability, items: [] }
+      itemCubes[itemCraftingItem.itemCraftingId]['items'].push(itemCraftingItem)
+    })
+
+    Object.values(itemCubes).map((itemCube: any) => {
+      const { itemId, itemQuantity, mobId, price, probability, items } = itemCube 
+      
+      content += `section\n`
+      content += `npc\t${mobId}\n`
+
+      items?.map((itemCraftingItem: IItemCraftingItem) => {
+        content += `item\t${itemCraftingItem.itemId}\t${itemCraftingItem.itemQuantity}\n`
+      })
+
+      content += `reward\t${itemId}\t${itemQuantity}\n`
+
+      if (price) content += `gold\t${price}\n`
+      
+      content += `percent\t${probability}\n`
+      content += `end\n\n`
     })
 
     return iconv.encode(content, KoreanEncoding)
@@ -462,25 +495,41 @@ export default class GameItemService extends Service<any> implements IGameItemSe
     const matches = content.match(/section(.*?)end/gis)
     matches?.map(match => {
 
-      const [npcMatch] = [...match.matchAll(/npc\s+(\d+)/gmi)]
-      const [itemMatch] = [...match.matchAll(/reward\s+(\d+)/gmi)]
-      const [moneyMatch] = [...match.matchAll(/gold\s+(\d+)/gmi)]
+      const [mobMatch] = [...match.matchAll(/npc\s+(\d+)/gmi)]
+      const [resultItemMatch] = [...match.matchAll(/reward\s+(\d+)\s+(\d+)/gmi)]
+      const [priceMatch] = [...match.matchAll(/gold\s+(\d+)/gmi)]
       const [probabilityMatch] = [...match.matchAll(/percent\s+(\d+)/gmi)]
 
-      const [_1, npcId] = npcMatch || []
-      const [_2, itemId] = itemMatch || []
-      const [_3, money] = moneyMatch || []
+      const [_1, mobId] = mobMatch || []
+      const [_2, resultItemId, resultItemQuantity] = resultItemMatch || []
+      const [_3, price] = priceMatch || []
       const [_4, probability] = probabilityMatch || []
 
-      const key = `${npcId}:${itemId}`
+      const key = `${mobId}:${resultItemId}`
 
-      
+      cubes.push({
+        mobId,
+        itemId: resultItemId,
+        itemQuantity: resultItemQuantity,
+        price,
+        probability
+      })
 
-      console.log(npcId, itemId, money, probability)
+      const items = [...match.matchAll(/item\s+(\d+)\s+(\d+)/gmi)]
+      items?.map(item => {
+        const [_5, itemId, itemQuantity] = item
+
+        cubeItems.push({
+          key,
+          itemId,
+          itemQuantity
+        })
+      })
+
 
     })
 
-    return []
+    return [cubes, cubeItems] as any
   }
 
   private getItemProtoHeadersByFormat(format: GameItemProtoFormat) {
@@ -618,10 +667,13 @@ export default class GameItemService extends Service<any> implements IGameItemSe
     const itemId = item.id
     const itemEndId = item.endId
 
+    const typeId = GameItemProtoType[item.typeId]
+
+    // @ts-ignore
     const subTypes = GameItemProtoTypeSubTypes[item.typeId] || {} as any
     const subTypeId = subTypes[item.subTypeId]
 
-    const typeId = subTypeId ? GameItemProtoType[item.typeId] : undefined
+    // const typeId = subTypeId ? GameItemProtoType[item.typeId] : undefined
 
     const maskSubTypes = GameItemProtoMaskTypeSubTypes[item.maskTypeId] || {} as any
 

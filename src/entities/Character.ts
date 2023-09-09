@@ -53,6 +53,7 @@ export type ICharacter = IEntity & {
   guildId: number
   guildGradeId: number
   lastPlayDate: string
+  playTime: number
   ip: string
 }
 
@@ -199,6 +200,10 @@ export default class Character extends Entity<CharacterProperties> implements IC
 
   get lastPlayDate() {
     return this.getProperty("player.last_play")
+  }
+
+  get playTime() {
+    return this.getProperty("player.playtime")
   }
 
   get ip() {

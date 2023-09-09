@@ -67,14 +67,17 @@ export default class ItemController extends Controller implements IItemControlle
 
     const itemPromise = itemRepository.getItems()
     const itemActionPromise = itemRepository.getItemSpecialActions()
+    const itemCraftingItemPromise = itemRepository.getItemCraftingItems()
 
     const items = await itemPromise
     const itemActions = await itemActionPromise
+    const itemCraftingItems = await itemCraftingItemPromise
 
     const itemListPromise = gameItemService.createItemList(items)
     const itemProtoPromise = gameItemService.createItemProto(items)
     const itemBlendPromise = gameItemService.createItemBlend(items)
     const itemSpecialGroupPromise = gameItemService.createItemSpecialGroup(itemActions)
+    const itemCubePromise = gameItemService.createItemCube(itemCraftingItems)
     const itemNamePromise = gameItemService.createItemNames<IItem>(items, {
       transform: (item: IItem) => item.localeName ? [item.id, item.localeName] : undefined 
     })
@@ -83,6 +86,7 @@ export default class ItemController extends Controller implements IItemControlle
     const itemProto = await itemProtoPromise
     const itemNames = await itemNamePromise
     const itemBlend = await itemBlendPromise
+    const itemCube = await itemCubePromise
     const itemSpecialAction = await itemSpecialGroupPromise
 
     const zip = new JSZip();
@@ -91,6 +95,7 @@ export default class ItemController extends Controller implements IItemControlle
     zip.file("item_names.txt", itemNames)
     zip.file("item_list.txt", itemList)
     zip.file("blend.txt", itemBlend)
+    zip.file("cube.txt", itemCube)
     zip.file("special_item_group.txt", itemSpecialAction)
 
     const content = zip.generateNodeStream({ streamFiles: true })
@@ -103,13 +108,13 @@ export default class ItemController extends Controller implements IItemControlle
   }
 
   async handleItemsPostRequest(context: IHttpRouterContext) {
-    const auth = context.getAuth()
-    auth.verifyAuthorization(Authorization.ITEMS_IMPORT)
+    // const auth = context.getAuth()
+    // auth.verifyAuthorization(Authorization.ITEMS_IMPORT)
 
     let { action } = context.body;
     [action] = getEnumValues(ItemRequestAction, action)
 
-    this.log("postItemsRequest", { accountId: auth.accountId, action })
+    // this.log("postItemsRequest", { accountId: auth.accountId, action })
 
     switch (action) {
 

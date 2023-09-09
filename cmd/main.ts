@@ -1,5 +1,7 @@
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer"
+import { createComplexityLimitRule } from "graphql-validation-complexity"
 import { GraphQLObjectType, GraphQLSchema } from "graphql"
+import { RateLimiterMemory } from "rate-limiter-flexible"
 import { ApolloServer } from '@apollo/server'
 import { createPool } from "mariadb"
 import * as dotenv from "dotenv"
@@ -63,7 +65,6 @@ import { IGraphQLContext } from "../src/entities/GraphQLContext"
 
 import GraphQLAccountMutation from "../src/graphql/AccountMutation"
 import GraphQLCaptchaMutation from "../src/graphql/CaptchaMutation"
-import GraphQLAuthMutation from "../src/graphql/AuthMutation"
 
 import GraphQLMobGroupGroupQuery from "../src/graphql/MobGroupGroupQuery"
 import GraphQLAccountGroupQuery from "../src/graphql/AccountGroupQuery"
@@ -93,6 +94,14 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
 
   const HTTP_PORT = ~~(process.env.HTTP_PORT || 4000)
   const HTTP_CORS_MAX_AGE = ~~(process.env.HTTP_CORS_MAX_AGE || 24 * 60 * 60)
+  const HTTP_RATE_LIMIT_PREFIX = process.env.HTTP_RATE_LIMIT_PREFIX || 'koaHttpRouter'
+  const HTTP_RATE_LIMIT_COUNT = ~~(process.env.HTTP_RATE_LIMIT_COUNT || 120) 
+  const HTTP_RATE_LIMIT_DURATION = ~~(process.env.HTTP_RATE_LIMIT_DURATION || 60)
+
+  const HTTP_GRAPHQL_COMPLEXITY_LIMIT = ~~(process.env.HTTP_GRAPHQL_COMPLEXITY_LIMIT || 1000)
+  const HTTP_GRAPHQL_COMPLEXITY_SCALAR_COST = ~~(process.env.HTTP_GRAPHQL_COMPLEXITY_SCALAR_COST || 1)
+  const HTTP_GRAPHQL_COMPLEXITY_OBJECT_COST = ~~(process.env.HTTP_GRAPHQL_COMPLEXITY_OBJECT_COST || 10)
+  const HTTP_GRAPHQL_COMPLEXITY_LIST_COST_FACTOR = ~~(process.env.HTTP_GRAPHQL_COMPLEXITY_LIST_COST_FACTOR || 10)
 
   const DATABASE_HOST = process.env.DATABASE_HOST || 'localhost'
   const DATABASE_PORT = ~~(process.env.DATABASE_PORT || 3306)
@@ -155,6 +164,12 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
 
   const koaRouter = new KoaRouter()
 
+  const koaRateLimiter = new RateLimiterMemory({
+    keyPrefix: HTTP_RATE_LIMIT_PREFIX,
+    points: HTTP_RATE_LIMIT_COUNT,
+    duration: HTTP_RATE_LIMIT_DURATION
+  })
+
   const httpServer = http.createServer(koa.callback())
 
   const mariaDatabasePool = createPool({
@@ -191,9 +206,8 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const mutations = new GraphQLObjectType({
     name: 'Mutation',
     fields: () => ({
-      ...GraphQLAuthMutation,
-      ...GraphQLCaptchaMutation,
-      ...GraphQLAccountMutation,
+      // ...GraphQLCaptchaMutation,
+      // ...GraphQLAccountMutation,
       // ...GraphQLItemMutations,
     })
   })
@@ -203,8 +217,15 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
     introspection: Boolean(DEBUG_FILTER),
     schema: new GraphQLSchema({
       query: queries,
-      mutation: mutations
+      // mutation: mutations
     }),
+    validationRules: [
+      createComplexityLimitRule(HTTP_GRAPHQL_COMPLEXITY_LIMIT, {
+        scalarCost: HTTP_GRAPHQL_COMPLEXITY_SCALAR_COST,
+        objectCost: HTTP_GRAPHQL_COMPLEXITY_OBJECT_COST,
+        listFactor: HTTP_GRAPHQL_COMPLEXITY_LIST_COST_FACTOR,
+      })
+    ],
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer })
     ],
@@ -215,7 +236,8 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
    * Infrastructures
    *****************************************************************************/
   Container.set(HttpRouterToken, new HttpRouter({
-    router: koaRouter
+    router: koaRouter,
+    rateLimiter: koaRateLimiter
   }))
 
   Container.set(GraphQLServerToken, new GraphQLServer({
@@ -360,6 +382,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
 
   Container.get(GraphQLControllerToken).init()
 
+  Container.get(AuthControllerToken).init()
   Container.get(LocaleControllerToken).init()
   Container.get(ItemControllerToken).init()
   Container.get(MobControllerToken).init()
