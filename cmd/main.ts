@@ -2,23 +2,32 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { createComplexityLimitRule } from "graphql-validation-complexity"
 import { GraphQLObjectType, GraphQLSchema } from "graphql"
 import { RateLimiterMemory } from "rate-limiter-flexible"
-import { ApolloServer } from '@apollo/server'
+import i18nextBackend from "i18next-fs-backend"
+import { ApolloServer } from "@apollo/server"
+import { createTransport } from "nodemailer"
 import { createPool } from "mariadb"
+import { configure } from "nunjucks"
 import * as dotenv from "dotenv"
+import { Redis } from "ioredis"
+import i18next from "i18next"
 import * as http from "http"
 import debug from "debug"
 import Ajv from "ajv"
 
 import Koa from "koa"
-import KoaCors from '@koa/cors'
+import KoaCors from "@koa/cors"
 import KoaRouter from "koa-router"
 import KoaConvert from "koa-convert"
 import KoaCompress from "koa-compress"
 import KoaBetterBody from "koa-better-body"
 
+import InternationalizationClient, { InternationalizationClientToken } from "../src/infrastructures/InternationalizationClient"
+import TemplateEngine, { TemplateEngineToken } from "../src/infrastructures/TemplateEngine"
 import MariaDatabase, { MariaDatabaseToken } from "../src/infrastructures/MariaDatabase"
-import GraphQLServer, { GraphQLServerToken } from '../src/infrastructures/GraphQLServer'
-import HttpRouter, { HttpRouterToken } from '../src/infrastructures/HttpRouter'
+import GraphQLServer, { GraphQLServerToken } from "../src/infrastructures/GraphQLServer"
+import RedisClient, { RedisClientToken } from "../src/infrastructures/RedisClient"
+import SmtpClient, { SmtpClientToken } from "../src/infrastructures/SmtpClient"
+import HttpRouter, { HttpRouterToken } from "../src/infrastructures/HttpRouter"
 import Container from "../src/infrastructures/Container"
 
 import MariaRepository, { MariaRepositoryToken } from "../src/repositories/MariaRepository"
@@ -52,7 +61,7 @@ import MobService, { MobServiceToken } from "../src/services/MobService"
 import MapService, { MapServiceToken } from "../src/services/MapService"
 
 import CharacterController, { CharacterControllerToken } from "../src/controllers/CharacterController"
-import GraphQLController, { GraphQLControllerToken } from '../src/controllers/GraphQLController'
+import GraphQLController, { GraphQLControllerToken } from "../src/controllers/GraphQLController"
 import AccountController, { AccountControllerToken } from "../src/controllers/AccountController"
 import LocaleController, { LocaleControllerToken } from "../src/controllers/LocaleController"
 import GuildController, { GuildControllerToken } from "../src/controllers/GuildController"
@@ -62,9 +71,6 @@ import MobController, { MobControllerToken } from "../src/controllers/MobControl
 import MapController, { MapControllerToken } from "../src/controllers/MapController"
 
 import { IGraphQLContext } from "../src/entities/GraphQLContext"
-
-import GraphQLAccountMutation from "../src/graphql/AccountMutation"
-import GraphQLCaptchaMutation from "../src/graphql/CaptchaMutation"
 
 import GraphQLMobGroupGroupQuery from "../src/graphql/MobGroupGroupQuery"
 import GraphQLAccountGroupQuery from "../src/graphql/AccountGroupQuery"
@@ -77,6 +83,7 @@ import GraphQLLocaleQuery from "../src/graphql/LocaleQuery"
 import GraphQLItemQuery from "../src/graphql/ItemQuery"
 import GraphQLMapQuery from "../src/graphql/MapQuery"
 import GraphQLMobQuery from "../src/graphql/MobQuery"
+
 
 (async () => {
 
@@ -109,11 +116,25 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const DATABASE_PASSWORD = process.env.DATABASE_PASSWORD || ''
   const DATABASE_CONNECTION_LIMIT = ~~(process.env.DATABASE_CONNECTION_LIMIT || 100)
 
+  const SMTP_HOST = process.env.SMTP_HOST || 'localhost'
+  const SMTP_PORT = ~~(process.env.SMTP_PORT || 587)
+  const SMTP_SSL = Boolean(~~(process.env.SMTP_SSL || 0))
+  const SMTP_USER = process.env.SMTP_USER || ''
+  const SMTP_PASSWORD = process.env.SMTP_PASSWORD || ''
+
+  const REDIS_HOST = process.env.REDIS_HOST || 'localhost'
+  const REDIS_PORT = ~~(process.env.REDIS_PORT || 6379)
+  const REDIS_USERNAME = process.env.REDIS_USERNAME || ''
+  const REDIS_PASSWORD = process.env.REDIS_PASSWORD || ''
+
   const DATABASE_ACCOUNT = process.env.DATABASE_ACCOUNT || 'account'
   const DATABASE_PLAYER = process.env.DATABASE_PLAYER || 'player'
   const DATABASE_COMMON = process.env.DATABASE_COMMON || 'common'
   const DATABASE_LOG = process.env.DATABASE_LOG || 'log'
   const DATABASE_CMS = process.env.DATABASE_CMS || 'ycm2'
+
+  const I18N_LOCALE = process.env.I18N_LOCALE || 'en'
+  const I18N_PRELOAD_LOCALES = (process.env.I18N_PRELOAD_LOCALES || I18N_LOCALE).split(', ')
 
   const OBFUSCATION = Boolean(~~(process.env.OBFUSCATION || 1))
   const OBFUSCATION_SALT = process.env.OBFUSCATION_SALT || ''
@@ -127,6 +148,8 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const AUTH_JWT_ALGORITHM = process.env.AUTH_JWT_ALGORITHM || 'HS512'
   const AUTH_JWT_SECRET = process.env.AUTH_JWT_SECRET || ''
   const AUTH_JWT_TTL = ~~(process.env.AUTH_JWT_TTL || 3600)
+
+  const MAIL_FROM = process.env.MAIL_FROM || 'noreply@example.com'
 
   const CAPTCHA_TOKEN_SECRET = process.env.CAPTCHA_TOKEN_SECRET || ""
   const CAPTCHA_TOKEN_MIN_LENGTH = ~~(process.env.CAPTCHA_TOKEN_MIN_LENGTH || 32)
@@ -186,6 +209,23 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
     nestTables: '.'
   })
 
+  const smtpTransporter = createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_SSL, 
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASSWORD,
+    }
+  })
+
+  const redisClient = new Redis({
+    host: REDIS_HOST,
+    port: REDIS_PORT,
+    username: REDIS_USERNAME,
+    password: REDIS_PASSWORD
+  })
+
   const queries = new GraphQLObjectType({
     name: 'Query',
     fields: () => ({
@@ -203,32 +243,44 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
     })
   })
 
-  const mutations = new GraphQLObjectType({
-    name: 'Mutation',
-    fields: () => ({
-      // ...GraphQLCaptchaMutation,
-      // ...GraphQLAccountMutation,
-      // ...GraphQLItemMutations,
-    })
-  })
-
   const apolloServer = new ApolloServer<IGraphQLContext>({
     nodeEnv: DEBUG_FILTER ? '' : 'production',
     introspection: Boolean(DEBUG_FILTER),
     schema: new GraphQLSchema({
       query: queries,
-      // mutation: mutations
     }),
     validationRules: [
       createComplexityLimitRule(HTTP_GRAPHQL_COMPLEXITY_LIMIT, {
         scalarCost: HTTP_GRAPHQL_COMPLEXITY_SCALAR_COST,
         objectCost: HTTP_GRAPHQL_COMPLEXITY_OBJECT_COST,
         listFactor: HTTP_GRAPHQL_COMPLEXITY_LIST_COST_FACTOR,
-      })
+      }) as any
     ],
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer })
     ],
+  })
+
+  const nunjucks = configure({
+    autoescape: false,
+    noCache: DEBUG_FILTER ? true : false,
+    dev: DEBUG_FILTER ? true : false,
+  })
+
+  await i18next.use(i18nextBackend).init({
+    lng: I18N_LOCALE,
+    preload: I18N_PRELOAD_LOCALES,
+    cleanCode: true,
+    fallbackLng: code => {
+      const match = code.match(/([^_]+)_?/)
+      return match ? [code, match[1], I18N_LOCALE] : I18N_LOCALE
+    },
+    backend: {
+      loadPath: `${__dirname}/../assets/locales/{{ns}}/{{lng}}.json`,
+    },
+    interpolation: {
+      escapeValue: false
+    }
   })
 
 
@@ -246,6 +298,23 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
 
   Container.set(MariaDatabaseToken, new MariaDatabase({
     pool: mariaDatabasePool
+  }))
+
+  Container.set(RedisClientToken, new RedisClient({
+    client: redisClient
+  }))
+
+  Container.set(InternationalizationClientToken, new InternationalizationClient({
+    i18n: i18next
+  }))
+
+  Container.set(TemplateEngineToken, new TemplateEngine({
+    templatePath: `${__dirname}/../assets/templates`,
+    nunjucks: nunjucks,
+  }))
+
+  Container.set(SmtpClientToken, new SmtpClient({
+    transporter: smtpTransporter
   }))
 
 
@@ -383,6 +452,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   Container.get(GraphQLControllerToken).init()
 
   Container.get(AuthControllerToken).init()
+  Container.get(AccountControllerToken).init()
   Container.get(LocaleControllerToken).init()
   Container.get(ItemControllerToken).init()
   Container.get(MobControllerToken).init()

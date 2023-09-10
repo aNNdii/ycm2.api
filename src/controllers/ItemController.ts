@@ -18,11 +18,11 @@ import { ItemRepositoryToken } from "../repositories/ItemRepository";
 import { ItemServiceToken } from "../services/ItemService";
 import { GameItemServiceToken } from "../services/GameItemService";
 
+import { IItemSpecialAction } from "../entities/ItemSpecialAction";
 import { IItemAttribute } from "../entities/ItemAttribute";
 import { IItem } from "../entities/Item";
 
 import Controller, { IController } from "./Controller";
-import { IItemSpecialAction } from "../entities/ItemSpecialAction";
 
 export const ItemControllerToken = new Token<IItemController>("ItemController")
 
@@ -57,10 +57,10 @@ export default class ItemController extends Controller implements IItemControlle
   }
 
   async handleItemsGetRequest(context: IHttpRouterContext) {
-    // const auth = context.getAuth()
+    const auth = context.getAuth()
     // auth.verifyAuthorization(Authorization.ITEMS, AuthorizationAction.EXPORT)
 
-    // this.log("getItemsRequest", { accountId: auth.accountId })
+    this.log("getItemsRequest", { accountId: auth.accountId })
 
     const gameItemService = Container.get(GameItemServiceToken)
     const itemRepository = Container.get(ItemRepositoryToken)
@@ -108,13 +108,13 @@ export default class ItemController extends Controller implements IItemControlle
   }
 
   async handleItemsPostRequest(context: IHttpRouterContext) {
-    // const auth = context.getAuth()
+    const auth = context.getAuth()
     // auth.verifyAuthorization(Authorization.ITEMS_IMPORT)
 
     let { action } = context.body;
     [action] = getEnumValues(ItemRequestAction, action)
 
-    // this.log("postItemsRequest", { accountId: auth.accountId, action })
+    this.log("postItemsRequest", { accountId: auth.accountId, action })
 
     switch (action) {
 

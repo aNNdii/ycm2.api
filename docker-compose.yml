@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+
+  mailserver:
+    image: ghcr.io/docker-mailserver/docker-mailserver:latest
+    hostname: ycm2.pr0gramm.dev
+    # restart: always
+    network_mode: host
+    env_file:
+      - ./config/.env.docker
+    ports:
+      - "25:25"
+      - "465:465"
+      - "587:587"
+      - "993:993"
+    volumes:
+      - ./docker/dms/data/:/var/mail/
+      - ./docker/dms/state/:/var/mail-state/
+      - ./docker/dms/logs/:/var/log/mail/
+      - ./docker/dms/config/:/tmp/docker-mailserver/
+      - /etc/localtime:/etc/localtime:ro
+
+  redis:
+    image: redis:latest
+    env_file:
+      - ./config/.env.docker
+    ports:
+      - "6379:6379"
+    volumes:
+      - /docker/redis/data:/root/redis
+      - /docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+

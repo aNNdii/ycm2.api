@@ -106,7 +106,10 @@ dist
 
 .npmrc
 config/.env.*
-!config/.env.example
+docker/**/*
 package-lock.json
 pnpm-lock.yaml
 .vscode/*
+
+!config/.env.example*
+!**/.gitkeep

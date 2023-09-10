@@ -1,4 +1,4 @@
-import hashids from "hashids/cjs/hashids";
+import hashids from "hashids";
 
 import Container, { Token } from "../infrastructures/Container";
 

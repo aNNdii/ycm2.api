@@ -1,5 +1,7 @@
 import Container, { Token } from "../infrastructures/Container";
 
+import { getEnumValues } from "../helpers/Enum";
+
 import { ErrorMessage } from "../interfaces/ErrorMessage";
 import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 import { AccountStatus } from "../interfaces/Account";
@@ -17,6 +19,11 @@ import Controller, { IController } from "./Controller";
 
 export const AccountControllerToken = new Token<IAccountController>("AccountController")
 
+export enum AccountRequestAction {
+  REQUEST_USERNAME,
+  RESET_PASSWORD,
+}
+
 export type AccountsOptions = PaginationOptions & {
   status?: AccountStatus
 }
@@ -32,6 +39,42 @@ export type IAccountController = IController & {
 }
 
 export default class AccountController extends Controller implements IAccountController {
+
+  init() {
+    this.post('/account', this.handleAccountPostRequest.bind(this))
+  }
+
+  async handleAccountPostRequest(context: IHttpRouterContext) {
+
+    let { action } = context.body;
+    [action] = getEnumValues(AccountRequestAction, action)
+
+    this.log("postAccountRequest", { action })
+
+    switch (action) {
+
+      case AccountRequestAction.REQUEST_USERNAME:
+        await this.handleAccountRequestUsernameRequest(context)
+        break
+
+      case AccountRequestAction.RESET_PASSWORD:
+        await this.handleAccountResetPasswordRequest(context)
+        break
+
+      default:
+        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+
+    }
+
+  }
+
+  async handleAccountRequestUsernameRequest(context: IHttpRouterContext) {
+
+  }
+
+  async handleAccountResetPasswordRequest(context: IHttpRouterContext) {
+
+  }
 
   async getAccounts(options: AccountsOptions, context: IHttpRouterContext) {
     this.log("getAccounts", options)
