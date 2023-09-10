@@ -124,7 +124,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
 
   const REDIS_HOST = process.env.REDIS_HOST || 'localhost'
   const REDIS_PORT = ~~(process.env.REDIS_PORT || 6379)
-  const REDIS_USERNAME = process.env.REDIS_USERNAME || ''
+  const REDIS_USER = process.env.REDIS_USER || ''
   const REDIS_PASSWORD = process.env.REDIS_PASSWORD || ''
 
   const DATABASE_ACCOUNT = process.env.DATABASE_ACCOUNT || 'account'
@@ -134,7 +134,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const DATABASE_CMS = process.env.DATABASE_CMS || 'ycm2'
 
   const I18N_LOCALE = process.env.I18N_LOCALE || 'en'
-  const I18N_PRELOAD_LOCALES = (process.env.I18N_PRELOAD_LOCALES || I18N_LOCALE).split(', ')
+  const I18N_PRELOAD_LOCALES = (process.env.I18N_PRELOAD_LOCALES || I18N_LOCALE).split(',')
 
   const OBFUSCATION = Boolean(~~(process.env.OBFUSCATION || 1))
   const OBFUSCATION_SALT = process.env.OBFUSCATION_SALT || ''
@@ -149,7 +149,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const AUTH_JWT_SECRET = process.env.AUTH_JWT_SECRET || ''
   const AUTH_JWT_TTL = ~~(process.env.AUTH_JWT_TTL || 3600)
 
-  const MAIL_FROM = process.env.MAIL_FROM || 'noreply@example.com'
+  const MAIL_FROM = process.env.MAIL_FROM || 'YCM2 <noreply@ycm2.com>'
 
   const CAPTCHA_TOKEN_SECRET = process.env.CAPTCHA_TOKEN_SECRET || ""
   const CAPTCHA_TOKEN_MIN_LENGTH = ~~(process.env.CAPTCHA_TOKEN_MIN_LENGTH || 32)
@@ -222,7 +222,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const redisClient = new Redis({
     host: REDIS_HOST,
     port: REDIS_PORT,
-    username: REDIS_USERNAME,
+    username: REDIS_USER,
     password: REDIS_PASSWORD
   })
 
