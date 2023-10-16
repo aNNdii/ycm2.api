@@ -1,6 +1,6 @@
 import { GraphQLEnumType, GraphQLInt, GraphQLString } from "graphql"
 
-import GraphQLPaginationOrder from "../graphql/PaginationOrder"
+import { GraphQLPaginationOrder } from "../graphql/PaginationOrder"
 
 export type PaginationArgumentOptions = {
   orders?: GraphQLEnumType

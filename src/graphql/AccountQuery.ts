@@ -19,7 +19,7 @@ import { GraphQLAccountStatus } from "./AccountStatus"
 import { GraphQLAccount } from "./Account"
 
 
-const GraphQLAccountQuery = {
+export const GraphQLAccountQuery = {
   me: {
     type: GraphQLAccount,
     resolve: async (_: any, __: any, context: IGraphQLContext) => {

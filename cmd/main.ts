@@ -7,13 +7,11 @@ import { ApolloServer } from "@apollo/server"
 import { createTransport } from "nodemailer"
 import { createPool } from "mariadb"
 import { configure } from "nunjucks"
-import AjvFormats from "ajv-formats"
 import * as dotenv from "dotenv"
 import { Redis } from "ioredis"
 import i18next from "i18next"
 import * as http from "http"
 import debug from "debug"
-import Ajv from "ajv"
 
 import Koa from "koa"
 import KoaCors from "@koa/cors"
@@ -22,71 +20,71 @@ import KoaConvert from "koa-convert"
 import KoaCompress from "koa-compress"
 import KoaBetterBody from "koa-better-body"
 
-import InternationalizationClient, { InternationalizationClientToken } from "../src/infrastructures/InternationalizationClient"
-import TemplateEngine, { TemplateEngineToken } from "../src/infrastructures/TemplateEngine"
-import MariaDatabase, { MariaDatabaseToken } from "../src/infrastructures/MariaDatabase"
-import GraphQLServer, { GraphQLServerToken } from "../src/infrastructures/GraphQLServer"
-import RedisClient, { RedisClientToken } from "../src/infrastructures/RedisClient"
-import SmtpClient, { SmtpClientToken } from "../src/infrastructures/SmtpClient"
-import HttpRouter, { HttpRouterToken } from "../src/infrastructures/HttpRouter"
+import { InternationalizationClient, InternationalizationClientToken } from "../src/infrastructures/InternationalizationClient"
+import { TemplateEngine, TemplateEngineToken } from "../src/infrastructures/TemplateEngine"
+import { MariaDatabase, MariaDatabaseToken } from "../src/infrastructures/MariaDatabase"
+import { GraphQLServer, GraphQLServerToken } from "../src/infrastructures/GraphQLServer"
+import { RedisClient, RedisClientToken } from "../src/infrastructures/RedisClient"
+import { SmtpClient, SmtpClientToken } from "../src/infrastructures/SmtpClient"
+import { HttpRouter, HttpRouterToken } from "../src/infrastructures/HttpRouter"
 import { Container } from "../src/infrastructures/Container"
 
-import MariaRepository, { MariaRepositoryToken } from "../src/repositories/MariaRepository"
-import GameRepository, { GameRepositoryToken } from "../src/repositories/GameRepository"
-import CharacterRepository, { CharacterRepositoryToken } from "../src/repositories/CharacterRepository"
-import AccountRepository, { AccountRepositoryToken } from "../src/repositories/AccountRepository"
-import LocaleRepository, { LocaleRepositoryToken } from "../src/repositories/LocaleRepository"
-import GuildRepository, { GuildRepositoryToken } from "../src/repositories/GuildRepository"
-import ItemRepository, { ItemRepositoryToken } from "../src/repositories/ItemRepository"
-import MobRepository, { MobRepositoryToken } from "../src/repositories/MobRepository"
-import MapRepository, { MapRepositoryToken } from "../src/repositories/MapRepository"
+import { MariaRepository, MariaRepositoryToken } from "../src/repositories/MariaRepository"
+import { GameRepository, GameRepositoryToken } from "../src/repositories/GameRepository"
+import { CharacterRepository, CharacterRepositoryToken } from "../src/repositories/CharacterRepository"
+import { AccountRepository, AccountRepositoryToken } from "../src/repositories/AccountRepository"
+import { LocaleRepository, LocaleRepositoryToken } from "../src/repositories/LocaleRepository"
+import { GuildRepository, GuildRepositoryToken } from "../src/repositories/GuildRepository"
+import { ItemRepository, ItemRepositoryToken } from "../src/repositories/ItemRepository"
+import { MobRepository, MobRepositoryToken } from "../src/repositories/MobRepository"
+import { MapRepository, MapRepositoryToken } from "../src/repositories/MapRepository"
 
-import GameCharacterService, { GameCharacterServiceToken } from "../src/services/GameCharacterService"
-import ObfuscationService, { ObfuscationServiceToken } from "../src/services/ObfuscationService"
-import PaginationService, { PaginationServiceToken } from "../src/services/PaginationService"
-import ValidatorService, { ValidatorServiceToken } from "../src/services/ValidatorService"
-import GameGuildService, { GameGuildServiceToken } from "../src/services/GameGuildService"
-import CharacterService, { CharacterServiceToken } from "../src/services/CharacterService"
-import GameItemService, { GameItemServiceToken } from "../src/services/GameItemService"
-import GameMobService, { GameMobServiceToken } from "../src/services/GameMobService"
-import GameMapService, { GameMapServiceToken } from "../src/services/GameMapService"
-import AccountService, { AccountServiceToken } from "../src/services/AccountService"
-import CaptchaService, { CaptchaServiceToken } from "../src/services/CaptchaService"
-import LocaleService, { LocaleServiceToken } from "../src/services/LocaleService"
-import GuildService, { GuildServiceToken } from "../src/services/GuildService"
-import TokenService, { TokenServiceToken } from "../src/services/TokenService"
-import GameService, { GameServiceToken } from "../src/services/GameService"
-import MailService, { MailServiceToken } from "../src/services/MailService"
-import ItemService, { ItemServiceToken } from "../src/services/ItemService"
-import HashService, { HashServiceToken } from "../src/services/HashService"
-import AuthService, { AuthServiceToken } from "../src/services/AuthService"
-import MobService, { MobServiceToken } from "../src/services/MobService"
-import MapService, { MapServiceToken } from "../src/services/MapService"
+import { GameCharacterService, GameCharacterServiceToken } from "../src/services/GameCharacterService"
+import { ObfuscationService, ObfuscationServiceToken } from "../src/services/ObfuscationService"
+import { PaginationService, PaginationServiceToken } from "../src/services/PaginationService"
+import { ValidatorService, ValidatorServiceToken } from "../src/services/ValidatorService"
+import { GameGuildService, GameGuildServiceToken } from "../src/services/GameGuildService"
+import { CharacterService, CharacterServiceToken } from "../src/services/CharacterService"
+import { GameItemService, GameItemServiceToken } from "../src/services/GameItemService"
+import { GameMobService, GameMobServiceToken } from "../src/services/GameMobService"
+import { GameMapService, GameMapServiceToken } from "../src/services/GameMapService"
+import { AccountService, AccountServiceToken } from "../src/services/AccountService"
+import { CaptchaService, CaptchaServiceToken } from "../src/services/CaptchaService"
+import { LocaleService, LocaleServiceToken } from "../src/services/LocaleService"
+import { GuildService, GuildServiceToken } from "../src/services/GuildService"
+import { TokenService, TokenServiceToken } from "../src/services/TokenService"
+import { GameService, GameServiceToken } from "../src/services/GameService"
+import { MailService, MailServiceToken } from "../src/services/MailService"
+import { ItemService, ItemServiceToken } from "../src/services/ItemService"
+import { HashService, HashServiceToken } from "../src/services/HashService"
+import { AuthService, AuthServiceToken } from "../src/services/AuthService"
+import { MobService, MobServiceToken } from "../src/services/MobService"
+import { MapService, MapServiceToken } from "../src/services/MapService"
 
-import CharacterController, { CharacterControllerToken } from "../src/controllers/CharacterController"
-import GraphQLController, { GraphQLControllerToken } from "../src/controllers/GraphQLController"
-import AccountController, { AccountControllerToken } from "../src/controllers/AccountController"
-import CaptchaController, { CaptchaControllerToken } from "../src/controllers/CaptchaController"
-import LocaleController, { LocaleControllerToken } from "../src/controllers/LocaleController"
-import GuildController, { GuildControllerToken } from "../src/controllers/GuildController"
-import ItemController, { ItemControllerToken } from "../src/controllers/ItemController"
-import AuthController, { AuthControllerToken } from "../src/controllers/AuthController"
-import MobController, { MobControllerToken } from "../src/controllers/MobController"
-import MapController, { MapControllerToken } from "../src/controllers/MapController"
+import { CharacterController, CharacterControllerToken } from "../src/controllers/CharacterController"
+import { GraphQLController, GraphQLControllerToken } from "../src/controllers/GraphQLController"
+import { AccountController, AccountControllerToken } from "../src/controllers/AccountController"
+import { CaptchaController, CaptchaControllerToken } from "../src/controllers/CaptchaController"
+import { LocaleController, LocaleControllerToken } from "../src/controllers/LocaleController"
+import { GuildController, GuildControllerToken } from "../src/controllers/GuildController"
+import { ItemController, ItemControllerToken } from "../src/controllers/ItemController"
+import { AuthController, AuthControllerToken } from "../src/controllers/AuthController"
+import { MobController, MobControllerToken } from "../src/controllers/MobController"
+import { MapController, MapControllerToken } from "../src/controllers/MapController"
 
 import { IGraphQLContext } from "../src/entities/GraphQLContext"
 
-import GraphQLMobGroupGroupQuery from "../src/graphql/MobGroupGroupQuery"
-import GraphQLAccountGroupQuery from "../src/graphql/AccountGroupQuery"
-import GraphQLMobRankItemQuery from "../src/graphql/MobRankItemQuery"
-import GraphQLCharacterQuery from "../src/graphql/CharacterQuery"
-import GraphQLMobGroupQuery from "../src/graphql/MobGroupQuery"
-import GraphQLMobItemQuery from "../src/graphql/MobItemQuery"
-import GraphQLAccountQuery from "../src/graphql/AccountQuery"
-import GraphQLLocaleQuery from "../src/graphql/LocaleQuery"
-import GraphQLItemQuery from "../src/graphql/ItemQuery"
-import GraphQLMapQuery from "../src/graphql/MapQuery"
-import GraphQLMobQuery from "../src/graphql/MobQuery"
+import { GraphQLMobGroupGroupQuery } from "../src/graphql/MobGroupGroupQuery"
+import { GraphQLAccountGroupQuery } from "../src/graphql/AccountGroupQuery"
+import { GraphQLMobRankItemQuery } from "../src/graphql/MobRankItemQuery"
+import { GraphQLCharacterQuery } from "../src/graphql/CharacterQuery"
+import { GraphQLMobGroupQuery } from "../src/graphql/MobGroupQuery"
+import { GraphQLMobItemQuery } from "../src/graphql/MobItemQuery"
+import { GraphQLAccountQuery } from "../src/graphql/AccountQuery"
+import { GraphQLLocaleQuery } from "../src/graphql/LocaleQuery"
+import { GraphQLItemQuery } from "../src/graphql/ItemQuery"
+import { GraphQLMapQuery } from "../src/graphql/MapQuery"
+import { GraphQLMobQuery } from "../src/graphql/MobQuery"
 
 
 (async () => {
@@ -106,7 +104,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const HTTP_PORT = ~~(process.env.HTTP_PORT || 4000)
   const HTTP_CORS_MAX_AGE = ~~(process.env.HTTP_CORS_MAX_AGE || 24 * 60 * 60)
   const HTTP_RATE_LIMIT_PREFIX = process.env.HTTP_RATE_LIMIT_PREFIX || 'koaHttpRouter'
-  const HTTP_RATE_LIMIT_COUNT = ~~(process.env.HTTP_RATE_LIMIT_COUNT || 120) 
+  const HTTP_RATE_LIMIT_COUNT = ~~(process.env.HTTP_RATE_LIMIT_COUNT || 120)
   const HTTP_RATE_LIMIT_DURATION = ~~(process.env.HTTP_RATE_LIMIT_DURATION || 60)
 
   const HTTP_GRAPHQL_COMPLEXITY_LIMIT = ~~(process.env.HTTP_GRAPHQL_COMPLEXITY_LIMIT || 1000)
@@ -161,7 +159,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const AUTH_JWT_TTL = ~~(process.env.AUTH_JWT_TTL || 3600)
 
   const MAIL_FROM = process.env.MAIL_FROM || 'YCM2 <noreply@example.com>'
-  
+
   const SERVER_URL = process.env.SERVER_URL || ''
   const SERVER_NAME = process.env.SERVER_NAME || 'YCM2'
   const SERVER_LOGO_URL = process.env.SERVER_LOGO_URL || ''
@@ -239,7 +237,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const smtpTransporter = createTransport({
     host: SMTP_HOST,
     port: SMTP_PORT,
-    secure: SMTP_SSL, 
+    secure: SMTP_SSL,
     auth: {
       user: SMTP_USER,
       pass: SMTP_PASSWORD,
@@ -422,7 +420,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
 
     accountPasswordMinLength: ACCOUNT_PASSWORD_MIN_LENGTH,
     accountPasswordMaxLength: ACCOUNT_PASSWORD_MAX_LENGTH,
-    
+
     accountPasswordRecoveryTokenObfuscationSalt: ACCOUNT_PASSWORD_RECOVERY_TOKEN_OBFUSCATION_SALT,
     accountPasswordRecoveryTokenTtl: ACCOUNT_PASSWORD_RECOVERY_TOKEN_TTL,
   }))
@@ -472,7 +470,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
 
     tokenObfuscationSalt: CAPTCHA_TOKEN_OBFUSCATION_SALT,
     tokenTtl: CAPTCHA_TOKEN_TTL,
-    
+
     imageFont: CAPTCHA_IMAGE_FONT ? `${__dirname}/../${CAPTCHA_IMAGE_FONT}` : undefined,
     imageFontSize: CAPTCHA_IMAGE_FONT_SIZE,
     imageInverse: CAPTCHA_IMAGE_INVERSE,
@@ -482,7 +480,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
     imageHeight: CAPTCHA_IMAGE_HEIGHT,
   }))
 
-  
+
   /*****************************************************************************
    * Controllers
    *****************************************************************************/

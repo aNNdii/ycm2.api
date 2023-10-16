@@ -31,7 +31,7 @@
     "@types/koa-router": "^7.4.5",
     "@types/koa__cors": "^4.0.1",
     "@types/mjml": "^4.7.2",
-    "@types/node": "^20.8.4",
+    "@types/node": "^20.8.6",
     "@types/nodemailer": "^6.4.11",
     "@types/nunjucks": "^3.2.4",
     "@types/sqlstring": "^2.3.0",
@@ -42,8 +42,6 @@
   "dependencies": {
     "@apollo/server": "^4.9.4",
     "@koa/cors": "^4.0.0",
-    "ajv": "^8.12.0",
-    "ajv-formats": "^2.1.1",
     "dataloader": "^2.2.2",
     "debug": "^4.3.4",
     "dotenv": "^16.3.1",
