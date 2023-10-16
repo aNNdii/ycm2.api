@@ -1,17 +1,16 @@
-import Container, { Token } from "../infrastructures/Container"
+import { Container, Token } from "../infrastructures/Container"
 
 import { ErrorMessage } from "../interfaces/ErrorMessage"
 import { EntityFilter } from "../interfaces/Entity"
 
 import { GuildRepositoryToken } from "../repositories/GuildRepository"
 
+import { GuildMessageProperties, IGuildMessage } from "../entities/GuildMessage"
 import { GuildGradeProperties, IGuildGrade } from "../entities/GuildGrade"
 import { GuildProperties, IGuild } from "../entities/Guild"
 
 import { PaginationOptions } from "./PaginationService"
-import EntityService from "./EntityService"
-import { IService } from "./Service"
-import { GuildMessageProperties, IGuildMessage } from "../entities/GuildMessage"
+import { EntityService, IEntityService } from "./EntityService"
 
 export const GuildServiceToken = new Token<IGuildService>("GuildService")
 
@@ -34,7 +33,7 @@ export type GuildServiceOptions = {
   guildMessageObfuscationSalt: string
 }
 
-export type IGuildService = IService & {
+export type IGuildService = IEntityService & {
   obfuscateGuildId(id: any): string
   deobfuscateGuildId(value: string | string[]): number[]
 
@@ -43,13 +42,13 @@ export type IGuildService = IService & {
 
   getGuildPaginationOptions(args: any): PaginationOptions
   getGuildMessagePaginationOptions(args: any): PaginationOptions
-  
+
   getGuilds(options?: GuildOptions): Promise<IGuild[]>
   getGuildGrades(options?: GuildGradeOptions): Promise<IGuildGrade[]>
   getGuildMessages(options?: GuildMessageOptions): Promise<IGuildMessage[]>
 }
 
-export default class GuildService extends EntityService<GuildServiceOptions> implements IGuildService {
+export class GuildService extends EntityService<GuildServiceOptions> implements IGuildService {
 
   obfuscateGuildId(id: any) {
     return this.obfuscateId(id, { salt: this.options.guildObfuscationSalt })
@@ -125,7 +124,7 @@ export default class GuildService extends EntityService<GuildServiceOptions> imp
     const {
       id,
       guildId,
-      orderId, 
+      orderId,
       offset,
       limit
     } = options || {}

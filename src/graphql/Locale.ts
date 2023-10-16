@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { getPaginationArguments } from "../helpers/GraphQL";
 
@@ -9,10 +9,11 @@ import { LocaleControllerToken } from "../controllers/LocaleController";
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { ILocale } from "../entities/Locale";
 
-import GraphQLLocaleItem from "./LocaleItem";
-import GraphQLLocaleMob from "./LocaleMob";
+import { GraphQLLocaleItem } from "./LocaleItem";
+import { GraphQLLocaleMob } from "./LocaleMob";
 
-const GraphQLLocale: GraphQLObjectType = new GraphQLObjectType({
+
+export const GraphQLLocale: GraphQLObjectType = new GraphQLObjectType({
   name: 'Locale',
   fields: () => ({
     id: {
@@ -65,5 +66,3 @@ const GraphQLLocale: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLLocale

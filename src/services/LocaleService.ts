@@ -1,5 +1,5 @@
 
-import Container, { Token } from "../infrastructures/Container"
+import { Container, Token } from "../infrastructures/Container"
 
 import { chunks } from "../helpers/Array"
 
@@ -10,14 +10,13 @@ import { EntityFilter } from "../interfaces/Entity"
 import { LocaleRepositoryToken } from "../repositories/LocaleRepository"
 
 import { ILocaleItem, LocaleItemProperties } from "../entities/LocaleItem"
+import { ILocaleMob, LocaleMobProperties } from "../entities/LocaleMob"
 import { ILocale, LocaleProperties } from "../entities/Locale"
 
-import EntityService, { EntityOptions } from "./EntityService"
+import { EntityService, EntityOptions, IEntityService } from "./EntityService"
 import { GameItemServiceToken } from "./GameItemService"
-import { PaginationOptions } from "./PaginationService"
-import { IService } from "./Service"
 import { GameMobServiceToken } from "./GameMobService"
-import { ILocaleMob, LocaleMobProperties } from "../entities/LocaleMob"
+import { PaginationOptions } from "./PaginationService"
 
 export const LocaleServiceToken = new Token<ILocaleService>("LocaleService")
 
@@ -48,7 +47,7 @@ export type LocaleServiceOptions = EntityOptions & {
   localeMobObfuscationSalt: string
 }
 
-export type ILocaleService = IService & {
+export type ILocaleService = IEntityService & {
   obfuscateLocaleId(id: any): string
   deobfuscateLocaleId(value: string | string[]): number[]
   obfuscateLocaleItemId(id: any): string
@@ -69,7 +68,7 @@ export type ILocaleService = IService & {
   importMobNames(localeId: number, path: string, options?: LocaleImportOptions): Promise<any>
 }
 
-export default class LocaleService extends EntityService<LocaleServiceOptions> implements ILocaleService {
+export class LocaleService extends EntityService<LocaleServiceOptions> implements ILocaleService {
 
   obfuscateLocaleId(id: any) {
     return this.obfuscateId(id, { salt: this.options.localeObfuscationSalt })

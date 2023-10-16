@@ -1,6 +1,6 @@
 import JSZip from "jszip"
 
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { getEnumValues } from "../helpers/Enum";
 
@@ -8,7 +8,7 @@ import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 import { ErrorMessage } from "../interfaces/ErrorMessage";
 
 import { IHttpRouterContext } from "../entities/HttpRouterContext";
-import HttpRouterError from "../entities/HttpRouterError";
+import { HttpRouterError } from "../entities/HttpRouterError";
 
 import { Authorization } from "../interfaces/Auth";
 import { GameItemProtoFormat } from "../interfaces/GameItem";
@@ -22,7 +22,7 @@ import { IItemSpecialAction } from "../entities/ItemSpecialAction";
 import { IItemAttribute } from "../entities/ItemAttribute";
 import { IItem } from "../entities/Item";
 
-import Controller, { IController } from "./Controller";
+import { Controller, IController } from "./Controller";
 
 export const ItemControllerToken = new Token<IItemController>("ItemController")
 
@@ -49,7 +49,7 @@ export type IItemController = IController & {
   getItemSpecialActionById(id: number, context: IHttpRouterContext): Promise<IItemSpecialAction>
 }
 
-export default class ItemController extends Controller implements IItemController {
+export class ItemController extends Controller implements IItemController {
 
   init() {
     this.get('/items', this.handleItemsGetRequest.bind(this))
@@ -143,7 +143,7 @@ export default class ItemController extends Controller implements IItemControlle
         break
 
       default:
-        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     }
 
@@ -160,7 +160,7 @@ export default class ItemController extends Controller implements IItemControlle
     [format] = getEnumValues(GameItemProtoFormat, format);
     update = ~~(update)
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     this.log("importItemProto", { file: file.path, format, update })
 
@@ -174,7 +174,7 @@ export default class ItemController extends Controller implements IItemControlle
     [file] = file || [];
     update = ~~(update)
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     this.log("importItemNames", { file: file.path, update })
 
@@ -188,7 +188,7 @@ export default class ItemController extends Controller implements IItemControlle
     [file] = file || [];
     update = ~~(update)
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     this.log("importItemList", { file: file.path, update })
 
@@ -202,7 +202,7 @@ export default class ItemController extends Controller implements IItemControlle
     [file] = file || [];
     update = ~~(update)
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     this.log("importItemBlend", { file: file.path, update })
 
@@ -216,7 +216,7 @@ export default class ItemController extends Controller implements IItemControlle
     [file] = file || [];
     override = ~~(override)
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     this.log("importItemSpecialGroup", { file: file.path, override })
 
@@ -230,7 +230,7 @@ export default class ItemController extends Controller implements IItemControlle
     [file] = file || [];
     override = ~~(override)
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     this.log("importItemCube", { file: file.path, override })
 

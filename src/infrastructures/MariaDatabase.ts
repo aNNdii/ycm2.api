@@ -1,8 +1,8 @@
 import { Pool } from "mariadb"
 
-import MariaDatabaseConnection, { IMariaDatabaseConnection } from "./MariaDatabaseConnection"
+import { MariaDatabaseConnection, IMariaDatabaseConnection } from "./MariaDatabaseConnection"
 import { Token } from "./Container"
-import Logger from "./Logger"
+import { Logger } from "./Logger"
 
 export const MariaDatabaseToken = new Token<IMariaDatabase>("MariaDatabase")
 
@@ -15,7 +15,7 @@ export type MariaDatabaseOptions = {
   pool: Pool
 }
 
-export default class MariaDatabase extends Logger implements IMariaDatabase {
+export class MariaDatabase extends Logger implements IMariaDatabase {
 
   private pool: Pool
 

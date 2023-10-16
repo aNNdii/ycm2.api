@@ -1,20 +1,21 @@
-import DataLoader, { IDataLoader } from "../infrastructures/DataLoader";
-import Container from "../infrastructures/Container";
+import { DataLoader, IDataLoader } from "../infrastructures/DataLoader";
+import { Container } from "../infrastructures/Container";
 
 import { EntityFilterMethod } from "../interfaces/Entity";
 
 import { MobGroupGroupMobGroupOptions, MobGroupMobOptions, MobGroupOptions, MobItemOptions, MobOptions, MobRankItemOptions, MobServiceToken } from "./MobService";
 import { AccountGroupAccountOptions, AccountGroupAuthorizationOptions, AccountGroupOptions, AccountServiceToken, AccountsOptions } from "./AccountService";
+import { ItemAttributeOptions, ItemOptions, ItemServiceToken, ItemSpecialActionOptions } from "./ItemService";
 import { GuildGradeOptions, GuildMessageOptions, GuildOptions, GuildServiceToken } from "./GuildService";
 import { LocaleItemOptions, LocaleMobOptions, LocaleOptions, LocaleServiceToken } from "./LocaleService";
 import { CharacterServiceToken, CharacterOptions, CharacterItemOptions } from "./CharacterService";
-import { ItemAttributeOptions, ItemOptions, ItemServiceToken, ItemSpecialActionOptions } from "./ItemService";
 import { MapEntityOptions, MapOptions, MapServiceToken } from "./MapService";
-import Service, { IService, ServiceOptions } from "./Service";
+import { Service, IService, ServiceOptions } from "./Service";
 
 import { IAccountGroupAuthorization } from "../entities/AccountGroupAuthorization";
 import { IMobGroupGroupMobGroup } from "../entities/MobGroupGroupMobGroup";
 import { IAccountGroupAccount } from "../entities/AccountGroupAccount";
+import { IItemSpecialAction } from "../entities/ItemSpecialAction";
 import { ICharacterItem } from "../entities/CharacterItem";
 import { IItemAttribute } from "../entities/ItemAttribute";
 import { IMobGroupGroup } from "../entities/MobGroupGroup";
@@ -35,7 +36,6 @@ import { IGuild } from "../entities/Guild";
 import { IItem } from "../entities/Item";
 import { IMap } from "../entities/Map";
 import { IMob } from "../entities/Mob";
-import { IItemSpecialAction } from "../entities/ItemSpecialAction";
 
 export type DataLoaderServiceOptions = ServiceOptions & {}
 
@@ -56,6 +56,7 @@ export type IDataLoaderService = IService & {
 
   getAccounts(options?: AccountsOptions): Promise<IAccount[]>
   getAccountsById(id: number | number[]): Promise<IAccount[]>
+  getAccountsByMail(mail: string | string[]): Promise<IAccount[]>
 
   getAccountGroups(options?: AccountGroupOptions): Promise<IAccountGroup[]>
   getAccountGroupsById(id: number | number[]): Promise<IAccountGroup[]>
@@ -138,7 +139,7 @@ export type IDataLoaderService = IService & {
   getGuildMessages(options?: GuildMessageOptions): Promise<IGuildMessage[]>
 }
 
-export default class DataLoaderService extends Service<DataLoaderServiceOptions> implements IDataLoaderService {
+export class DataLoaderService extends Service<DataLoaderServiceOptions> implements IDataLoaderService {
 
   private loaders: { [key: string]: IDataLoader } = {}
 
@@ -205,6 +206,11 @@ export default class DataLoaderService extends Service<DataLoaderServiceOptions>
   getAccountsById(id: number | number[]) {
     const func = this.getLoaderBatchFunc(ids => this.getAccounts({ id: [EntityFilterMethod.IN, ids] }))
     return this.getLoader('getAccountsById', func, { batch: true }).load(id)
+  }
+
+  getAccountsByMail(mail: string | string[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getAccounts({ mail: [EntityFilterMethod.IN, mail] }), { key: 'mail' })
+    return this.getLoader('getAccountsByMail', func, { batch: true }).load(mail)
   }
 
 

@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { getPaginationArguments } from "../helpers/GraphQL";
 
@@ -17,19 +17,20 @@ import { AccountControllerToken } from "../controllers/AccountController";
 import { MapControllerToken } from "../controllers/MapController";
 
 import { IGraphQLContext } from "../entities/GraphQLContext";
-import HttpRouterError from "../entities/HttpRouterError";
-import Character, { ICharacter } from "../entities/Character";
+import { HttpRouterError } from "../entities/HttpRouterError";
+import { Character, ICharacter } from "../entities/Character";
 
-import GraphQLCharacterItemWindow from "./CharacterItemWindow";
-import GraphQLCharacterQuickSlot from "./CharacterQuickSlot";
-import GraphQLCharacterSkill from "./CharacterSkill";
-import GraphQLCharacterHorse from "./CharacterHorse";
-import GraphQLGuildCharacter from "./GuildCharacter";
-import GraphQLCharacterItem from "./CharacterItem";
-import GraphQLAccount from "./Account";
-import GraphQLMap from "./Map";
+import { GraphQLCharacterItemWindow } from "./CharacterItemWindow";
+import { GraphQLCharacterQuickSlot } from "./CharacterQuickSlot";
+import { GraphQLCharacterSkill } from "./CharacterSkill";
+import { GraphQLCharacterHorse } from "./CharacterHorse";
+import { GraphQLGuildCharacter } from "./GuildCharacter";
+import { GraphQLCharacterItem } from "./CharacterItem";
+import { GraphQLAccount } from "./Account";
+import { GraphQLMap } from "./Map";
 
-const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
+
+export const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
   name: 'Character',
   fields: () => ({
     id: {
@@ -40,10 +41,10 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLAccount,
       resolve: (character: ICharacter, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-  
+
         const hasPermissions = auth.hasAuthorization(Authorization.ACCOUNTS_READ) || auth.accountId === character.accountId
         if (!hasPermissions) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.AUTH_INSUFFICIENT_PERMISSION)
-      
+
         const accountController = Container.get(AccountControllerToken)
         return accountController.getAccountById(character.accountId, context)
       }
@@ -57,10 +58,10 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
       },
       resolve: (character: ICharacter, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-  
+
         const hasPermissions = auth.hasAuthorization(Authorization.ACCOUNTS_READ) || auth.accountId === character.accountId
         if (!hasPermissions) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.AUTH_INSUFFICIENT_PERMISSION)
-      
+
         const characterController = Container.get(CharacterControllerToken)
         return characterController.getCharacterItems({
           ...args,
@@ -73,7 +74,7 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
       resolve: (character: ICharacter) => character.name
     },
     empire: {
-      type: GraphQLString, 
+      type: GraphQLString,
       resolve: (character: ICharacter) => Empire[character.empireId]?.toLowerCase()
     },
     race: {
@@ -97,7 +98,7 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
           case CharacterJob.SURA_FEMALE:
             characterRaceId = CharacterRace.SURA
             break
-            
+
           case CharacterJob.SHAMAN_MALE:
           case CharacterJob.SHAMAN_FEMALE:
             characterRaceId = CharacterRace.SHAMAN
@@ -120,8 +121,8 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
           case CharacterJob.SURA_MALE:
           case CharacterJob.SHAMAN_MALE:
             characterSexId = CharacterSex.MALE
-            break  
-          
+            break
+
           case CharacterJob.WARRIOR_FEMALE:
           case CharacterJob.ASSASSIN_FEMALE:
           case CharacterJob.SURA_FEMALE:
@@ -174,10 +175,10 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: (character: ICharacter, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-  
+
         const hasPermissions = auth.hasAuthorization(Authorization.CHARACTERS_READ) || auth.accountId === character.accountId
         if (!hasPermissions) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.AUTH_INSUFFICIENT_PERMISSION)
-      
+
         return character.money
       }
     },
@@ -197,10 +198,10 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: (character: ICharacter, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-  
+
         const hasPermissions = auth.hasAuthorization(Authorization.CHARACTERS_READ) || auth.accountId === character.accountId
         if (!hasPermissions) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.AUTH_INSUFFICIENT_PERMISSION)
-      
+
         return character.skillPointCount
       }
     },
@@ -208,7 +209,7 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: (character: ICharacter, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-  
+
         const hasPermissions = auth.hasAuthorization(Authorization.CHARACTERS_READ) || auth.accountId === character.accountId
         if (!hasPermissions) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.AUTH_INSUFFICIENT_PERMISSION)
 
@@ -234,7 +235,7 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
       type: new GraphQLList(GraphQLCharacterQuickSlot),
       resolve: (character: ICharacter, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-  
+
         const hasPermissions = auth.hasAuthorization(Authorization.CHARACTERS_READ) || auth.accountId === character.accountId
         if (!hasPermissions) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.AUTH_INSUFFICIENT_PERMISSION)
 
@@ -246,7 +247,7 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
       type: new GraphQLList(GraphQLCharacterSkill),
       resolve: (character: ICharacter, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-  
+
         const hasPermissions = auth.hasAuthorization(Authorization.CHARACTERS_READ) || auth.accountId === character.accountId
         if (!hasPermissions) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.AUTH_INSUFFICIENT_PERMISSION)
 
@@ -258,7 +259,7 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLCharacterHorse,
       resolve: (character: ICharacter, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-  
+
         const hasPermissions = auth.hasAuthorization(Authorization.CHARACTERS_READ) || auth.accountId === character.accountId
         if (!hasPermissions) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.AUTH_INSUFFICIENT_PERMISSION)
 
@@ -269,7 +270,7 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: (character: ICharacter, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-  
+
         const hasPermissions = auth.hasAuthorization(Authorization.CHARACTERS_READ) || auth.accountId === character.accountId
         if (!hasPermissions) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.AUTH_INSUFFICIENT_PERMISSION)
 
@@ -280,7 +281,7 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLString,
       resolve: (character: ICharacter, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-  
+
         const hasPermissions = auth.hasAuthorization(Authorization.CHARACTERS_READ) || auth.accountId === character.accountId
         if (!hasPermissions) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.AUTH_INSUFFICIENT_PERMISSION)
 
@@ -291,7 +292,7 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLString,
       resolve: (character: ICharacter, args: any, context: IGraphQLContext) => {
         const auth = context.getAuth()
-  
+
         const hasPermissions = auth.hasAuthorization(Authorization.CHARACTERS_READ) || auth.accountId === character.accountId
         if (!hasPermissions) throw new HttpRouterError(HttpStatusCode.FORBIDDEN, ErrorMessage.AUTH_INSUFFICIENT_PERMISSION)
 
@@ -300,5 +301,3 @@ const GraphQLCharacter: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLCharacter

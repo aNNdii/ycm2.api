@@ -1,6 +1,6 @@
 import { Token } from "../infrastructures/Container";
 
-import Repository, { RepositoryOptions } from "./Repository";
+import { Repository, RepositoryOptions } from "./Repository";
 
 export const GameRepositoryToken = new Token<IGameRepository>("GameRepository")
 
@@ -20,7 +20,7 @@ export type IGameRepository = {
   getCmsDatabaseName(): string
 }
 
-export default class GameRepository extends Repository<GameRepositoryOptions> implements IGameRepository {
+export class GameRepository extends Repository<GameRepositoryOptions> implements IGameRepository {
 
   getAccountDatabaseName() {
     return this.options?.accountDatabaseName || 'account'

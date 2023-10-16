@@ -4,7 +4,7 @@ export type ILogger = {
   log(data: any): void
 }
 
-export default class Logger implements ILogger {
+export class Logger implements ILogger {
 
   protected logger: Debugger
 

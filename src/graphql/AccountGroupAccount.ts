@@ -1,16 +1,17 @@
 import { GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { AccountControllerToken } from "../controllers/AccountController";
 
 import { IAccountGroupAccount } from "../entities/AccountGroupAccount";
 import { IGraphQLContext } from "../entities/GraphQLContext";
 
-import GraphQLAccountGroup from "./AccountGroup";
-import GraphQLAccount from "./Account";
+import { GraphQLAccountGroup } from "./AccountGroup";
+import { GraphQLAccount } from "./Account";
 
-const GraphQLAccountGroupAccount = new GraphQLObjectType({
+
+export const GraphQLAccountGroupAccount = new GraphQLObjectType({
   name: 'AccountGroupAccount',
   fields: () => ({
     account: {
@@ -33,5 +34,3 @@ const GraphQLAccountGroupAccount = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLAccountGroupAccount

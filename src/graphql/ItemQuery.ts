@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLList, GraphQLNonNull } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { getPaginationArguments } from "../helpers/GraphQL";
 
@@ -8,10 +8,10 @@ import { ItemControllerToken } from "../controllers/ItemController";
 
 import { IGraphQLContext } from "../entities/GraphQLContext";
 
-import GraphQLItem from "./Item";
+import { GraphQLItem } from "./Item";
 
 
-const GraphQLItemQuery = {
+export const GraphQLItemQuery = {
   item: {
     type: GraphQLItem,
     args: {
@@ -37,5 +37,3 @@ const GraphQLItemQuery = {
     }
   }
 }
-
-export default GraphQLItemQuery

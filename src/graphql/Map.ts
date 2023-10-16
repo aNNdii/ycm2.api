@@ -1,6 +1,6 @@
 import { GraphQLFloat, GraphQLID, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { getPaginationArguments } from "../helpers/GraphQL";
 
@@ -11,9 +11,10 @@ import { IMap } from "../entities/Map";
 
 import { MapControllerToken } from "../controllers/MapController";
 
-import GraphQLMapEntity from "./MapEntity";
+import { GraphQLMapEntity } from "./MapEntity";
 
-const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
+
+export const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
   name: 'Map',
   fields: () => ({
     id: {
@@ -138,5 +139,3 @@ const GraphQLMap: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLMap

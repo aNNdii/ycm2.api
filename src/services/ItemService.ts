@@ -1,4 +1,4 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { chunks } from "../helpers/Array"
 
@@ -14,7 +14,7 @@ import { IItemSpecialAction, ItemSpecialActionProperties } from "../entities/Ite
 import { IItemAttribute, ItemAttributeProperties } from "../entities/ItemAttribute";
 import { IItem, ItemProperties } from "../entities/Item";
 
-import EntityService, { EntityOptions, IEntityService } from "./EntityService";
+import { EntityService, EntityOptions, IEntityService } from "./EntityService";
 import { GameItemServiceToken } from './GameItemService';
 import { PaginationOptions } from "./PaginationService";
 
@@ -70,7 +70,7 @@ export type IItemService = IEntityService & {
   importItemSpecialGroup(path: string, options?: ItemImportOptions): Promise<any>
 }
 
-export default class ItemService extends EntityService<ItemServiceOptions> implements IItemService {
+export class ItemService extends EntityService<ItemServiceOptions> implements IItemService {
 
   obfuscateItemSpecialActionId(id: any) {
     return this.obfuscateId(id, { salt: this.options.itemSpecialActionObfuscationSalt })

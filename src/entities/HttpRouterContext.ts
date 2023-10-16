@@ -1,15 +1,15 @@
 import { RouterContext as KoaRouterContext } from "koa-router"
 
-import Container from "../infrastructures/Container"
+import { Container } from "../infrastructures/Container"
 
 import { AuthenticationTokenType } from "../interfaces/Auth"
 import { ErrorMessage } from "../interfaces/ErrorMessage"
 import { HttpStatusCode } from "../interfaces/HttpStatusCode"
 
-import DataLoaderService, { IDataLoaderService } from "../services/DataLoaderService"
+import { DataLoaderService, IDataLoaderService } from "../services/DataLoaderService"
 import { AuthServiceToken } from "../services/AuthService"
 
-import HttpRouterError from "./HttpRouterError"
+import { HttpRouterError }  from "./HttpRouterError"
 import { IAuth } from "./Auth"
 
 export enum AuthenticationScheme {
@@ -34,8 +34,9 @@ export type IHttpRouterContext = {
   ip: string
   url: string
   headers: any
-  body: any
   parameters: any
+  query: any
+  body: any
 
   getHeader(key: string): string
   setHeader(key: string, value: string): void
@@ -53,7 +54,7 @@ export type IHttpRouterContext = {
   
 }
 
-export default class HttpRouterContext<T extends KoaRouterContext = KoaRouterContext> implements IHttpRouterContext {
+export class HttpRouterContext<T extends KoaRouterContext = KoaRouterContext> implements IHttpRouterContext {
 
   private context: T
 
@@ -63,7 +64,7 @@ export default class HttpRouterContext<T extends KoaRouterContext = KoaRouterCon
     const { context } = options
 
     this.context = context
-    this.dataLoaderService = new DataLoaderService({})
+    this.dataLoaderService = new DataLoaderService()
   }
 
   get url() {
@@ -85,6 +86,10 @@ export default class HttpRouterContext<T extends KoaRouterContext = KoaRouterCon
 
   get headers() {
     return this.context.headers
+  }
+
+  get query() {
+    return this.context.query
   }
 
   get ip() {

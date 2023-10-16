@@ -1,4 +1,4 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 import { ErrorMessage } from "../interfaces/ErrorMessage";
@@ -8,12 +8,12 @@ import { PaginationOptions } from "../services/PaginationService";
 import { GuildServiceToken } from "../services/GuildService";
 
 import { IHttpRouterContext } from "../entities/HttpRouterContext";
-import HttpRouterError from "../entities/HttpRouterError";
+import { HttpRouterError } from "../entities/HttpRouterError";
 
 import { IGuildMessage } from "../entities/GuildMessage";
 import { IGuild } from "../entities/Guild";
 
-import Controller, { IController } from "./Controller";
+import { Controller, IController } from "./Controller";
 
 export const GuildControllerToken = new Token<IGuildController>("GuildController")
 
@@ -33,7 +33,7 @@ export type IGuildController = IController & {
   getGuildMessages(options: GuildMessageOptions, context: IHttpRouterContext): Promise<IGuildMessage[]>
 }
 
-export default class GuildController extends Controller implements IGuildController {
+export class GuildController extends Controller implements IGuildController {
 
   getGuilds(options: GuildOptions, context: IHttpRouterContext) {
     this.log("getGuilds", options)

@@ -1,17 +1,18 @@
 import { GraphQLInt, GraphQLObjectType } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { GuildControllerToken } from "../controllers/GuildController";
 
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { ICharacter } from "../entities/Character";
 
-import GraphQLGuildGrade from "./GuildGrade";
-import GraphQLCharacter from "./Character";
-import GraphQLGuild from "./Guild";
+import { GraphQLGuildGrade } from "./GuildGrade";
+import { GraphQLCharacter } from "./Character";
+import { GraphQLGuild } from "./Guild";
 
-const GraphQLGuildCharacter: GraphQLObjectType = new GraphQLObjectType({
+
+export const GraphQLGuildCharacter: GraphQLObjectType = new GraphQLObjectType({
   name: 'GuildCharacter',
   fields: () => ({
     character: {
@@ -28,11 +29,9 @@ const GraphQLGuildCharacter: GraphQLObjectType = new GraphQLObjectType({
     grade: {
       type: GraphQLGuildGrade,
       resolve: async (character: ICharacter, args: any, context: IGraphQLContext) => {
-        const [grade] = await context.dataLoaderService.getGuildGradesByIdAndGuildId(character.guildGradeId, character.guildId) 
+        const [grade] = await context.dataLoaderService.getGuildGradesByIdAndGuildId(character.guildGradeId, character.guildId)
         return grade
       }
     },
   })
 })
-
-export default GraphQLGuildCharacter

@@ -1,9 +1,11 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList } from "graphql";
-import { IItemAttribute } from "../entities/ItemAttribute";
 
 import { ItemAttribute } from "../interfaces/Item";
 
-const GraphQLItemAttribute: GraphQLObjectType = new GraphQLObjectType({
+import { IItemAttribute } from "../entities/ItemAttribute";
+
+
+export const GraphQLItemAttribute: GraphQLObjectType = new GraphQLObjectType({
   name: 'ItemAttribute',
   fields: () => ({
     id: {
@@ -58,5 +60,3 @@ const GraphQLItemAttribute: GraphQLObjectType = new GraphQLObjectType({
     },
   })
 })
-
-export default GraphQLItemAttribute

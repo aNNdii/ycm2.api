@@ -1,11 +1,11 @@
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { EntityTableFilter } from "../interfaces/Entity";
 import { MapTable } from "../interfaces/Map";
 
 import { MapServiceToken } from "../services/MapService";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 
 export type MapProperties = EntityTableFilter<"map", MapTable>
 
@@ -26,7 +26,7 @@ export type IMap = IEntity & {
   modifiedDate: string
 }
 
-export default class Map extends Entity<MapProperties> implements IMap {
+export class Map extends Entity<MapProperties> implements IMap {
 
   get id() {
     return this.getProperty("map.map_id")

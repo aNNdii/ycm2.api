@@ -1,7 +1,7 @@
 import { EntityTableFilter } from "../interfaces/Entity";
 import { ItemCraftingTable } from "../interfaces/Item";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 
 export type ItemCraftingProperties = EntityTableFilter<"item_crafting", ItemCraftingTable>
 
@@ -17,7 +17,7 @@ export type IItemCrafting = IEntity & {
   modifiedDate: string
 }
 
-export default class ItemCrafting extends Entity<ItemCraftingProperties> implements IItemCrafting {
+export class ItemCrafting extends Entity<ItemCraftingProperties> implements IItemCrafting {
 
   get id() {
     return this.getProperty("item_crafting.item_crafting_id")

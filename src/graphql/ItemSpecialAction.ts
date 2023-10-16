@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLInt, GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { ItemAttribute, ItemSpecialActionType } from "../interfaces/Item";
 
@@ -10,12 +10,12 @@ import { IGraphQLContext } from "../entities/GraphQLContext";
 import { ItemControllerToken } from "../controllers/ItemController";
 import { MobControllerToken } from "../controllers/MobController";
 
-import GraphQLMobGroup from "./MobGroup";
-import GraphQLItem from "./Item";
-import GraphQLMob from "./Mob";
+import { GraphQLMobGroup } from "./MobGroup";
+import { GraphQLItem } from "./Item";
+import { GraphQLMob } from "./Mob";
 
 
-const GraphQLItemSpecialAction: GraphQLObjectType = new GraphQLObjectType({
+export const GraphQLItemSpecialAction: GraphQLObjectType = new GraphQLObjectType({
   name: 'ItemSpecialAction',
   fields: () => ({
     id: {
@@ -80,5 +80,3 @@ const GraphQLItemSpecialAction: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLItemSpecialAction

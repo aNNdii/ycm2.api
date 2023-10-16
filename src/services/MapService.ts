@@ -1,4 +1,4 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { chunks } from "../helpers/Array";
 
@@ -10,10 +10,9 @@ import { MapRepositoryToken } from "../repositories/MapRepository";
 import { IMapEntity, MapEntityProperties } from "../entities/MapEntity";
 import { IMap, MapProperties } from "../entities/Map";
 
+import { EntityService, IEntityService } from "./EntityService";
 import { GameMapServiceToken } from "./GameMapService";
 import { PaginationOptions } from "./PaginationService";
-import EntityService from "./EntityService";
-import { IService } from "./Service";
 
 export const MapServiceToken = new Token<IMapService>("MapService")
 
@@ -42,7 +41,7 @@ export type MapServiceOptions = {
   mapEntityObfuscationSalt: string
 }
 
-export type IMapService = IService & {
+export type IMapService = IEntityService & {
   obfuscateMapId(id: any): string
   deobfuscateMapId(value: string | string[]): number[]
   obfuscateMapEntityId(id: any): string
@@ -59,7 +58,7 @@ export type IMapService = IService & {
   importMapRegen(mapId: number, path: string, options?: MapRegenImportOptions): Promise<any>
 }
 
-export default class MapService extends EntityService<MapServiceOptions> implements IMapService {
+export class MapService extends EntityService<MapServiceOptions> implements IMapService {
 
   obfuscateMapId(id: any) {
     return this.obfuscateId(id, { salt: this.options.mapObfuscationSalt })

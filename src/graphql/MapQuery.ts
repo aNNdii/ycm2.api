@@ -1,18 +1,17 @@
 import { GraphQLID, GraphQLList, GraphQLNonNull, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
-// import { Authorization, AuthorizationAction } from "../interfaces/Auth";
+import { getPaginationArguments } from "../helpers/GraphQL";
 
 import { MapControllerToken } from "../controllers/MapController";
 
 import { IGraphQLContext } from "../entities/GraphQLContext";
 
-import GraphQLMap from "./Map";
-import { getPaginationArguments } from "../helpers/GraphQL";
+import { GraphQLMap } from "./Map";
 
 
-const GraphQLMapQuery = {
+export const GraphQLMapQuery = {
   map: {
     type: GraphQLMap,
     args: {
@@ -36,5 +35,3 @@ const GraphQLMapQuery = {
     }
   }
 }
-
-export default GraphQLMapQuery

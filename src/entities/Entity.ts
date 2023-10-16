@@ -3,7 +3,7 @@ export type IEntity = {
   getCustomProperty(key: any): any
 }
 
-export default class Entity<T> implements IEntity {
+export class Entity<T> implements IEntity {
 
   constructor(protected properties: T) {}
 

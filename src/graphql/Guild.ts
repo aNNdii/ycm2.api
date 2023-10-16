@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { getPaginationArguments } from "../helpers/GraphQL";
 
@@ -12,12 +12,13 @@ import { GuildControllerToken } from "../controllers/GuildController";
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { IGuild } from "../entities/Guild";
 
-import GraphQLGuildMessage from "./GuildMessage";
-import GraphQLGuildSkill from "./GuildSkill";
-import GraphQLGuildGrade from "./GuildGrade";
-import GraphQLCharacter from "./Character";
+import { GraphQLGuildMessage } from "./GuildMessage";
+import { GraphQLGuildSkill } from "./GuildSkill";
+import { GraphQLGuildGrade } from "./GuildGrade";
+import { GraphQLCharacter } from "./Character";
 
-const GraphQLGuild: GraphQLObjectType = new GraphQLObjectType({
+
+export const GraphQLGuild: GraphQLObjectType = new GraphQLObjectType({
   name: 'Guild',
   fields: () => ({
     id: {
@@ -88,7 +89,7 @@ const GraphQLGuild: GraphQLObjectType = new GraphQLObjectType({
       resolve: (guild: IGuild) => guild.drawCount
     },
     lossCount: {
-      type: GraphQLInt, 
+      type: GraphQLInt,
       resolve: (guild: IGuild) => guild.lossCount
     },
     pointCount: {
@@ -101,5 +102,3 @@ const GraphQLGuild: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLGuild

@@ -1,23 +1,26 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { randomNumber } from "../helpers/Number";
 
+import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 import { ErrorMessage } from "../interfaces/ErrorMessage";
-import { AccountStatus } from "../interfaces/Account";
+import { AccountStatus, AccountTable } from "../interfaces/Account";
 import { EntityFilter } from "../interfaces/Entity";
 
 import { AccountRepositoryToken } from "../repositories/AccountRepository";
+import { MariaRepositoryToken } from "../repositories/MariaRepository";
 import { GameRepositoryToken } from "../repositories/GameRepository";
 
+import { AccountGroupAuthorizationProperties, IAccountGroupAuthorization } from "../entities/AccountGroupAuthorization";
+import { AccountGroupAccountProperties, IAccountGroupAccount } from "../entities/AccountGroupAccount";
 import { AccountGroupProperties, IAccountGroup } from "../entities/AccountGroup";
 import { AccountProperties, IAccount } from "../entities/Account";
 
-import EntityService, { EntityOptions, IEntityService } from "./EntityService";
+import { EntityService, EntityOptions, IEntityService } from "./EntityService";
+import { ValidateOptions, ValidatorServiceToken } from "./ValidatorService";
+import { TokenServiceToken, TokenType } from "./TokenService";
 import { PaginationOptions } from "./PaginationService";
 import { HashServiceToken } from "./HashService";
-import { AccountGroupAccountProperties, IAccountGroupAccount } from "../entities/AccountGroupAccount";
-import { AccountGroupAuthorizationProperties, IAccountGroupAuthorization } from "../entities/AccountGroupAuthorization";
-import { MariaRepositoryToken } from "../repositories/MariaRepository";
 
 export const AccountServiceToken = new Token<IAccountService>("AccountService")
 
@@ -25,6 +28,7 @@ export type AccountsOptions = PaginationOptions & {
   id?: EntityFilter<number>
   status?: EntityFilter<AccountStatus>
   username?: EntityFilter<string>
+  mail?: EntityFilter<string>
 }
 
 export type AccountGroupOptions = PaginationOptions & {
@@ -41,15 +45,36 @@ export type AccountGroupAuthorizationOptions = PaginationOptions & {
   accountId?: EntityFilter<number>
 }
 
+export type AccountUpdateFilter = {
+
+}
+
+export type AccountUpdateProperties = {
+  password: string
+}
+
 export type AccountCreateOptions = {
   username: string
   password: string
   deleteCode?: string
 }
 
+export type AccountPasswordRecoveryTokenCreateOptions = {
+  id: number
+}
+
 export type AccountServiceOptions = EntityOptions & {
   accountObfuscationSalt: string
   accountGroupObfuscationSalt: string
+
+  accountUsernameMinLength: number
+  accountUsernameMaxLength: number
+
+  accountPasswordMinLength: number
+  accountPasswordMaxLength: number
+
+  accountPasswordRecoveryTokenObfuscationSalt: string
+  accountPasswordRecoveryTokenTtl: number
 }
 
 export type IAccountService = IEntityService & {
@@ -57,6 +82,12 @@ export type IAccountService = IEntityService & {
   deobfuscateAccountId(value: string | string[]): number[]
   obfuscateAccountGroupId(id: any): string
   deobfuscateAccountGroupId(value: string | string[]): number[]
+
+  isAccountUsername(value: unknown, options?: ValidateOptions): void
+  isAccountPassword(value: unknown, options?: ValidateOptions): void
+
+  createAccountPasswordRecoveryToken(options: AccountPasswordRecoveryTokenCreateOptions): Promise<{ token: string, ttl: number }>
+  verifyAccountPasswordRecoveryToken(token: string): Promise<number[]>
 
   getAccountPaginationOptions(args: any): PaginationOptions
   getAccountGroupPaginationOptions(args: any): PaginationOptions
@@ -66,10 +97,12 @@ export type IAccountService = IEntityService & {
   getAccountGroupAccounts(options?: AccountGroupAccountOptions): Promise<IAccountGroupAccount[]>
   getAccountGroupAuthorizations(options?: AccountGroupAuthorizationOptions): Promise<IAccountGroupAuthorization[]>
 
+  setAccountById(id: number, properties: any): Promise<any>
+
   createAccount(options: AccountCreateOptions): Promise<number>
 }
 
-export default class AccountService extends EntityService<AccountServiceOptions> implements IAccountService {
+export class AccountService extends EntityService<AccountServiceOptions> implements IAccountService {
 
   obfuscateAccountId(id: any) {
     return this.obfuscateId(id, { salt: this.options.accountObfuscationSalt })
@@ -101,11 +134,42 @@ export default class AccountService extends EntityService<AccountServiceOptions>
     return this.getPaginationOptions(args, { offsetHandler: offset => this.deobfuscateAccountGroupId(offset) })
   }
 
+  isAccountUsername(value: unknown, options?: ValidateOptions) {
+    const {
+      code = HttpStatusCode.BAD_REQUEST,
+      message = ErrorMessage.REQUEST_PARAMETERS_INVALID,
+    } = options || {}
+
+    const validatorService = Container.get(ValidatorServiceToken)
+    return validatorService.isString(value, {
+      code,
+      message,
+      minLength: this.options.accountUsernameMinLength,
+      maxLength: this.options.accountUsernameMaxLength
+    })
+  }
+
+  isAccountPassword(value: unknown, options?: ValidateOptions) {
+    const {
+      code = HttpStatusCode.BAD_REQUEST,
+      message = ErrorMessage.REQUEST_PARAMETERS_INVALID,
+    } = options || {}
+
+    const validatorService = Container.get(ValidatorServiceToken)
+    return validatorService.isString(value, {
+      code,
+      message,
+      minLength: this.options.accountPasswordMinLength,
+      maxLength: this.options.accountPasswordMaxLength
+    })
+  }
+
   async getAccounts(options?: AccountsOptions) {
     let {
       id,
       status,
       username,
+      mail,
       orderId,
       limit,
       offset
@@ -123,6 +187,7 @@ export default class AccountService extends EntityService<AccountServiceOptions>
     if (id) filter["account.id"] = id
     if (status) filter["account.status"] = status
     if (username) filter["account.login"] = username
+    if (mail) filter["account.ycm2_account_mail"] = mail
 
     return accountRepository.getAccounts({ filter, where, order, limit })
   }
@@ -202,6 +267,15 @@ export default class AccountService extends EntityService<AccountServiceOptions>
     return accountRepository.getAccountGroupAuthorizations({ filter, where, order, limit })
   }
 
+  async setAccountById(id: number, properties: any) {
+    this.log("setAccountById", { id, properties })
+
+    return this.setAccount({
+      filter: { id },
+      properties
+    })
+  }
+
   async createAccount(options: AccountCreateOptions) {
     const {
       username, 
@@ -225,6 +299,71 @@ export default class AccountService extends EntityService<AccountServiceOptions>
     })
 
     return insertId
+  }
+
+  async createAccountPasswordRecoveryToken(options: AccountPasswordRecoveryTokenCreateOptions) {
+    const {
+      id,
+    } = options
+
+    this.log("createAccountPasswordRecoveryToken", { id })
+
+    const tokenService = Container.get(TokenServiceToken)
+
+    const token = await tokenService.createToken({
+      obfuscationSalt: this.options.accountPasswordRecoveryTokenObfuscationSalt,
+      ttl: this.options.accountPasswordRecoveryTokenTtl,
+      type: TokenType.ACCOUNT_PASSWORD_RECOVERY,
+      values: [ id ],
+    })
+
+    return {
+      ttl: this.options.accountPasswordRecoveryTokenTtl,
+      token, 
+    }
+  }
+
+  async verifyAccountPasswordRecoveryToken(token: string) {
+    this.log("createAccountPasswordRecoveryToken", { token })
+
+    const tokenService = Container.get(TokenServiceToken)
+
+    return tokenService.verifyToken({
+      obfuscationSalt: this.options.accountPasswordRecoveryTokenObfuscationSalt,
+      ttl: this.options.accountPasswordRecoveryTokenTtl,
+      type: TokenType.ACCOUNT_PASSWORD_RECOVERY,
+      token: token,
+    })
+  }
+
+  private async setAccount(options: any) {
+    const {
+      filter,
+      properties
+    } = options 
+    
+    this.log("setAccount", options)
+
+    const {
+      id
+    } = filter
+
+    const {
+      password
+    } = properties
+
+    const updateFilter: Partial<AccountTable> = {}
+    const updateProperties: Partial<AccountTable> = {}
+
+    if (id) updateFilter.id = id
+
+    if (password) updateProperties.password = password
+
+    const accountRepository = Container.get(AccountRepositoryToken)
+    return accountRepository.updateAccounts({
+      filter: updateFilter,
+      entity: updateProperties
+    })
   }
 
 }

@@ -1,4 +1,4 @@
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { CharacterTable } from "../interfaces/Character";
 import { EntityTableFilter } from "../interfaces/Entity";
@@ -7,7 +7,7 @@ import { GuildCommentTable } from "../interfaces/Guild";
 import { CharacterServiceToken } from "../services/CharacterService";
 import { GuildServiceToken } from "../services/GuildService";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 
 
 export type GuildMessageProperties = EntityTableFilter<"guild_comment", GuildCommentTable>
@@ -25,7 +25,7 @@ export type IGuildMessage = IEntity & {
   createdDate: string
 }
 
-export default class GuildMessage extends Entity<GuildMessageProperties> implements IGuildMessage {
+export class GuildMessage extends Entity<GuildMessageProperties> implements IGuildMessage {
 
   get id() {
     return this.getProperty("guild_comment.id")

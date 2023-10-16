@@ -1,17 +1,17 @@
-import Container, { Token } from "../infrastructures/Container"
+import { Container, Token } from "../infrastructures/Container"
 
 import { merge } from "../helpers/Object"
 
 import { ItemCraftingItemTable, ItemCraftingTable, ItemSpecialActionTable, ItemTable } from "../interfaces/Item"
 
-import ItemSpecialAction, { IItemSpecialAction, ItemSpecialActionProperties } from "../entities/ItemSpecialAction"
-import ItemCraftingItem, { IItemCraftingItem, ItemCraftingItemProperties } from "../entities/ItemCraftingItem"
-import ItemAttribute, { IItemAttribute, ItemAttributeProperties } from "../entities/ItemAttribute"
-import ItemCrafting, { IItemCrafting, ItemCraftingProperties } from "../entities/ItemCrafting"
-import Item, { IItem, ItemProperties } from "../entities/Item"
+import { ItemSpecialAction, IItemSpecialAction, ItemSpecialActionProperties } from "../entities/ItemSpecialAction"
+import { ItemCraftingItem, IItemCraftingItem, ItemCraftingItemProperties } from "../entities/ItemCraftingItem"
+import { ItemAttribute, IItemAttribute, ItemAttributeProperties } from "../entities/ItemAttribute"
+import { ItemCrafting, IItemCrafting, ItemCraftingProperties } from "../entities/ItemCrafting"
+import { Item, IItem, ItemProperties } from "../entities/Item"
 
 import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions, MariaRepositoryToken } from "./MariaRepository"
-import Repository, { IRepository } from "./Repository"
+import { Repository, IRepository } from "./Repository"
 import { GameRepositoryToken } from "./GameRepository"
 
 export const ItemRepositoryToken = new Token<IItemRepository>("ItemRepository")
@@ -36,7 +36,7 @@ export type IItemRepository = IRepository & {
   truncateItemCraftingItems(): Promise<any>
 }
 
-export default class ItemRepository extends Repository implements IItemRepository {
+export class ItemRepository extends Repository implements IItemRepository {
 
   getItems<Entity = IItem, Filter = ItemProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getItems", options)

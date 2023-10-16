@@ -1,4 +1,4 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { CharacterJob } from "../interfaces/Character";
 import { CharacterItemWindow } from "../interfaces/CharacterItem";
@@ -11,7 +11,7 @@ import { CharacterRepositoryToken } from "../repositories/CharacterRepository";
 import { CharacterItemProperties, ICharacterItem } from "../entities/CharacterItem";
 import { ICharacter, CharacterProperties } from "../entities/Character";
 
-import EntityService, { EntityOptions, IEntityService } from "./EntityService";
+import { EntityService, EntityOptions, IEntityService } from "./EntityService";
 import { PaginationOptions } from "./PaginationService";
 
 export const CharacterServiceToken = new Token<ICharacterService>("CharacterService")
@@ -48,7 +48,7 @@ export type ICharacterService = IEntityService & {
   getCharacterItems(options?: CharacterItemOptions): Promise<ICharacterItem[]>
 }
 
-export default class CharacterService extends EntityService<CharacterServiceOptions> implements ICharacterService {
+export class CharacterService extends EntityService<CharacterServiceOptions> implements ICharacterService {
 
   obfuscateCharacterId(id: any) {
     return this.obfuscateId(id, { salt: this.options.characterObfuscationSalt })

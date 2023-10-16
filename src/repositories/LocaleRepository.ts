@@ -1,15 +1,15 @@
-import Container, { Token } from "../infrastructures/Container"
+import { Container, Token } from "../infrastructures/Container"
 
 import { LocaleItemTable, LocaleMobTable, LocaleTable } from "../interfaces/Locale"
 
 import { merge } from "../helpers/Object"
 
-import LocaleItem, { ILocaleItem, LocaleItemProperties } from "../entities/LocaleItem"
-import LocaleMob, { ILocaleMob, LocaleMobProperties } from "../entities/LocaleMob"
-import Locale, { ILocale, LocaleProperties } from "../entities/Locale"
+import { LocaleItem, ILocaleItem, LocaleItemProperties } from "../entities/LocaleItem"
+import { LocaleMob, ILocaleMob, LocaleMobProperties } from "../entities/LocaleMob"
+import { Locale, ILocale, LocaleProperties } from "../entities/Locale"
 
 import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions, MariaRepositoryToken } from "./MariaRepository"
-import Repository, { IRepository } from "./Repository"
+import { Repository, IRepository } from "./Repository"
 import { GameRepositoryToken } from "./GameRepository"
 
 export const LocaleRepositoryToken = new Token<ILocaleRepository>("LocaleRepository")
@@ -25,7 +25,7 @@ export type ILocaleRepository = IRepository & {
   createLocaleMobs<Entity = LocaleMobTable, Response = any>(options?: MariaRepositoryInsertOptions<Entity>): Promise<Response>
 }
 
-export default class LocaleRepository extends Repository implements ILocaleRepository {
+export class LocaleRepository extends Repository implements ILocaleRepository {
 
   getLocales<Entity = ILocale, Filter = LocaleProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getLocales", options)

@@ -1,9 +1,9 @@
 import hashids from "hashids";
 
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { HashServiceToken } from "./HashService";
-import Service, { IService, ServiceOptions } from "./Service";
+import { Service, IService, ServiceOptions } from "./Service";
 
 export const ObfuscationServiceToken = new Token<IObfuscationService>("ObfuscationService")
 
@@ -22,7 +22,7 @@ export type IObfuscationService = IService & {
   deobfuscate(value: string | string[], options?: ObfuscationOptions): any[]
 }
 
-export default class ObfuscationService extends Service<ObfuscationServiceOptions> implements IObfuscationService {
+export class ObfuscationService extends Service<ObfuscationServiceOptions> implements IObfuscationService {
 
   private readonly hashIds: { [key: string]: hashids } = {}
 

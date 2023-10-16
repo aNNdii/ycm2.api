@@ -1,18 +1,14 @@
 import { HttpRouterHandler, HttpRouterToken } from "../infrastructures/HttpRouter"
-import { IDataLoader } from "../infrastructures/DataLoader"
-import Container from "../infrastructures/Container"
-import Logger from "../infrastructures/Logger"
-import DataLoader from "dataloader"
+import { Container } from "../infrastructures/Container"
+import { Logger } from "../infrastructures/Logger"
 
 export type IController = {
   init(): void
 }
 
-export default class Controller extends Logger implements IController {
+export class Controller extends Logger implements IController {
 
-  private loaders: { [key: string]: IDataLoader } = {}
-
-  init() {}
+  init() { }
 
   protected get(path: string, handler: HttpRouterHandler) {
     const router = Container.get(HttpRouterToken)

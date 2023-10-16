@@ -1,10 +1,8 @@
 import { GraphQLInt, GraphQLObjectType, GraphQLString } from "graphql";
-import Character, { ICharacter } from "../entities/Character";
 
+import { Character, ICharacter } from "../entities/Character";
 
-// hp, stamina, level, hp_droptime, riding, skillPoint
-
-const GraphQLCharacterHorse = new GraphQLObjectType({
+export const GraphQLCharacterHorse = new GraphQLObjectType({
   name: 'CharacterHorse',
   fields: () => ({
     health: {
@@ -35,5 +33,3 @@ const GraphQLCharacterHorse = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLCharacterHorse

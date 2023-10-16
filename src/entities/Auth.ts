@@ -1,13 +1,14 @@
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
+
 import { AuthenticationTokenType, Authorization } from "../interfaces/Auth";
-import { ErrorMessage } from "../interfaces/ErrorMessage";
 import { HttpStatusCode } from "../interfaces/HttpStatusCode";
+import { ErrorMessage } from "../interfaces/ErrorMessage";
 
 import { AccountServiceToken } from "../services/AccountService";
 import { AuthServiceToken } from "../services/AuthService";
 
-import Entity, { IEntity } from "./Entity";
-import HttpRouterError from "./HttpRouterError";
+import { Entity, IEntity  } from "./Entity";
+import { HttpRouterError }  from "./HttpRouterError";
 
 export type AuthorizationVerificationOptions = {
   code?: HttpStatusCode,
@@ -32,7 +33,7 @@ export type IAuth = IEntity & {
   verifyAuthorization(authorization: Authorization | Authorization[], options?: AuthorizationVerificationOptions): void
 }
 
-export default class Auth extends Entity<AuthProperties> implements IAuth {
+export class Auth extends Entity<AuthProperties> implements IAuth {
 
   get accountId() {
     return this.getProperty("accountId")

@@ -3,10 +3,11 @@ import { GraphQLID, GraphQLList, GraphQLObjectType, GraphQLString } from "graphq
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { IMobGroup } from "../entities/MobGroup";
 
-import GraphQLMobGroupGroupMobGroup from "./MobGroupGroupMobGroup";
-import GraphQLMobGroupMob from "./MobGroupMob";
+import { GraphQLMobGroupGroupMobGroup } from "./MobGroupGroupMobGroup";
+import { GraphQLMobGroupMob } from "./MobGroupMob";
 
-const GraphQLMobGroup: GraphQLObjectType = new GraphQLObjectType({
+
+export const GraphQLMobGroup: GraphQLObjectType = new GraphQLObjectType({
   name: 'MobGroup',
   fields: () => ({
     id: {
@@ -35,5 +36,3 @@ const GraphQLMobGroup: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLMobGroup

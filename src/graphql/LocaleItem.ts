@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { ItemControllerToken } from "../controllers/ItemController";
 import { LocaleControllerToken } from "../controllers/LocaleController";
@@ -8,11 +8,11 @@ import { LocaleControllerToken } from "../controllers/LocaleController";
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { ILocaleItem } from "../entities/LocaleItem";
 
-import GraphQLLocale from "./Locale";
-import GraphQLItem from "./Item";
+import { GraphQLLocale } from "./Locale";
+import { GraphQLItem } from "./Item";
 
 
-const GraphQLLocaleItem: GraphQLObjectType = new GraphQLObjectType({
+export const GraphQLLocaleItem: GraphQLObjectType = new GraphQLObjectType({
   name: 'LocaleItem',
   fields: () => ({
     id: {
@@ -20,7 +20,7 @@ const GraphQLLocaleItem: GraphQLObjectType = new GraphQLObjectType({
       resolve: (item: ILocaleItem) => item.hashId
     },
     name: {
-      type: GraphQLString, 
+      type: GraphQLString,
       resolve: (item: ILocaleItem) => item.name
     },
     description: {
@@ -55,5 +55,3 @@ const GraphQLLocaleItem: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLLocaleItem

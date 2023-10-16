@@ -1,11 +1,11 @@
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { EntityTableFilter } from "../interfaces/Entity";
 import { MobGroupGroupTable } from "../interfaces/Mob";
 
 import { MobServiceToken } from "../services/MobService";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 
 export type MobGroupGroupProperties = EntityTableFilter<"mob_group_group", MobGroupGroupTable>
 
@@ -17,7 +17,7 @@ export type IMobGroupGroup = IEntity & {
   modifiedDate: string
 }
 
-export default class MobGroupGroup extends Entity<MobGroupGroupProperties> implements IMobGroupGroup {
+export class MobGroupGroup extends Entity<MobGroupGroupProperties> implements IMobGroupGroup {
 
   get id() {
     return this.getProperty("mob_group_group.mob_group_group_id")

@@ -3,7 +3,8 @@ import { CharacterQuickSlotType } from "../interfaces/Character";
 
 import { ICharacterQuickSlot } from "../services/GameCharacterService";
 
-const GraphQLCharacterQuickSlot = new GraphQLObjectType({
+
+export const GraphQLCharacterQuickSlot = new GraphQLObjectType({
   name: 'CharacterQuickSlot',
   fields: () => ({
     id: {
@@ -20,5 +21,3 @@ const GraphQLCharacterQuickSlot = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLCharacterQuickSlot

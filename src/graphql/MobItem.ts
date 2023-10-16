@@ -1,6 +1,6 @@
 import { GraphQLFloat, GraphQLID, GraphQLInt, GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { MobItemType } from "../interfaces/Mob";
 
@@ -10,10 +10,11 @@ import { MobControllerToken } from "../controllers/MobController";
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { IMobItem } from "../entities/MobItem";
 
-import GraphQLItem from "./Item";
-import GraphQLMob from "./Mob";
+import { GraphQLItem } from "./Item";
+import { GraphQLMob } from "./Mob";
 
-const GraphQLMobItem: GraphQLObjectType = new GraphQLObjectType({
+
+export const GraphQLMobItem: GraphQLObjectType = new GraphQLObjectType({
   name: 'MobItem',
   fields: () => ({
     id: {
@@ -60,5 +61,3 @@ const GraphQLMobItem: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLMobItem

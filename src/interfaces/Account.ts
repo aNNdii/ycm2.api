@@ -6,14 +6,15 @@ export enum AccountStatus {
 }
 
 export type AccountTable = EntityTable & {
+  // Columns used by game
   id: number
   login: string
   password: string
+  securitycode: string
   social_id: string
+  status: AccountStatus
   availDt: string
   create_time: string
-  status: AccountStatus
-  securitycode: string
   gold_expire: string
   silver_expire: string
   safebox_expire: string
@@ -21,8 +22,14 @@ export type AccountTable = EntityTable & {
   fish_mind_expire: string
   marriage_fast_expire: string
   money_drop_rate_expire: string
-  ip: string
   last_play: string
+  cash: number
+  mileage: number
+
+  // Columns used by ycm2
+  ycm2_account_mail: string
+  ycm2_account_locale_id: number
+  ycm2_account_modified_date: string
 }
 
 export type AccountGroupTable = EntityTable & {

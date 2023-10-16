@@ -1,6 +1,7 @@
 import { CharacterAffectTable } from "../interfaces/CharacterAffect";
 import { EntityTableFilter } from "../interfaces/Entity";
-import Entity, { IEntity } from "./Entity";
+
+import { Entity, IEntity  } from "./Entity";
 
 export type CharacterAffectProperties = EntityTableFilter<"affect", CharacterAffectTable>
 
@@ -14,7 +15,7 @@ export type ICharacterAffect = IEntity & {
   cost: number
 }
 
-export default class CharacterAffect extends Entity<CharacterAffectProperties> implements ICharacterAffect {
+export class CharacterAffect extends Entity<CharacterAffectProperties> implements ICharacterAffect {
 
 
   get typeId() {

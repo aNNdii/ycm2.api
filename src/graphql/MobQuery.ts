@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLList, GraphQLNonNull } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { getPaginationArguments } from "../helpers/GraphQL";
 
@@ -8,15 +8,15 @@ import { IGraphQLContext } from "../entities/GraphQLContext";
 
 import { MobControllerToken } from "../controllers/MobController";
 
-import GraphQLMob from "./Mob";
+import { GraphQLMob } from "./Mob";
 
 
-const GraphQLMobQuery = {
+export const GraphQLMobQuery = {
   mob: {
     type: GraphQLMob,
     args: {
-      id: { type: new GraphQLNonNull(GraphQLID)}
-    }, 
+      id: { type: new GraphQLNonNull(GraphQLID) }
+    },
     resolve: (_: any, args: any, context: IGraphQLContext) => {
       let { id } = args || {}
 
@@ -37,5 +37,3 @@ const GraphQLMobQuery = {
     }
   }
 }
-
-export default GraphQLMobQuery

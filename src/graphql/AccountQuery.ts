@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLList, GraphQLNonNull } from "graphql"
 
-import Container from "../infrastructures/Container"
+import { Container } from "../infrastructures/Container"
 
 import { getPaginationArguments } from "../helpers/GraphQL"
 
@@ -13,10 +13,11 @@ import { Authorization } from "../interfaces/Auth"
 import { AccountStatus } from "../interfaces/Account"
 
 import { IGraphQLContext } from "../entities/GraphQLContext"
-import HttpRouterError from "../entities/HttpRouterError"
+import { HttpRouterError } from "../entities/HttpRouterError"
 
-import GraphQLAccountStatus from "./AccountStatus"
-import GraphQLAccount from "./Account"
+import { GraphQLAccountStatus } from "./AccountStatus"
+import { GraphQLAccount } from "./Account"
+
 
 const GraphQLAccountQuery = {
   me: {

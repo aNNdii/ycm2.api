@@ -2,7 +2,8 @@ import { GraphQLID, GraphQLObjectType, GraphQLString } from "graphql";
 
 import { IAuth } from "../entities/Auth";
 
-const GraphQLAuth = new GraphQLObjectType({
+
+export const GraphQLAuth = new GraphQLObjectType({
   name: 'Auth',
   fields: () => ({
     accountId: {
@@ -19,5 +20,3 @@ const GraphQLAuth = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLAuth

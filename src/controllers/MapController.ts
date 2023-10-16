@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { getEnumValues } from "../helpers/Enum";
 
@@ -16,11 +16,11 @@ import { GameMapServiceToken } from "../services/GameMapService";
 import { MapServiceToken } from "../services/MapService";
 
 import { IHttpRouterContext } from "../entities/HttpRouterContext";
-import HttpRouterError from "../entities/HttpRouterError";
+import { HttpRouterError }  from "../entities/HttpRouterError";
 import { IMapEntity } from "../entities/MapEntity";
 import { IMap } from "../entities/Map";
 
-import Controller, { IController } from "./Controller";
+import { Controller, IController } from "./Controller";
 
 export const MapControllerToken = new Token<IMapController>("MapController")
 
@@ -52,7 +52,7 @@ export type IMapController = IController & {
   getMapEntityByHashId(hashId: string, context: IHttpRouterContext): Promise<IMapEntity>
 }
 
-export default class MapController extends Controller implements IMapController {
+export class MapController extends Controller implements IMapController {
 
   init() {
     this.get('/maps', this.handleMapsGetRequest.bind(this))
@@ -142,7 +142,7 @@ export default class MapController extends Controller implements IMapController 
         break
 
       default:
-        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     }
 
@@ -172,7 +172,7 @@ export default class MapController extends Controller implements IMapController 
         break
 
       default:
-        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     }
 
@@ -202,7 +202,7 @@ export default class MapController extends Controller implements IMapController 
         break
 
       default:
-        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     }
 
@@ -221,7 +221,7 @@ export default class MapController extends Controller implements IMapController 
 
     this.log("importMapIndex", { path: file.path, update })
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     const mapService = Container.get(MapServiceToken)
     await mapService.importMapIndex(file.path, { update })
@@ -234,7 +234,7 @@ export default class MapController extends Controller implements IMapController 
 
     this.log("importMapSettings", { mapId: map.id, path: file.path })
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     const mapService = Container.get(MapServiceToken)
     await mapService.importMapSettings(map.id, file.path)
@@ -248,7 +248,7 @@ export default class MapController extends Controller implements IMapController 
 
     this.log("importMapRegen", { mapId: map.id, path: file.path })
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     const mapService = Container.get(MapServiceToken)
     await mapService.importMapRegen(map.id, file.path, { override })

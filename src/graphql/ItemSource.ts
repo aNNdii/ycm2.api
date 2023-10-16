@@ -3,10 +3,11 @@ import { GraphQLList, GraphQLObjectType } from "graphql";
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { IItem } from "../entities/Item";
 
-import GraphQLMobRankItem from "./MobRankItem";
-import GraphQLMobItem from "./MobItem";
+import { GraphQLMobRankItem } from "./MobRankItem";
+import { GraphQLMobItem } from "./MobItem";
 
-const GraphQLItemSource: GraphQLObjectType = new GraphQLObjectType({
+
+export const GraphQLItemSource: GraphQLObjectType = new GraphQLObjectType({
   name: 'ItemSource',
   fields: () => ({
     mobs: {
@@ -19,5 +20,3 @@ const GraphQLItemSource: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLItemSource

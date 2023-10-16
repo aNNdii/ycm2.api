@@ -1,4 +1,4 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 import { ErrorMessage } from "../interfaces/ErrorMessage";
@@ -10,10 +10,11 @@ import { HashServiceToken } from "../services/HashService";
 import { AuthServiceToken } from "../services/AuthService";
 
 import { AuthenticationScheme, IHttpRouterContext } from "../entities/HttpRouterContext";
-import HttpRouterError from "../entities/HttpRouterError";
+import { HttpRouterError } from "../entities/HttpRouterError";
 import { IAuth } from "../entities/Auth";
 
-import Controller, { IController } from "./Controller";
+import { Controller, IController } from "./Controller";
+import { AccountServiceToken } from "../services/AccountService";
 
 export const AuthControllerToken = new Token<IAuthController>("AuthController")
 
@@ -27,7 +28,7 @@ export type AuthenticationOptions = {
 
 export type IAuthController = IController & {}
 
-export default class AuthController extends Controller implements IAuthController {
+export class AuthController extends Controller implements IAuthController {
 
   init() {
     this.get('/auth', this.handleAuthGetRequest.bind(this))
@@ -70,20 +71,12 @@ export default class AuthController extends Controller implements IAuthControlle
 
     this.log("getAuthByUsernameAndPassword", { username, password })
 
-    const schema = {
-      type: 'object',
-      required: ['username', 'password'],
-      properties: {
-        username: { type: 'string', minLength: 4, maxLength: 32 },
-        password: { type: 'string', minLength: 4, maxLength: 32 }
-      },
-    }
-
-    const validator = Container.get(ValidatorServiceToken)
-    validator.validate<AuthenticationOptions>(options, schema)
-
+    const accountService = Container.get(AccountServiceToken)
     const hashService = Container.get(HashServiceToken)
     const authService = Container.get(AuthServiceToken)
+
+    accountService.isAccountUsername(username)
+    accountService.isAccountPassword(password)
 
     const [account] = await context.dataLoaderService.getAccounts({ username })
     if (!account) throw new HttpRouterError(HttpStatusCode.NOT_FOUND, ErrorMessage.ACCOUNT_NOT_FOUND)
@@ -101,10 +94,10 @@ export default class AuthController extends Controller implements IAuthControlle
 
     this.log("getAuthByJsonWebToken", { token })
 
-    const validator = Container.get(ValidatorServiceToken)
-    validator.validate<AuthenticationOptions>(token, { type: 'string', pattern: '^[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+$' })
-
+    const validatorService = Container.get(ValidatorServiceToken)
     const authService = Container.get(AuthServiceToken)
+
+    validatorService.isString(token, { pattern: /^[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+$/ })
 
     const auth = authService.getAuthByToken(token || '', { types: tokenTypes })
 

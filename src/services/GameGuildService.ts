@@ -1,7 +1,7 @@
 import { Token } from "../infrastructures/Container";
 import { GuildSkill } from "../interfaces/Guild";
 
-import Service, { IService } from "./Service";
+import { Service, IService } from "./Service";
 
 const SkillIdOffset = 150
 
@@ -16,7 +16,7 @@ export type IGameGuildService = IService & {
   parseGuildSkills(buffer: any[]): IGuildSkill[]
 }
 
-export default class GameGuildService extends Service<any> implements IGameGuildService {
+export class GameGuildService extends Service<any> implements IGameGuildService {
 
   parseGuildSkills(buffer: any[]): IGuildSkill[] {
     const skillCount = buffer.length

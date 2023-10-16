@@ -1,4 +1,4 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { ErrorMessage } from "../interfaces/ErrorMessage";
 import { HttpStatusCode } from "../interfaces/HttpStatusCode";
@@ -11,11 +11,11 @@ import { CharacterServiceToken } from "../services/CharacterService";
 import { PaginationOptions } from "../services/PaginationService";
 
 import { IHttpRouterContext } from "../entities/HttpRouterContext";
+import { HttpRouterError } from "../entities/HttpRouterError";
 import { ICharacterItem } from "../entities/CharacterItem";
-import HttpRouterError from "../entities/HttpRouterError";
 import { ICharacter } from "../entities/Character";
 
-import Controller, { IController } from "./Controller";
+import { Controller, IController } from "./Controller";
 
 export const CharacterControllerToken = new Token<ICharacterController>("CharacterController")
 
@@ -39,7 +39,7 @@ export type ICharacterController = IController & {
   getCharacterItems(options: CharacterItemOptions, context: IHttpRouterContext): Promise<ICharacterItem[]>
 }
 
-export default class CharacterController extends Controller implements ICharacterController {
+export class CharacterController extends Controller implements ICharacterController {
 
   async getCharacters(options: CharacterOptions, context: IHttpRouterContext) {
     this.log("getCharacters", options)

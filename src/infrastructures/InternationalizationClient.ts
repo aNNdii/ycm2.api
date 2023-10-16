@@ -1,7 +1,7 @@
 import { i18n } from "i18next"
 
 import { Token } from "./Container"
-import Logger from "./Logger"
+import { Logger } from "./Logger"
 
 export const InternationalizationClientToken = new Token<IInternationalizationClient>("InternationalizationClient")
 
@@ -18,7 +18,7 @@ export type IInternationalizationClient = {
   translate(key: string, options: InternationalizationClientTranslateOptions): string
 }
 
-export default class InternationalizationClient extends Logger implements IInternationalizationClient {
+export class InternationalizationClient extends Logger implements IInternationalizationClient {
 
   private i18n: i18n
 

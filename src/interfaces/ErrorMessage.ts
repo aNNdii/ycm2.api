@@ -2,10 +2,14 @@
 export enum ErrorMessage {
 
   INTERNAL_GRAPHQL_ERROR = "internal_graphql_error",
-  INVALID_REQUEST_PARAMETERS = "invalid_request_parameters",
-
+  REQUEST_PARAMETERS_INVALID = "invalid_request_parameters",
+  EMAIL_PARAMETER_INVALID = "invalid_email_parameter",
+  
   GAME_DATABASE_INVALID = "invalid_game_database",
 
+  TOKEN_INVALID = "invalid_token",
+  TOKEN_EXPIRED = "token_expired",
+  
   PAGINATION_OFFSET_INVALID = "invalid_pagination_offset",
   PAGINATION_LIMIT_INVALID = "invalid_pagination_limit",
   PAGINATION_ORDER_INVALID = "invalid_pagination_order",
@@ -78,6 +82,7 @@ export enum ErrorMessage {
 
   CAPTCHA_TOKEN_INVALID = "invalid_captcha_token",
   CAPTCHA_TOKEN_EXPIRED = "captcha_token_expired",
-  CAPTCHA_VALUE_INVALID = "invalid_captcha_value"
+  CAPTCHA_VALUE_INVALID = "invalid_captcha_value",
+  CAPTCHA_TYPE_INVALID = "invalid_captcha_type",
 
 }

@@ -1,12 +1,12 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { merge } from "../helpers/Object";
 
-import CharacterItem, { CharacterItemProperties, ICharacterItem } from "../entities/CharacterItem";
-import Character, { ICharacter, CharacterProperties } from "../entities/Character";
+import { CharacterItem, CharacterItemProperties, ICharacterItem } from "../entities/CharacterItem";
+import { Character, ICharacter, CharacterProperties } from "../entities/Character";
 
 import { MariaRepositorySelectOptions, MariaRepositoryToken } from "./MariaRepository";
-import Repository, { IRepository } from "./Repository";
+import { Repository, IRepository } from "./Repository";
 import { GameRepositoryToken } from "./GameRepository";
 
 export const CharacterRepositoryToken = new Token<ICharacterRepository>("CharacterRepository")
@@ -16,7 +16,7 @@ export type ICharacterRepository = IRepository & {
   getCharacterItems<Entity = ICharacterItem, Filter = CharacterItemProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
 }
 
-export default class CharacterRepository extends Repository implements ICharacterRepository {
+export class CharacterRepository extends Repository implements ICharacterRepository {
 
   getCharacters<Entity = ICharacter, Filter = CharacterProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getCharacters", options)

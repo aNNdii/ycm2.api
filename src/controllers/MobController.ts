@@ -1,6 +1,6 @@
 import JSZip from "jszip"
 
-import Container, { Token } from "../infrastructures/Container"
+import { Container, Token } from "../infrastructures/Container"
 
 import { getEnumValues } from "../helpers/Enum"
 
@@ -10,7 +10,7 @@ import { Authorization } from "../interfaces/Auth"
 import { GameMobProtoFormat } from "../interfaces/GameMob"
 
 import { IHttpRouterContext } from "../entities/HttpRouterContext"
-import HttpRouterError from "../entities/HttpRouterError"
+import { HttpRouterError }  from "../entities/HttpRouterError"
 
 import { MobRepositoryToken } from "../repositories/MobRepository"
 
@@ -25,7 +25,7 @@ import { IMobGroup } from "../entities/MobGroup"
 import { IMobItem } from "../entities/MobItem"
 import { IMob } from "../entities/Mob"
 
-import Controller, { IController } from "./Controller"
+import { Controller, IController } from "./Controller"
 
 export const MobControllerToken = new Token<IMobController>("MobController")
 
@@ -70,7 +70,7 @@ export type IMobController = IController & {
   getMobGroupGroupMobGroupByHashId(hashId: string, context: IHttpRouterContext): Promise<IMobGroupGroupMobGroup>
 }
 
-export default class MobController extends Controller implements IMobController {
+export class MobController extends Controller implements IMobController {
 
   init() {
     this.get('/mobs', this.handleMobsGetRequest.bind(this))
@@ -214,7 +214,7 @@ export default class MobController extends Controller implements IMobController 
         break
 
       default:
-        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     }
 
@@ -244,7 +244,7 @@ export default class MobController extends Controller implements IMobController 
         break
 
       default:
-        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     }
 
@@ -274,7 +274,7 @@ export default class MobController extends Controller implements IMobController 
         break
 
       default:
-        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     }
 
@@ -291,7 +291,7 @@ export default class MobController extends Controller implements IMobController 
     [file] = file || [];
     update = ~~(update)
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     this.log("importMobNames", { file: file.path, update })
 
@@ -306,7 +306,7 @@ export default class MobController extends Controller implements IMobController 
     [format] = getEnumValues(GameMobProtoFormat, format);
     update = ~~(update)
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     this.log("importMobProto", { file: file.path, format, update })
 
@@ -331,7 +331,7 @@ export default class MobController extends Controller implements IMobController 
     [file] = file || [];
     override = ~~(override)
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     this.log("importMobDropItem", { override })
 
@@ -345,7 +345,7 @@ export default class MobController extends Controller implements IMobController 
     [file] = file || [];
     override = ~~(override)
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     this.log("importCommonDropItem", { override })
 
@@ -359,7 +359,7 @@ export default class MobController extends Controller implements IMobController 
     [file] = file || [];
     override = ~~(override)
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     this.log("importMobGroup", { override })
 
@@ -373,7 +373,7 @@ export default class MobController extends Controller implements IMobController 
     [file] = file || [];
     override = ~~(override)
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     this.log("importMobGroupGroup", { override })
 

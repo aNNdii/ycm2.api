@@ -1,11 +1,11 @@
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { EntityTableFilter } from "../interfaces/Entity";
 import { GuildTable } from "../interfaces/Guild";
 
 import { GuildServiceToken } from "../services/GuildService";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 
 export type GuildProperties = EntityTableFilter<"guild", GuildTable>
 
@@ -26,7 +26,7 @@ export type IGuild = IEntity & {
   money: number
 }
 
-export default class Guild extends Entity<GuildProperties> implements IGuild {
+export class Guild extends Entity<GuildProperties> implements IGuild {
 
   get id() {
     return this.getProperty("guild.id")

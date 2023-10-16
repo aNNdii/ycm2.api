@@ -1,4 +1,4 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { chunks } from "../helpers/Array"
 
@@ -17,7 +17,7 @@ import { IMobGroup, MobGroupProperties } from "../entities/MobGroup";
 import { IMobItem, MobItemProperties } from "../entities/MobItem";
 import { IMob, MobProperties } from "../entities/Mob";
 
-import EntityService, { EntityOptions, IEntityService } from "./EntityService";
+import { EntityService, EntityOptions, IEntityService } from "./EntityService";
 import { GameMobServiceToken } from "./GameMobService";
 import { PaginationOptions } from "./PaginationService";
 
@@ -116,7 +116,7 @@ export type IMobService = IEntityService & {
   importMobGroupGroup(path: string, options?: MobItemsImportOptions): Promise<any>
 }
 
-export default class MobService extends EntityService<MobServiceOptions> implements IMobService {
+export class MobService extends EntityService<MobServiceOptions> implements IMobService {
 
   obfuscateMobItemId(id: any) {
     return this.obfuscateId(id, { salt: this.options.mobItemObfuscationSalt })

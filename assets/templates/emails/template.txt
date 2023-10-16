@@ -1,0 +1,6 @@
+{{ serverName }} 
+ 
+{% block content %}
+{% endblock %} 
+
+Copyright © {{ currentYear }} {{ serverName }} 

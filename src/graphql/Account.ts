@@ -5,9 +5,10 @@ import { Authorization } from "../interfaces/Auth";
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { IAccount } from "../entities/Account";
 
-import GraphQLCharacter from "./Character";
+import { GraphQLCharacter } from "./Character";
 
-const GraphQLAccount = new GraphQLObjectType({
+
+export const GraphQLAccount = new GraphQLObjectType({
   name: 'Account',
   fields: () => ({
     id: {
@@ -41,7 +42,7 @@ const GraphQLAccount = new GraphQLObjectType({
       }
     },
     moneyBonusExpirationDate: {
-      type: GraphQLString, 
+      type: GraphQLString,
       resolve: (account: IAccount, _: any, context: IGraphQLContext) => account.moneyBonusExpirationDate
     },
     itemBonusExpirationDate: {
@@ -82,5 +83,3 @@ const GraphQLAccount = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLAccount

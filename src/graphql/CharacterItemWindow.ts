@@ -2,7 +2,8 @@ import { GraphQLEnumType } from "graphql";
 
 import { CharacterItemWindow } from "../interfaces/CharacterItem";
 
-const GraphQLCharacterItemWindow = new GraphQLEnumType({
+
+export const GraphQLCharacterItemWindow = new GraphQLEnumType({
   name: 'CharacterItemWindow',
   values: {
     [CharacterItemWindow[CharacterItemWindow.EQUIPMENT].toLowerCase()]: { value: CharacterItemWindow.EQUIPMENT },
@@ -13,5 +14,3 @@ const GraphQLCharacterItemWindow = new GraphQLEnumType({
     [CharacterItemWindow[CharacterItemWindow.BELT_INVENTORY].toLowerCase()]: { value: CharacterItemWindow.BELT_INVENTORY },
   }
 })
-
-export default GraphQLCharacterItemWindow

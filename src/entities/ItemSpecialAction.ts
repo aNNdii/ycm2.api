@@ -1,10 +1,10 @@
 import { ItemSpecialActionTable, ItemTable } from "../interfaces/Item";
 import { EntityTableFilter } from "../interfaces/Entity";
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { ItemServiceToken } from "../services/ItemService";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 
 export type ItemSpecialActionProperties = EntityTableFilter<"item_special_action", ItemSpecialActionTable>
                                         & EntityTableFilter<"item", ItemTable>
@@ -27,7 +27,7 @@ export type IItemSpecialAction = IEntity & {
   modifiedDate: string
 }
 
-export default class ItemSpecialAction extends Entity<ItemSpecialActionProperties> implements IItemSpecialAction {
+export class ItemSpecialAction extends Entity<ItemSpecialActionProperties> implements IItemSpecialAction {
 
   get id() {
     return this.getProperty("item_special_action.item_special_action_id")

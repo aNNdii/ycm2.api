@@ -1,7 +1,7 @@
 import { Transporter, SendMailOptions } from "nodemailer"
 
 import { Token } from "./Container"
-import Logger from "./Logger"
+import { Logger } from "./Logger"
 
 export const SmtpClientToken = new Token<ISmtpClient>("SmtpClient")
 
@@ -15,7 +15,7 @@ export type SmtpClientOptions = {
   transporter: Transporter
 }
 
-export default class SmtpClient extends Logger implements ISmtpClient {
+export class SmtpClient extends Logger implements ISmtpClient {
 
   private transporter: Transporter
 

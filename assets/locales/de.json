@@ -1,0 +1,10 @@
+{
+  "LabelAccountPasswordRecoveryFallbackLink" : "Sollte der Button nicht funktionieren, bitte den folgenden Link kopieren und in die Adresszeile Deines Browsers einfügen:",
+  "LabelAccountPasswordRecoveryGreeting" : "Hallo {{ username }},",
+  "LabelAccountPasswordRecoveryGreetingBody" : "wir haben Deine Anfrage zum Zurücksetzen Deines Passworts erhalten. Keine Sorge, wir helfen Dir, schnell wieder Zugang zu Deinem Account zu bekommen.",
+  "LabelAccountPasswordRecoveryHowTo" : "So setzt Du Dein Passwort zurück",
+  "LabelAccountPasswordRecoveryHowToBody" : "Klicke auf den untenstehenden Button, um ein neues Passwort zu erstellen. Aus Sicherheitsgründen ist der Link nur für die nächsten {{ duration }} Stunden gültig.",
+  "LabelAccountPasswordReset" : "Passwort zurücksetzen",
+  "LabelMailIgnore" : "Wenn Du diese E-Mail nicht angefordert hast oder irrtümlich erhalten hast, kannst Du sie einfach ignorieren.",
+  "LabelMailSupportHelp" : "Brauchst Du Hilfe oder hast Du Fragen? Unser Support-Team ist jederzeit für Dich da."
+}

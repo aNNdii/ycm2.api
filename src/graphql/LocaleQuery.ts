@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLList, GraphQLNonNull } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { getPaginationArguments } from "../helpers/GraphQL";
 
@@ -8,10 +8,10 @@ import { LocaleControllerToken } from "../controllers/LocaleController";
 
 import { IGraphQLContext } from "../entities/GraphQLContext";
 
-import GraphQLLocale from "./Locale";
+import { GraphQLLocale } from "./Locale";
 
 
-const GraphQLLocaleQuery = {
+export const GraphQLLocaleQuery = {
   locale: {
     type: GraphQLLocale,
     args: {
@@ -19,7 +19,7 @@ const GraphQLLocaleQuery = {
     },
     resolve: (_: any, args: any, context: IGraphQLContext) => {
       const { id } = args || {}
-      
+
       const localeController = Container.get(LocaleControllerToken)
       return localeController.getLocaleByHashId(id, context)
     }
@@ -35,5 +35,3 @@ const GraphQLLocaleQuery = {
     }
   }
 }
-
-export default GraphQLLocaleQuery

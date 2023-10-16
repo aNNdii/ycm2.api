@@ -1,7 +1,7 @@
 import { ItemAttributeTable } from "../interfaces/ItemAttribute";
 import { EntityTableFilter } from "../interfaces/Entity";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 
 
 export type ItemAttributeProperties = EntityTableFilter<"item_attr", ItemAttributeTable>
@@ -24,7 +24,7 @@ export type IItemAttribute = IEntity & {
   maxLevelEar: number
 }
 
-export default class ItemAttribute extends Entity<ItemAttributeProperties> implements IItemAttribute {
+export class ItemAttribute extends Entity<ItemAttributeProperties> implements IItemAttribute {
 
   get id() {
     return this.getCustomProperty('.id')

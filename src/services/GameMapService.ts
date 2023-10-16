@@ -14,7 +14,7 @@ import { GameMapEntityType } from "../interfaces/GameMap";
 import { IMapEntity } from "../entities/MapEntity";
 import { IMap } from "../entities/Map";
 
-import Service, { IService } from "./Service";
+import { Service, IService } from "./Service";
 
 export const GameMapServiceToken = new Token<IGameMapService>("GameMapService")
 
@@ -32,7 +32,7 @@ export type IGameMapService = IService & {
   createMapRegen(entities: IMapEntity[]): Promise<Buffer>
 }
 
-export default class GameMapService extends Service<any> implements IGameMapService {
+export class GameMapService extends Service<any> implements IGameMapService {
 
   readMapIndex(path: string) {
     const stream = createReadStream(path)

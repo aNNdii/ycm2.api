@@ -5,9 +5,7 @@ export const PaginationOrders = {
   'id_desc': { value: 'id_desc' }
 }
 
-const GraphQLPaginationOrder = new GraphQLEnumType({
+export const GraphQLPaginationOrder = new GraphQLEnumType({
   name: 'Order', 
   values: PaginationOrders
 })
-
-export default GraphQLPaginationOrder

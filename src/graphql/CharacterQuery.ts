@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLList, GraphQLNonNull } from "graphql"
 
-import Container from "../infrastructures/Container"
+import { Container } from "../infrastructures/Container"
 
 import { getPaginationArguments } from "../helpers/GraphQL"
 
@@ -10,11 +10,12 @@ import { CharacterControllerToken } from "../controllers/CharacterController"
 
 import { IGraphQLContext } from "../entities/GraphQLContext"
 
-import GraphQLEmpire from "./Empire"
-import GraphQLCharacterJob from "./CharacterJob"
-import GraphQLCharacter from "./Character"
+import { GraphQLEmpire } from "./Empire"
+import { GraphQLCharacterJob } from "./CharacterJob"
+import { GraphQLCharacter } from "./Character"
 
-const GraphQLCharacterQuery = {
+
+export const GraphQLCharacterQuery = {
   character: {
     type: GraphQLCharacter,
     args: {
@@ -46,5 +47,3 @@ const GraphQLCharacterQuery = {
     }
   }
 }
-
-export default GraphQLCharacterQuery

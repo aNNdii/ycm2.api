@@ -1,6 +1,6 @@
 import { FieldInfo, PoolConnection, TypeCastNextFunction } from "mariadb";
 
-import Logger from "./Logger";
+import { Logger } from "./Logger";
 
 const COLUMN_TYPE_BIT = 16
 
@@ -9,7 +9,7 @@ export type IMariaDatabaseConnection = {
   release(): Promise<void>
 }
 
-export default class MariaDatabaseConnection extends Logger implements IMariaDatabaseConnection {
+export class MariaDatabaseConnection extends Logger implements IMariaDatabaseConnection {
 
   constructor(private connection: PoolConnection) {
     super(`MariaDatabaseConnection:${connection.threadId}`)

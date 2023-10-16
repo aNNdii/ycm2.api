@@ -1,13 +1,13 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { merge } from "../helpers/Object";
 
-import GuildMessage, { GuildMessageProperties, IGuildMessage } from "../entities/GuildMessage";
-import GuildGrade, { GuildGradeProperties, IGuildGrade } from "../entities/GuildGrade";
-import Guild, { GuildProperties, IGuild } from "../entities/Guild";
+import { GuildMessage, GuildMessageProperties, IGuildMessage } from "../entities/GuildMessage";
+import { GuildGrade, GuildGradeProperties, IGuildGrade } from "../entities/GuildGrade";
+import { Guild, GuildProperties, IGuild } from "../entities/Guild";
 
 import { MariaRepositorySelectOptions, MariaRepositoryToken } from "./MariaRepository";
-import Repository, { IRepository } from "./Repository";
+import { Repository, IRepository } from "./Repository";
 import { GameRepositoryToken } from "./GameRepository";
 
 export const GuildRepositoryToken = new Token<IGuildRepository>("GuildRepository")
@@ -18,7 +18,7 @@ export type IGuildRepository = IRepository & {
   getGuildMessages<Entity = IGuildMessage, Filter = GuildMessageProperties>(options?: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
 } 
 
-export default class GuildRepository extends Repository implements IGuildRepository {
+export class GuildRepository extends Repository implements IGuildRepository {
   
   getGuilds<Entity = IGuild, Filter = GuildProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getGuilds", options)

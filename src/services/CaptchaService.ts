@@ -1,85 +1,153 @@
+import { loadFont } from "svg-captcha"
 const svgCaptcha = require("svg-captcha")
 
-import Container, { Token } from "../infrastructures/Container"
+import { Container, Token } from "../infrastructures/Container"
 
 import { HttpStatusCode } from "../interfaces/HttpStatusCode"
 import { ErrorMessage } from "../interfaces/ErrorMessage"
 
-import HttpRouterError from "../entities/HttpRouterError"
-import Captcha, { ICaptcha } from "../entities/Captcha"
+import { HttpRouterError }  from "../entities/HttpRouterError"
 
-import { ObfuscationServiceToken } from "./ObfuscationService"
-import Service, { IService, ServiceOptions } from "./Service"
+import { Service, IService, ServiceOptions } from "./Service"
+import { TokenServiceToken, TokenType } from "./TokenService"
 
 export const CaptchaServiceToken = new Token<ICaptchaService>("CaptchaService")
 
+export enum CaptchaType {
+  ACCOUNT_USERNAME_RECOVERY = 1,
+  ACCOUNT_PASSWORD_RECOVERY,
+}
+
+export type CaptchaTokenCreateOptions = {
+  type: CaptchaType
+  value: number
+}
+
+export type CaptchaTokenVerificationOptions = {
+  token: string, 
+  type: CaptchaType, 
+  value: number | string, 
+}
+
+export type CaptchaImageCreateOptions = {
+  value: number
+
+  fontSize?: number
+  inverse?: number
+  height?: number
+  width?: number
+  color?: number
+  noise?: number
+}
+
 export type CaptchaServiceOptions = ServiceOptions & {
-  tokenSecret: string
-  tokenMinLength: number
+  length: number
+  
+  tokenObfuscationSalt: string
   tokenTtl: number
+
+  imageFont?: string
+  imageFontSize: number
   imageColors: number
   imageNoises: number
-  length: number
+  imageWidth: number
+  imageHeight: number
+  imageInverse: boolean
 }
 
 export type ICaptchaService = IService & {
-  createCaptcha(): ICaptcha
-  createCaptchaToken(value: any): string
-  createCaptchaImage(value: any): string
-  verifyCaptcha(token: string, value: any): boolean
+  createCaptchaValue(): Promise<number>
+  createCaptchaImage(options: CaptchaImageCreateOptions): Promise<string>
+  createCaptchaToken(options: CaptchaTokenCreateOptions): Promise<string>
+
+  verifyCaptchaToken(options: CaptchaTokenVerificationOptions): Promise<boolean>
 }
 
-export default class CaptchaService extends Service<CaptchaServiceOptions> implements ICaptchaService {
+export class CaptchaService extends Service<CaptchaServiceOptions> implements ICaptchaService {
 
-  createCaptcha() {
-    this.log("createCaptcha", {})
+  constructor(options: CaptchaServiceOptions) {
+    super(options)
+    options.imageFont && loadFont(options.imageFont)
+  }
+
+  async createCaptchaValue() {
+    this.log("createCaptchaValue")
 
     const minValue = Math.pow(10, this.options.length - 1)
     const maxValue = Math.pow(10, this.options.length)
 
     const value = Math.floor(Math.random() * (maxValue - minValue + 1) + minValue)
-    return new Captcha({ value })
+    return value
   }
 
-  createCaptchaToken(value: any) {
-    this.log("createCaptchaToken", { value })
+  async createCaptchaToken(options: CaptchaTokenCreateOptions) {
+    const {
+      type,
+      value, 
+    } = options
 
-    const timestamp = Math.floor(new Date().getTime() / 1000)
+    this.log("createCaptchaToken", { type, value })
 
-    const obfuscationService = Container.get(ObfuscationServiceToken)
-    return obfuscationService.obfuscate([timestamp, value], {
-      minLength: this.options.tokenMinLength,
-      salt: this.options.tokenSecret
+    const tokenService = Container.get(TokenServiceToken)
+    return tokenService.createToken({
+      obfuscationSalt: this.options.tokenObfuscationSalt,
+      ttl: this.options.tokenTtl,
+
+      type: TokenType.CAPTCHA,
+      values: [ type, value ],
     })
   }
 
-  createCaptchaImage(value: any) {
-    this.log("createCaptchaImage", { value })
+  async createCaptchaImage(options: CaptchaImageCreateOptions) {
+    const {
+      value,
+
+      fontSize = this.options.imageFontSize,
+      inverse = this.options.imageInverse,
+      height = this.options.imageHeight,
+      width = this.options.imageWidth,
+      color = this.options.imageColors,
+      noise = this.options.imageNoises,
+    } = options
+
+    this.log("createCaptchaImage", options)
 
     return svgCaptcha(value.toString(), {
-      color: this.options.imageColors,
-      noise: this.options.imageNoises,
+      fontSize,
+      inverse,
+      color,
+      noise,
+      height,
+      width,
     })
   }
 
-  verifyCaptcha(token: string, value: any) {
-    this.log("verifyCaptcha", { token, value })
+  async verifyCaptchaToken(options: CaptchaTokenVerificationOptions) {
+    const {
+      type, 
+      value,
+      token, 
+    } = options
 
-    if (!value || value.length !== this.options.length) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.CAPTCHA_VALUE_INVALID)
-    if (!token || token.length !== this.options.tokenMinLength) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.CAPTCHA_TOKEN_INVALID)
+    this.log("verifyCaptcha", { token, type, value })
 
-    const obfuscationService = Container.get(ObfuscationServiceToken)
-    const [tokenTimestamp, tokenValue] = obfuscationService.deobfuscate(token, {
-      minLength: this.options.tokenMinLength,
-      salt: this.options.tokenSecret
+    const tokenService = Container.get(TokenServiceToken)
+    const [tokenType, tokenTimestamp, tokenCaptchaType, tokenCaptchaValue] = await tokenService.verifyToken({
+      obfuscationSalt: this.options.tokenObfuscationSalt,
+      ttl: this.options.tokenTtl,
+      
+      type: TokenType.CAPTCHA,
+      token: token,
+
+      errorMessageTokenInvalid: ErrorMessage.CAPTCHA_TOKEN_INVALID,
+      errorMessageTokenTypeInvalid: ErrorMessage.CAPTCHA_TOKEN_INVALID,
+      errorMessageTokenExpired: ErrorMessage.CAPTCHA_TOKEN_EXPIRED,
     })
 
-    if (!tokenTimestamp || !tokenValue) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.CAPTCHA_TOKEN_INVALID)
-
-    const currentTimestamp = Math.floor(new Date().getTime() / 1000)
-    if (tokenTimestamp + this.options.tokenTtl < currentTimestamp) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.CAPTCHA_TOKEN_EXPIRED)
-
-    if (tokenValue != value) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.CAPTCHA_VALUE_INVALID)
+    if (!tokenCaptchaValue || tokenCaptchaValue.toString().length !== this.options.length) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.CAPTCHA_VALUE_INVALID)
+    
+    if (tokenCaptchaType != type) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.CAPTCHA_TOKEN_INVALID)
+    if (tokenCaptchaValue != value) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.CAPTCHA_VALUE_INVALID)
 
     return true
   }

@@ -1,15 +1,16 @@
 import { GraphQLID, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { GuildControllerToken } from "../controllers/GuildController";
 
+import { IGraphQLContext } from "../entities/GraphQLContext";
 import { IGuildGrade } from "../entities/GuildGrade";
 
-import GraphQLGuild from "./Guild";
-import { IGraphQLContext } from "../entities/GraphQLContext";
+import { GraphQLGuild } from "./Guild";
 
-const GraphQLGuildGrade = new GraphQLObjectType({
+
+export const GraphQLGuildGrade = new GraphQLObjectType({
   name: 'GuildGrade',
   fields: () => ({
     id: {
@@ -33,5 +34,3 @@ const GraphQLGuildGrade = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLGuildGrade

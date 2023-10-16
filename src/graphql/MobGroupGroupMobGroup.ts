@@ -1,16 +1,17 @@
 import { GraphQLID, GraphQLInt, GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { IMobGroupGroupMobGroup } from "../entities/MobGroupGroupMobGroup";
 import { IGraphQLContext } from "../entities/GraphQLContext";
 
 import { MobControllerToken } from "../controllers/MobController";
 
-import GraphQLMobGroupGroup from "./MobGroupGroup";
-import GraphQLMobGroup from "./MobGroup";
+import { GraphQLMobGroupGroup } from "./MobGroupGroup";
+import { GraphQLMobGroup } from "./MobGroup";
 
-const GraphQLMobGroupGroupMobGroup: GraphQLObjectType = new GraphQLObjectType({
+
+export const GraphQLMobGroupGroupMobGroup: GraphQLObjectType = new GraphQLObjectType({
   name: 'MobGroupGroupMobGroup',
   fields: () => ({
     id: {
@@ -46,5 +47,3 @@ const GraphQLMobGroupGroupMobGroup: GraphQLObjectType = new GraphQLObjectType({
 
   })
 })
-
-export default GraphQLMobGroupGroupMobGroup

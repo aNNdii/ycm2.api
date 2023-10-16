@@ -1,13 +1,13 @@
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { ErrorMessage } from "../interfaces/ErrorMessage";
 import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 
-import HttpRouterError from "../entities/HttpRouterError";
+import { HttpRouterError }  from "../entities/HttpRouterError";
 
-import { ObfuscationOptions, ObfuscationServiceToken } from "./ObfuscationService";
 import { PaginationColumnOptions, PaginationCustomColumnOptions, PaginationOptions, PaginationOptionsOptions, PaginationOrderColumnOptions, PaginationQueryOptions, PaginationQueryOrderOptions, PaginationServiceToken } from "./PaginationService";
-import Service, { IService, ServiceOptions } from "./Service";
+import { ObfuscationOptions, ObfuscationServiceToken } from "./ObfuscationService";
+import { Service, IService, ServiceOptions } from "./Service";
 
 export type DeobfuscationOptions = ObfuscationOptions & {
   error: ErrorMessage
@@ -17,7 +17,7 @@ export type EntityOptions = ServiceOptions & {}
 
 export type IEntityService = IService & {}
 
-export default class EntityService<T> extends Service<T> implements IEntityService {
+export class EntityService<T> extends Service<T> implements IEntityService {
 
   protected obfuscateId(id: any, options: ObfuscationOptions) {
     const obfuscationService = Container.get(ObfuscationServiceToken)

@@ -16,7 +16,7 @@ import { ItemAttribute, ItemLimitType, ItemMaskType, ItemSpecialActionType, Item
 import { ILocaleItem } from "../entities/LocaleItem";
 import { IItem } from "../entities/Item";
 
-import Service, { IService } from "./Service";
+import { Service, IService } from "./Service";
 import { IItemSpecialAction } from "../entities/ItemSpecialAction";
 import { IItemCraftingItem } from "../entities/ItemCraftingItem";
 
@@ -62,7 +62,7 @@ export type IGameItemService = IService & {
   createItemSpecialGroup(actions: IItemSpecialAction[]): Promise<Buffer>
 }
 
-export default class GameItemService extends Service<any> implements IGameItemService {
+export class GameItemService extends Service<any> implements IGameItemService {
 
   async createItemNames<T = any>(items: T[], options?: CSVWriteOptions) {
     const { transform } = options || {}

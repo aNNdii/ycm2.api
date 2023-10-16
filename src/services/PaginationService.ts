@@ -3,9 +3,9 @@ import { Token } from "../infrastructures/Container";
 import { ErrorMessage } from "../interfaces/ErrorMessage";
 import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 
-import HttpRouterError from "../entities/HttpRouterError";
+import { HttpRouterError }  from "../entities/HttpRouterError";
 
-import Service, { IService, ServiceOptions } from "./Service";
+import { Service, IService, ServiceOptions } from "./Service";
 
 export const PaginationServiceToken = new Token<IPaginationService>("PaginationService")
 
@@ -74,7 +74,7 @@ export type IPaginationService = IService & {
   getPaginationCustomColumnOptions(options: PaginationCustomColumnOptions): PaginationOrderColumnOptions
 }
 
-export default class PaginationService extends Service<PaginationServiceOptions> implements IPaginationService {
+export class PaginationService extends Service<PaginationServiceOptions> implements IPaginationService {
 
   getPaginationOptions(params: PaginationRequestOptions, options: PaginationOptionsOptions): PaginationOptions {
     const { limitDefault, limitMax, limitMin } = this.options

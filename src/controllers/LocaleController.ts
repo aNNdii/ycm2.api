@@ -1,6 +1,6 @@
 import JSZip from "jszip"
 
-import Container, { Token } from "../infrastructures/Container"
+import { Container, Token } from "../infrastructures/Container"
 
 import { getEnumValues } from "../helpers/Enum"
 
@@ -11,7 +11,7 @@ import { EntityFilterMethod } from "../interfaces/Entity"
 import { Authorization } from "../interfaces/Auth"
 
 import { IHttpRouterContext } from "../entities/HttpRouterContext"
-import HttpRouterError from "../entities/HttpRouterError"
+import { HttpRouterError }  from "../entities/HttpRouterError"
 
 import { LocaleRepositoryToken } from "../repositories/LocaleRepository"
 
@@ -24,7 +24,7 @@ import { ILocaleItem } from "../entities/LocaleItem"
 import { ILocaleMob } from "../entities/LocaleMob"
 import { ILocale } from "../entities/Locale"
 
-import Controller, { IController } from "./Controller"
+import { Controller, IController } from "./Controller"
 
 export const LocaleControllerToken = new Token<ILocaleController>("LocaleController")
 
@@ -64,7 +64,7 @@ export type ILocaleController = IController & {
   getLocaleMobByHashId(hashId: string, context: IHttpRouterContext): Promise<ILocaleMob>
 }
 
-export default class LocaleController extends Controller implements ILocaleController {
+export class LocaleController extends Controller implements ILocaleController {
 
   init() {
     this.get('/locales/:localeId/items', this.handleLocaleItemsGetRequest.bind(this))
@@ -139,7 +139,7 @@ export default class LocaleController extends Controller implements ILocaleContr
         break
 
       default:
-        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     }
 
@@ -208,7 +208,7 @@ export default class LocaleController extends Controller implements ILocaleContr
         break
 
       default:
-        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     }
 
@@ -226,7 +226,7 @@ export default class LocaleController extends Controller implements ILocaleContr
 
     this.log("importItemNames", { localeId: locale.id, localeCode: locale.code })
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     const localeService = Container.get(LocaleServiceToken)
     await localeService.importItemNames(locale.id, file.path, { update })
@@ -240,7 +240,7 @@ export default class LocaleController extends Controller implements ILocaleContr
 
     this.log("importItemDescriptions", { localeId: locale.id, localeCode: locale.code })
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     const localeService = Container.get(LocaleServiceToken)
     await localeService.importItemDescriptions(locale.id, file.path, { update })
@@ -254,7 +254,7 @@ export default class LocaleController extends Controller implements ILocaleContr
 
     this.log("importMobNames", { localeId: locale.id, localeCode: locale.code })
 
-    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+    if (!file) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     const localeService = Container.get(LocaleServiceToken)
     await localeService.importMobNames(locale.id, file.path, { update })

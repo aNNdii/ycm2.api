@@ -3,10 +3,11 @@ import { GraphQLID, GraphQLList, GraphQLObjectType, GraphQLString } from "graphq
 import { IAccountGroup } from "../entities/AccountGroup";
 import { IGraphQLContext } from "../entities/GraphQLContext";
 
-import GraphQLAccountGroupAuthorization from "./AccountGroupAuthorization";
-import GraphQLAccountGroupAccount from "./AccountGroupAccount";
+import { GraphQLAccountGroupAuthorization } from "./AccountGroupAuthorization";
+import { GraphQLAccountGroupAccount } from "./AccountGroupAccount";
 
-const GraphQLAccountGroup: GraphQLObjectType = new GraphQLObjectType({
+
+export const GraphQLAccountGroup: GraphQLObjectType = new GraphQLObjectType({
   name: 'AccountGroup',
   fields: () => ({
     id: {
@@ -35,5 +36,3 @@ const GraphQLAccountGroup: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLAccountGroup

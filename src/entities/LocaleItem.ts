@@ -1,11 +1,11 @@
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { LocaleItemTable } from "../interfaces/Locale";
 import { EntityTableFilter } from "../interfaces/Entity";
 
 import { LocaleServiceToken } from "../services/LocaleService";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 
 export type LocaleItemProperties = EntityTableFilter<"locale_item", LocaleItemTable>
 
@@ -21,7 +21,7 @@ export type ILocaleItem = IEntity & {
   modifiedDate: string
 }
 
-export default class LocaleItem extends Entity<LocaleItemProperties> implements ILocaleItem {
+export class LocaleItem extends Entity<LocaleItemProperties> implements ILocaleItem {
 
   get id() {
     return this.getProperty("locale_item.locale_item_id")

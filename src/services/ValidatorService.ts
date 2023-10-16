@@ -1,13 +1,13 @@
-import Ajv, { JSONSchemaType, Schema } from "ajv"
+import { z } from "zod";
+
+import { Token } from "../infrastructures/Container";
 
 import { ErrorMessage } from "../interfaces/ErrorMessage";
-import Container, { Token } from "../infrastructures/Container";
 import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 
-import HttpRouterError from "../entities/HttpRouterError";
+import { HttpRouterError }  from "../entities/HttpRouterError";
 
-import { HashServiceToken } from "./HashService";
-import Service, { ServiceOptions } from "./Service";
+import { Service, ServiceOptions } from "./Service";
 
 export const ValidatorServiceToken = new Token<IValidatorService>("Validator")
 
@@ -16,44 +16,58 @@ export type ValidateOptions = {
   message?: ErrorMessage
 }
 
+export type ValidateStringOptions = ValidateOptions & {
+  minLength?: number
+  maxLength?: number
+  pattern?: RegExp
+}
+
 export type ValidatorServiceOptions = ServiceOptions & {
-  ajv: Ajv
 }
 
 export type IValidatorService = {
-  validate<T extends any>(data: any, schema: Schema | JSONSchemaType<T>, options?: ValidateOptions): void
+  isString(value: unknown, options?: ValidateStringOptions): void
+  isEmail(value: unknown, options?: ValidateOptions): void
 }
 
-export default class ValidatorService extends Service<ValidatorServiceOptions> implements IValidatorService {
-
-  private ajv: Ajv
-  private validators: any
+export class ValidatorService extends Service<ValidatorServiceOptions> implements IValidatorService {
 
   constructor(options: ValidatorServiceOptions) {
     super(options)
-
-    this.ajv = options.ajv
-    this.validators = {}
   }
 
-  validate<T extends any>(data: any, schema: Schema | JSONSchemaType<T>, options?: ValidateOptions) {
+  isString(value: unknown, options?: ValidateStringOptions) {
     const {
       code = HttpStatusCode.BAD_REQUEST,
-      message = ErrorMessage.INVALID_REQUEST_PARAMETERS
+      message = ErrorMessage.REQUEST_PARAMETERS_INVALID,
+
+      minLength,
+      maxLength,
+
+      pattern
     } = options || {}
 
-    const validate = this.getSchema<T>(schema)
+    let validator = z.string()
 
-    if (!validate(data)) throw new HttpRouterError(code, message)
-  }
-  
-  private getSchema<T extends any>(schema: Schema | JSONSchemaType<T>) {
-    const hashService = Container.get(HashServiceToken)
-    
-    const hash = hashService.hashObject(schema)
-    this.validators[hash] = this.validators[hash] || this.ajv.compile<T>(schema)
+    if (minLength) validator = validator.min(minLength)
+    if (maxLength) validator = validator.max(maxLength)
+    if (pattern) validator = validator.regex(pattern)
 
-    return this.validators[hash]
+    const { success } = validator.safeParse(value)
+    if (!success) throw new HttpRouterError(code, message)
   }
+
+  isEmail(value: unknown, options?: ValidateOptions) {
+    const {
+      code = HttpStatusCode.BAD_REQUEST,
+      message = ErrorMessage.EMAIL_PARAMETER_INVALID,
+    } = options || {}
+
+    let validator = z.string().email()
+
+    const { success } = validator.safeParse(value)
+    if (!success) throw new HttpRouterError(code, message)
+  }
+
 
 }

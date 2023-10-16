@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLList } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { getPaginationArguments } from "../helpers/GraphQL";
 
@@ -8,10 +8,10 @@ import { AccountControllerToken } from "../controllers/AccountController";
 
 import { IGraphQLContext } from "../entities/GraphQLContext";
 
-import GraphQLAccountGroup from "./AccountGroup";
+import { GraphQLAccountGroup } from "./AccountGroup";
 
 
-const GraphQLAccountGroupQuery = {
+export const GraphQLAccountGroupQuery = {
   accountGroup: {
     type: GraphQLAccountGroup,
     args: {
@@ -35,5 +35,3 @@ const GraphQLAccountGroupQuery = {
     }
   }
 }
-
-export default GraphQLAccountGroupQuery

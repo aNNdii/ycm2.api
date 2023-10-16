@@ -1,4 +1,4 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { getEnumValues } from "../helpers/Enum";
 
@@ -7,21 +7,26 @@ import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 import { AccountStatus } from "../interfaces/Account";
 
 import { AccountGroupOptions, AccountServiceToken } from "../services/AccountService";
+import { CaptchaServiceToken, CaptchaType } from "../services/CaptchaService";
+import { ValidatorServiceToken } from "../services/ValidatorService";
 import { PaginationOptions } from "../services/PaginationService";
+import { MailServiceToken } from "../services/MailService";
+import { HashServiceToken } from "../services/HashService";
 
 import { IHttpRouterContext } from "../entities/HttpRouterContext";
-import HttpRouterError from "../entities/HttpRouterError";
+import { HttpRouterError } from "../entities/HttpRouterError";
 
 import { IAccountGroup } from "../entities/AccountGroup";
 import { IAccount } from "../entities/Account";
 
-import Controller, { IController } from "./Controller";
+import { Controller, IController } from "./Controller";
 
 export const AccountControllerToken = new Token<IAccountController>("AccountController")
 
 export enum AccountRequestAction {
-  REQUEST_USERNAME,
-  RESET_PASSWORD,
+  REQUEST_USERNAME_RECOVERY,
+  REQUEST_PASSWORD_RECOVERY,
+  CONFIRM_PASSWORD_RECOVERY,
 }
 
 export type AccountsOptions = PaginationOptions & {
@@ -38,7 +43,7 @@ export type IAccountController = IController & {
   getAccountGroupByHashId(hashId: string, context: IHttpRouterContext): Promise<IAccountGroup>
 }
 
-export default class AccountController extends Controller implements IAccountController {
+export class AccountController extends Controller implements IAccountController {
 
   init() {
     this.post('/account', this.handleAccountPostRequest.bind(this))
@@ -46,35 +51,109 @@ export default class AccountController extends Controller implements IAccountCon
 
   async handleAccountPostRequest(context: IHttpRouterContext) {
 
+    let response = {}
     let { action } = context.body;
     [action] = getEnumValues(AccountRequestAction, action)
 
-    this.log("postAccountRequest", { action })
+    this.log("handleAccountPostRequest", { action })
 
     switch (action) {
 
-      case AccountRequestAction.REQUEST_USERNAME:
-        await this.handleAccountRequestUsernameRequest(context)
+      case AccountRequestAction.REQUEST_USERNAME_RECOVERY:
+        response = await this.handleAccountUsernameRecoveryRequest(context)
         break
 
-      case AccountRequestAction.RESET_PASSWORD:
-        await this.handleAccountResetPasswordRequest(context)
+      case AccountRequestAction.REQUEST_PASSWORD_RECOVERY:
+        response = await this.handleAccountPasswordRecoveryRequest(context)
+        break
+
+      case AccountRequestAction.CONFIRM_PASSWORD_RECOVERY:
+        response = await this.handleAccountPasswordRecoveryConfirmRequest(context)
         break
 
       default:
-        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.INVALID_REQUEST_PARAMETERS)
+        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.REQUEST_PARAMETERS_INVALID)
 
     }
 
+    context.setResponse(response)
   }
 
-  async handleAccountRequestUsernameRequest(context: IHttpRouterContext) {
+  async handleAccountUsernameRecoveryRequest(context: IHttpRouterContext) {
+    const { mail } = context.body
 
+    this.log("handleAccountUsernameRecoveryRequest", { mail })
+
+    const mailService = Container.get(MailServiceToken)
+    const validatorService = Container.get(ValidatorServiceToken)
+
+    validatorService.isEmail(mail)
+
+    const [account] = await context.dataLoaderService.getAccountsByMail(mail)
+    if (account?.status === AccountStatus.OK) {
+      await mailService.sendAccountUsernameRecovery({
+        localeCode: account.localeCode,
+        username: account.username,
+        to: account.mail,
+      })
+    }
+
+    return {}
   }
 
-  async handleAccountResetPasswordRequest(context: IHttpRouterContext) {
+  async handleAccountPasswordRecoveryRequest(context: IHttpRouterContext) {
+    const { mail, captchaValue, captchaToken } = context.body
 
+    this.log("handleAccountPasswordRecoveryRequest", { mail, captchaValue, captchaToken })
+
+    const validatorService = Container.get(ValidatorServiceToken)
+    const captchaService = Container.get(CaptchaServiceToken)
+    const accountService = Container.get(AccountServiceToken)
+    const mailService = Container.get(MailServiceToken)
+
+    validatorService.isEmail(mail)
+
+    await captchaService.verifyCaptchaToken({
+      type: CaptchaType.ACCOUNT_PASSWORD_RECOVERY,
+      token: captchaToken,
+      value: captchaValue
+    })
+
+    const [account] = await context.dataLoaderService.getAccountsByMail(mail)
+    if (account?.status === AccountStatus.OK) {
+      const { token, ttl } = await accountService.createAccountPasswordRecoveryToken({ id: account.id })
+
+      await mailService.sendAccountPasswordRecovery({
+        to: account.mail,
+        localeCode: account.localeCode,
+        username: account.username,
+        token: token,
+        ttl: ttl
+      })
+    }
+
+    return {}
   }
+
+  async handleAccountPasswordRecoveryConfirmRequest(context: IHttpRouterContext) {
+    const { token, password } = context.body
+
+    this.log("handleAccountPasswordRecoveryConfirmRequest", { token, password })
+
+    const accountService = Container.get(AccountServiceToken)
+    const hashService = Container.get(HashServiceToken)
+
+    accountService.isAccountPassword(password)
+
+    const [tokenType, tokenTimestamp, tokenAccountId] = await accountService.verifyAccountPasswordRecoveryToken(token)
+
+    await accountService.setAccountById(tokenAccountId, {
+      password: hashService.mysql41Password(password)
+    })
+
+    return {}
+  }
+
 
   async getAccounts(options: AccountsOptions, context: IHttpRouterContext) {
     this.log("getAccounts", options)
@@ -94,6 +173,15 @@ export default class AccountController extends Controller implements IAccountCon
     this.log("getAccountById", { id })
 
     const [account] = await context.dataLoaderService.getAccountsById(id)
+    if (!account) throw new HttpRouterError(HttpStatusCode.NOT_FOUND, ErrorMessage.ACCOUNT_NOT_FOUND)
+
+    return account
+  }
+
+  async getAccountByMail(mail: string, context: IHttpRouterContext) {
+    this.log("getAccountByMail", { mail })
+
+    const [account] = await context.dataLoaderService.getAccountsByMail(mail)
     if (!account) throw new HttpRouterError(HttpStatusCode.NOT_FOUND, ErrorMessage.ACCOUNT_NOT_FOUND)
 
     return account
@@ -137,6 +225,5 @@ export default class AccountController extends Controller implements IAccountCon
 
     return this.getAccountGroupById(id, context)
   }
-
 
 }

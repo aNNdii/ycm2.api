@@ -18,7 +18,7 @@ import { IGameMob } from "../entities/GameMob";
 import { IMobItem } from "../entities/MobItem";
 import { IMob } from "../entities/Mob";
 
-import Service, { IService } from "./Service"
+import { Service, IService } from "./Service"
 import { IMobGroupGroupMobGroup } from "../entities/MobGroupGroupMobGroup";
 
 export const GameMobServiceToken = new Token<IGameMobService>("GameMobService")
@@ -60,7 +60,7 @@ export type IGameMobService = IService & {
   createMobGroupGroup(mobGroupGroupMobGroups: IMobGroupGroupMobGroup[]): Promise<Buffer>
 }
 
-export default class GameMobService extends Service<any> implements IGameMobService {
+export class GameMobService extends Service<any> implements IGameMobService {
 
   async createMobNames<T = any>(mobs: T[], options?: CSVWriteOptions) {
     const { transform } = options || {}

@@ -1,4 +1,4 @@
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { CharacterEmpireTable, CharacterTable } from "../interfaces/Character";
 import { EntityTableFilter } from "../interfaces/Entity";
@@ -7,7 +7,7 @@ import { MapTable } from "../interfaces/Map";
 
 import { CharacterServiceToken } from "../services/CharacterService";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 import { GuildGradeTable, GuildMemberTable } from "../interfaces/Guild";
 
 export type CharacterProperties = EntityTableFilter<"player", CharacterTable>
@@ -57,7 +57,7 @@ export type ICharacter = IEntity & {
   ip: string
 }
 
-export default class Character extends Entity<CharacterProperties> implements ICharacter {
+export class Character extends Entity<CharacterProperties> implements ICharacter {
 
   get id() {
     return this.getProperty("player.id")

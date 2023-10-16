@@ -2,7 +2,7 @@ import { Token } from "../infrastructures/Container";
 
 import { CharacterSkill, CharacterSkillMastery } from "../interfaces/Character";
 
-import Service, { IService } from "./Service";
+import { Service, IService } from "./Service";
 
 const SkilLTableEntityLength = 6
 const QuickSlotTableEntityLength = 2
@@ -30,7 +30,7 @@ export type IGameCharacterService = IService & {
   parseCharacterSkills(buffer: any[]): ICharacterSkill[]
 }
 
-export default class GameCharacterService extends Service<any> implements IGameCharacterService {
+export class GameCharacterService extends Service<any> implements IGameCharacterService {
 
   parseCharacterQuickSlot(buffer: any[]) {
     const quickSlotCount = buffer.length / QuickSlotTableEntityLength

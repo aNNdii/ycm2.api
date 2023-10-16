@@ -1,7 +1,7 @@
 import Redis from "ioredis"
 
 import { Token } from "./Container"
-import Logger from "./Logger"
+import { Logger } from "./Logger"
 
 export const RedisClientToken = new Token<IRedisClient>("RedisClient")
 
@@ -18,7 +18,7 @@ export type IRedisClient = {
   set(key: string, value: string | Buffer, options?: RedisSetOptions): Promise<any>
 }
 
-export default class RedisClient extends Logger implements IRedisClient {
+export class RedisClient extends Logger implements IRedisClient {
   
   client: Redis
 

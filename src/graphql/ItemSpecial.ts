@@ -5,9 +5,10 @@ import { ItemSpecialType } from "../interfaces/Item";
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { IItem } from "../entities/Item";
 
-import GraphQLItemSpecialAction from "./ItemSpecialAction";
+import { GraphQLItemSpecialAction } from "./ItemSpecialAction";
 
-const GraphQLItemSpecial: GraphQLObjectType = new GraphQLObjectType({
+
+export const GraphQLItemSpecial: GraphQLObjectType = new GraphQLObjectType({
   name: 'ItemSpecial',
   fields: () => ({
     type: {
@@ -24,5 +25,3 @@ const GraphQLItemSpecial: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLItemSpecial

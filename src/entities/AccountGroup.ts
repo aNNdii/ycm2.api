@@ -1,8 +1,11 @@
-import Container from "typedi";
+import { Container } from "typedi";
+
 import { AccountGroupTable } from "../interfaces/Account";
 import { EntityTableFilter } from "../interfaces/Entity";
+
 import { AccountServiceToken } from "../services/AccountService";
-import Entity, { IEntity } from "./Entity";
+
+import { Entity, IEntity  } from "./Entity";
 
 
 export type AccountGroupProperties = EntityTableFilter<"account_group", AccountGroupTable>
@@ -15,7 +18,7 @@ export type IAccountGroup = IEntity & {
   modifiedDate: string
 }
 
-export default class AccountGroup extends Entity<AccountGroupProperties> implements IAccountGroup {
+export class AccountGroup extends Entity<AccountGroupProperties> implements IAccountGroup {
 
   get id() {
     return this.getProperty("account_group.account_group_id")

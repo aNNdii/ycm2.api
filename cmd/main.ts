@@ -7,6 +7,7 @@ import { ApolloServer } from "@apollo/server"
 import { createTransport } from "nodemailer"
 import { createPool } from "mariadb"
 import { configure } from "nunjucks"
+import AjvFormats from "ajv-formats"
 import * as dotenv from "dotenv"
 import { Redis } from "ioredis"
 import i18next from "i18next"
@@ -28,7 +29,7 @@ import GraphQLServer, { GraphQLServerToken } from "../src/infrastructures/GraphQ
 import RedisClient, { RedisClientToken } from "../src/infrastructures/RedisClient"
 import SmtpClient, { SmtpClientToken } from "../src/infrastructures/SmtpClient"
 import HttpRouter, { HttpRouterToken } from "../src/infrastructures/HttpRouter"
-import Container from "../src/infrastructures/Container"
+import { Container } from "../src/infrastructures/Container"
 
 import MariaRepository, { MariaRepositoryToken } from "../src/repositories/MariaRepository"
 import GameRepository, { GameRepositoryToken } from "../src/repositories/GameRepository"
@@ -53,7 +54,9 @@ import AccountService, { AccountServiceToken } from "../src/services/AccountServ
 import CaptchaService, { CaptchaServiceToken } from "../src/services/CaptchaService"
 import LocaleService, { LocaleServiceToken } from "../src/services/LocaleService"
 import GuildService, { GuildServiceToken } from "../src/services/GuildService"
+import TokenService, { TokenServiceToken } from "../src/services/TokenService"
 import GameService, { GameServiceToken } from "../src/services/GameService"
+import MailService, { MailServiceToken } from "../src/services/MailService"
 import ItemService, { ItemServiceToken } from "../src/services/ItemService"
 import HashService, { HashServiceToken } from "../src/services/HashService"
 import AuthService, { AuthServiceToken } from "../src/services/AuthService"
@@ -63,6 +66,7 @@ import MapService, { MapServiceToken } from "../src/services/MapService"
 import CharacterController, { CharacterControllerToken } from "../src/controllers/CharacterController"
 import GraphQLController, { GraphQLControllerToken } from "../src/controllers/GraphQLController"
 import AccountController, { AccountControllerToken } from "../src/controllers/AccountController"
+import CaptchaController, { CaptchaControllerToken } from "../src/controllers/CaptchaController"
 import LocaleController, { LocaleControllerToken } from "../src/controllers/LocaleController"
 import GuildController, { GuildControllerToken } from "../src/controllers/GuildController"
 import ItemController, { ItemControllerToken } from "../src/controllers/ItemController"
@@ -134,12 +138,19 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const DATABASE_CMS = process.env.DATABASE_CMS || 'ycm2'
 
   const I18N_LOCALE = process.env.I18N_LOCALE || 'en'
-  const I18N_PRELOAD_LOCALES = (process.env.I18N_PRELOAD_LOCALES || I18N_LOCALE).split(',')
+  const I18N_LOCALES = (process.env.I18N_LOCALES || I18N_LOCALE).split(',')
+  const I18N_LOCALES_PATH = process.env.I18N_LOCALES_PATH || 'assets/locales/{{lng}}.json'
+
+  const TEMPLATES_PATH = process.env.TEMPLATES_PATH || 'assets/templates'
 
   const OBFUSCATION = Boolean(~~(process.env.OBFUSCATION || 1))
   const OBFUSCATION_SALT = process.env.OBFUSCATION_SALT || ''
   const OBFUSCATION_ALPHABET = process.env.OBFUSCATION_ALPHABET || '-_abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   const OBFUSCATION_MIN_LENGTH = ~~(process.env.OBFUSCATION_MIN_LENGTH || 8)
+
+  const TOKEN_OBFUSCATION_SALT = process.env.TOKEN_OBFUSCATION_SALT || OBFUSCATION_SALT
+  const TOKEN_MIN_LENGTH = ~~(process.env.TOKEN_MIN_LENGTH || 32)
+  const TOKEN_TTL = ~~(process.env.TOKEN_TTL || 60)
 
   const PAGINATION_LIMIT_DEFAULT = ~~(process.env.PAGINATION_LIMIT_DEFAULT || 10)
   const PAGINATION_LIMIT_MAX = ~~(process.env.PAGINATION_LIMIT_MAX || 50)
@@ -149,13 +160,19 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const AUTH_JWT_SECRET = process.env.AUTH_JWT_SECRET || ''
   const AUTH_JWT_TTL = ~~(process.env.AUTH_JWT_TTL || 3600)
 
-  const MAIL_FROM = process.env.MAIL_FROM || 'YCM2 <noreply@ycm2.com>'
+  const MAIL_FROM = process.env.MAIL_FROM || 'YCM2 <noreply@example.com>'
+  
+  const SERVER_URL = process.env.SERVER_URL || ''
+  const SERVER_NAME = process.env.SERVER_NAME || 'YCM2'
+  const SERVER_LOGO_URL = process.env.SERVER_LOGO_URL || ''
 
-  const CAPTCHA_TOKEN_SECRET = process.env.CAPTCHA_TOKEN_SECRET || ""
-  const CAPTCHA_TOKEN_MIN_LENGTH = ~~(process.env.CAPTCHA_TOKEN_MIN_LENGTH || 32)
-  const CAPTCHA_TOKEN_TTL = ~~(process.env.CAPTCHA_TOKEN_TTL || 60)
   const CAPTCHA_IMAGE_COLORS = ~~(process.env.CAPTCHA_IMAGE_COLORS || 1)
   const CAPTCHA_IMAGE_NOISES = ~~(process.env.CAPTCHA_IMAGE_NOISES || 3)
+  const CAPTCHA_IMAGE_WIDTH = ~~(process.env.CAPTCHA_IMAGE_WIDTH || 160)
+  const CAPTCHA_IMAGE_HEIGHT = ~~(process.env.CAPTCHA_IMAGE_HEIGHT || 90)
+  const CAPTCHA_IMAGE_FONT_SIZE = ~~(process.env.CAPTCHA_IMAGE_FONT_SIZE || 20)
+  const CAPTCHA_IMAGE_INVERSE = Boolean(~~(process.env.CAPTCHA_IMAGE_INVERSE || 1))
+  const CAPTCHA_IMAGE_FONT = process.env.CAPTCHA_IMAGE_FONT || ''
   const CAPTCHA_LENGTH = ~~(process.env.CAPTCHA_LENGTH || 6)
 
   const ACCOUNT_OBFUSCATION_SALT = process.env.ACCOUNT_OBFUSCATION_SALT || OBFUSCATION_SALT
@@ -177,12 +194,22 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   const MOB_GROUP_GROUP_OBFUSCATION_SALT = process.env.MOB_GROUP_GROUP_OBFUSCATION_SALT || OBFUSCATION_SALT
   const MOB_GROUP_GROUP_MOB_GROUP_OBFUSCATION_SALT = process.env.MOB_GROUP_GROUP_MOB_GROUP_OBFUSCATION_SALT || OBFUSCATION_SALT
 
+  const CAPTCHA_TOKEN_OBFUSCATION_SALT = process.env.CAPTCHA_TOKEN_OBFUSCATION_SALT || TOKEN_OBFUSCATION_SALT
+  const CAPTCHA_TOKEN_TTL = ~~(process.env.CAPTCHA_TOKEN_TTL || 300)
+
+  const ACCOUNT_PASSWORD_RECOVERY_TOKEN_OBFUSCATION_SALT = process.env.ACCOUNT_PASSWORD_RECOVERY_TOKEN_OBFUSCATION_SALT || TOKEN_OBFUSCATION_SALT
+  const ACCOUNT_PASSWORD_RECOVERY_TOKEN_TTL = ~~(process.env.ACCOUNT_PASSWORD_RECOVERY_TOKEN_TTL || 28_800)
+
+  const ACCOUNT_USERNAME_MIN_LENGTH = ~~(process.env.ACCOUNT_USERNAME_MIN_LENGTH || 8)
+  const ACCOUNT_USERNAME_MAX_LENGTH = ~~(process.env.ACCOUNT_USERNAME_MAX_LENGTH || 16)
+
+  const ACCOUNT_PASSWORD_MIN_LENGTH = ~~(process.env.ACCOUNT_PASSWORD_MIN_LENGTH || 8)
+  const ACCOUNT_PASSWORD_MAX_LENGTH = ~~(process.env.ACCOUNT_PASSWORD_MAX_LENGTH || 16)
+
 
   /*****************************************************************************
    * Third parties
    *****************************************************************************/
-  const ajv = new Ajv()
-
   const koa = new Koa()
 
   const koaRouter = new KoaRouter()
@@ -269,14 +296,14 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
 
   await i18next.use(i18nextBackend).init({
     lng: I18N_LOCALE,
-    preload: I18N_PRELOAD_LOCALES,
+    preload: I18N_LOCALES,
     cleanCode: true,
     fallbackLng: code => {
-      const match = code.match(/([^_]+)_?/)
+      const match = code?.match(/([^_]+)_?/)
       return match ? [code, match[1], I18N_LOCALE] : I18N_LOCALE
     },
     backend: {
-      loadPath: `${__dirname}/../assets/locales/{{ns}}/{{lng}}.json`,
+      loadPath: `${__dirname}/../${I18N_LOCALES_PATH}`,
     },
     interpolation: {
       escapeValue: false
@@ -309,7 +336,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   }))
 
   Container.set(TemplateEngineToken, new TemplateEngine({
-    templatePath: `${__dirname}/../assets/templates`,
+    templatePath: `${__dirname}/../${TEMPLATES_PATH}`,
     nunjucks: nunjucks,
   }))
 
@@ -346,7 +373,6 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   Container.set(HashServiceToken, new HashService({}))
 
   Container.set(ValidatorServiceToken, new ValidatorService({
-    ajv: ajv
   }))
 
   Container.set(PaginationServiceToken, new PaginationService({
@@ -362,6 +388,12 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
     minLength: OBFUSCATION_MIN_LENGTH
   }))
 
+  Container.set(TokenServiceToken, new TokenService({
+    minLength: TOKEN_MIN_LENGTH,
+    ttl: TOKEN_TTL,
+    obfuscationSalt: TOKEN_OBFUSCATION_SALT,
+  }))
+
   Container.set(AuthServiceToken, new AuthService({
     jwtAlgorithm: AUTH_JWT_ALGORITHM,
     jwtSecret: AUTH_JWT_SECRET,
@@ -374,9 +406,25 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
     localeMobObfuscationSalt: LOCALE_MOB_OBFUSCATION_SALT,
   }))
 
+  Container.set(MailServiceToken, new MailService({
+    from: MAIL_FROM,
+    serverUrl: SERVER_URL,
+    serverName: SERVER_NAME,
+    serverLogoUrl: SERVER_LOGO_URL,
+  }))
+
   Container.set(AccountServiceToken, new AccountService({
     accountObfuscationSalt: ACCOUNT_OBFUSCATION_SALT,
-    accountGroupObfuscationSalt: ACCOUNT_GROUP_OBFUSCATION_SALT
+    accountGroupObfuscationSalt: ACCOUNT_GROUP_OBFUSCATION_SALT,
+
+    accountUsernameMinLength: ACCOUNT_USERNAME_MIN_LENGTH,
+    accountUsernameMaxLength: ACCOUNT_USERNAME_MAX_LENGTH,
+
+    accountPasswordMinLength: ACCOUNT_PASSWORD_MIN_LENGTH,
+    accountPasswordMaxLength: ACCOUNT_PASSWORD_MAX_LENGTH,
+    
+    accountPasswordRecoveryTokenObfuscationSalt: ACCOUNT_PASSWORD_RECOVERY_TOKEN_OBFUSCATION_SALT,
+    accountPasswordRecoveryTokenTtl: ACCOUNT_PASSWORD_RECOVERY_TOKEN_TTL,
   }))
 
   Container.set(CharacterServiceToken, new CharacterService({
@@ -420,12 +468,18 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   Container.set(GameMapServiceToken, new GameMapService({}))
 
   Container.set(CaptchaServiceToken, new CaptchaService({
-    tokenSecret: CAPTCHA_TOKEN_SECRET,
+    length: CAPTCHA_LENGTH,
+
+    tokenObfuscationSalt: CAPTCHA_TOKEN_OBFUSCATION_SALT,
     tokenTtl: CAPTCHA_TOKEN_TTL,
-    tokenMinLength: CAPTCHA_TOKEN_MIN_LENGTH,
+    
+    imageFont: CAPTCHA_IMAGE_FONT ? `${__dirname}/../${CAPTCHA_IMAGE_FONT}` : undefined,
+    imageFontSize: CAPTCHA_IMAGE_FONT_SIZE,
+    imageInverse: CAPTCHA_IMAGE_INVERSE,
     imageColors: CAPTCHA_IMAGE_COLORS,
     imageNoises: CAPTCHA_IMAGE_NOISES,
-    length: CAPTCHA_LENGTH,
+    imageWidth: CAPTCHA_IMAGE_WIDTH,
+    imageHeight: CAPTCHA_IMAGE_HEIGHT,
   }))
 
   
@@ -433,6 +487,7 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
    * Controllers
    *****************************************************************************/
   Container.set(GraphQLControllerToken, new GraphQLController())
+  Container.set(CaptchaControllerToken, new CaptchaController())
   Container.set(AuthControllerToken, new AuthController())
 
   Container.set(CharacterControllerToken, new CharacterController())
@@ -451,7 +506,9 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
 
   Container.get(GraphQLControllerToken).init()
 
+  Container.get(CaptchaControllerToken).init()
   Container.get(AuthControllerToken).init()
+
   Container.get(AccountControllerToken).init()
   Container.get(LocaleControllerToken).init()
   Container.get(ItemControllerToken).init()
@@ -476,7 +533,11 @@ import GraphQLMobQuery from "../src/graphql/MobQuery"
   process.on('exit', async () => {
     console.log(`Received exit signal. Closing open connections...`)
 
-    await mariaDatabasePool.end()
+    const mariaDatabasePromise = mariaDatabasePool.end()
+    const redisClientPromise = redisClient.quit()
+
+    await mariaDatabasePromise
+    await redisClientPromise
   })
 
 })()

@@ -2,7 +2,8 @@ import { GraphQLEnumType } from "graphql";
 
 import { Empire } from "../interfaces/Empire";
 
-const GraphQLEmpire = new GraphQLEnumType({
+
+export const GraphQLEmpire = new GraphQLEnumType({
   name: 'Empire',
   values: {
     [Empire[Empire.RED].toLowerCase()]: { value: Empire.RED },
@@ -10,5 +11,3 @@ const GraphQLEmpire = new GraphQLEnumType({
     [Empire[Empire.BLUE].toLowerCase()]: { value: Empire.BLUE },
   }
 })
-
-export default GraphQLEmpire

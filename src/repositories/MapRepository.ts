@@ -1,14 +1,14 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { merge } from "../helpers/Object";
 
 import { MapEntityTable, MapTable } from "../interfaces/Map";
 
-import MapEntity, { IMapEntity, MapEntityProperties } from "../entities/MapEntity";
-import Map, { IMap, MapProperties } from "../entities/Map";
+import { MapEntity, IMapEntity, MapEntityProperties } from "../entities/MapEntity";
+import { Map, IMap, MapProperties } from "../entities/Map";
 
 import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions, MariaRepositoryToken, MariaRepositoryUpdateOptions } from "./MariaRepository";
-import Repository, { IRepository } from "./Repository";
+import { Repository, IRepository } from "./Repository";
 import { GameRepositoryToken } from "./GameRepository";
 
 export const MapRepositoryToken = new Token<IMapRepository>("MapRepository")
@@ -25,7 +25,7 @@ export type IMapRepository = IRepository & {
   deleteMapEntities<Table = MapEntityTable, Response = any>(options?: MariaRepositoryUpdateOptions<Table>): Promise<Response>
 }
 
-export default class MapRepository extends Repository implements IMapRepository {
+export class MapRepository extends Repository implements IMapRepository {
 
   getMaps<Entity = IMap, Filter = MapProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getMaps", options)

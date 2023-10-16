@@ -4,7 +4,8 @@ import { CharacterSkill, CharacterSkillMastery } from "../interfaces/Character";
 
 import { ICharacterSkill } from "../services/GameCharacterService";
 
-const GraphQLCharacterSkill = new GraphQLObjectType({
+
+export const GraphQLCharacterSkill = new GraphQLObjectType({
   name: 'CharacterSkill',
   fields: () => ({
     id: {
@@ -29,5 +30,3 @@ const GraphQLCharacterSkill = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLCharacterSkill

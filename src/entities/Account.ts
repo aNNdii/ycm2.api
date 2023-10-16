@@ -1,25 +1,28 @@
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { AccountTable } from "../interfaces/Account";
 import { EntityTableFilter } from "../interfaces/Entity";
+import { LocaleTable } from "../interfaces/Locale";
 import { SafeboxTable } from "../interfaces/Safebox";
 
 import { AccountServiceToken } from "../services/AccountService";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 
 export type AccountProperties = EntityTableFilter<"account", AccountTable>
                               & EntityTableFilter<"safebox", SafeboxTable>
+                              & EntityTableFilter<"locale", LocaleTable>
 
 export type IAccount = IEntity & {
   id: number
   hashId: string
   username: string
   password: string
+  mail: string
   status: string
-  blockExpirationDate: string
   deleteCode: string
   safeBoxCode: string
+  blockExpirationDate: string
   moneyBonusExpirationDate: string
   itemBonusExpirationDate: string
   experienceBonusExpirationDate: string
@@ -27,11 +30,14 @@ export type IAccount = IEntity & {
   autoLootExpirationDate: string
   fishingBonusExpirationDate: string
   marriageBonusExpirationDate: string
-  createDate: string
+  localeId: number
+  localeCode: string
   lastPlayDate: string
+  createDate: string
+  modifiedDate: string
 }
 
-export default class Account extends Entity<AccountProperties> implements IAccount {
+export class Account extends Entity<AccountProperties> implements IAccount {
 
   get id() {
     return this.getProperty("account.id")
@@ -40,6 +46,10 @@ export default class Account extends Entity<AccountProperties> implements IAccou
   get hashId() {
     const accountService = Container.get(AccountServiceToken)
     return accountService.obfuscateAccountId(this.id)
+  }
+
+  get mail() {
+    return this.getProperty("account.ycm2_account_mail")
   }
 
   get username() {
@@ -94,12 +104,24 @@ export default class Account extends Entity<AccountProperties> implements IAccou
     return this.getProperty("account.money_drop_rate_expire")
   }
 
-  get createDate() {
-    return this.getProperty("account.create_time")
+  get localeId() {
+    return this.getProperty("account.ycm2_account_locale_id")
+  }
+
+  get localeCode() {
+    return this.getProperty("locale.locale_code")
   }
 
   get lastPlayDate() {
     return this.getProperty("account.last_play")
+  }
+
+  get createDate() {
+    return this.getProperty("account.create_time")
+  }
+
+  get modifiedDate() {
+    return this.getProperty("account.ycm2_account_modified_date")
   }
 
 }

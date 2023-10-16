@@ -1,17 +1,17 @@
 import jwt, { Algorithm } from "jsonwebtoken";
 
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 import { AuthenticationTokenType } from "../interfaces/Auth";
 
 import { ErrorMessage } from "../interfaces/ErrorMessage";
 import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 
-import HttpRouterError from "../entities/HttpRouterError";
-import Auth, { IAuth } from "../entities/Auth";
+import { HttpRouterError }  from "../entities/HttpRouterError";
+import { Auth, IAuth } from "../entities/Auth";
 import { IAccount } from "../entities/Account";
 
 import { AccountServiceToken } from "./AccountService";
-import Service, { IService, ServiceOptions } from "./Service";
+import { Service, IService, ServiceOptions } from "./Service";
 
 export const AuthServiceToken = new Token<IAuthService>("AuthService")
 
@@ -33,7 +33,7 @@ export type IAuthService = IService & {
   getAuthByToken(token: string, options?: AuthTokenOptions): IAuth
 }
 
-export default class AuthService extends Service<AuthServiceOptions> implements IAuthService {
+export class AuthService extends Service<AuthServiceOptions> implements IAuthService {
 
   getJsonWebToken(payload: any) {
     return jwt.sign(payload, this.options.jwtSecret, {

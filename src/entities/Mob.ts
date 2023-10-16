@@ -1,7 +1,7 @@
 import { EntityTableFilter } from "../interfaces/Entity";
 import { MobTable } from "../interfaces/Mob";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 
 export type MobProperties = EntityTableFilter<"mob", MobTable>
 
@@ -102,7 +102,7 @@ export type IMob = IEntity & {
   modifiedDate: string
 }
 
-export default class Mob extends Entity<MobProperties> implements IMob {
+export class Mob extends Entity<MobProperties> implements IMob {
 
   get id() {
     return this.getProperty("mob.mob_id")

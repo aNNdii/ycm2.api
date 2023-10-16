@@ -1,11 +1,11 @@
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { LocaleMobTable } from "../interfaces/Locale";
 import { EntityTableFilter } from "../interfaces/Entity";
 
 import { LocaleServiceToken } from "../services/LocaleService";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 
 
 export type LocaleMobProperties = EntityTableFilter<"locale_mob", LocaleMobTable>
@@ -20,7 +20,7 @@ export type ILocaleMob = IEntity & {
   modifiedDate: string
 }
 
-export default class LocaleMob extends Entity<LocaleMobProperties> implements ILocaleMob {
+export class LocaleMob extends Entity<LocaleMobProperties> implements ILocaleMob {
 
   get id() {
     return this.getProperty("locale_mob.locale_mob_id")

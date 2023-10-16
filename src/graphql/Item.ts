@@ -1,6 +1,6 @@
 import { GraphQLBoolean, GraphQLID, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { getFlagsByFlagId } from "../helpers/Game";
 
@@ -12,12 +12,13 @@ import { ItemControllerToken } from "../controllers/ItemController";
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { IItem } from "../entities/Item";
 
-import GraphQLCharacterItemAttribute from "./CharacterItemAttribute";
-import GraphQLLocaleItem from "./LocaleItem";
-import GraphQLItemSource from "./ItemSource";
-import GraphQLItemSpecial from "./ItemSpecial";
+import { GraphQLCharacterItemAttribute } from "./CharacterItemAttribute";
+import { GraphQLLocaleItem } from "./LocaleItem";
+import { GraphQLItemSource } from "./ItemSource";
+import { GraphQLItemSpecial } from "./ItemSpecial";
 
-const GraphQLItem: GraphQLObjectType = new GraphQLObjectType({
+
+export const GraphQLItem: GraphQLObjectType = new GraphQLObjectType({
   name: 'Item',
   fields: () => ({
     id: {
@@ -198,5 +199,3 @@ const GraphQLItem: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLItem

@@ -1,20 +1,20 @@
 import { GraphQLBoolean, GraphQLID, GraphQLInt, GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { MapEntityType } from "../interfaces/Map";
 
-import MapController from "../controllers/MapController";
+import { MobControllerToken } from "../controllers/MobController";
+import { MapControllerToken } from "../controllers/MapController";
 
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { IMapEntity } from "../entities/MapEntity";
 
-import GraphQLMap from "./Map";
-import GraphQLMob from "./Mob";
-import { MobControllerToken } from "../controllers/MobController";
+import { GraphQLMap } from "./Map";
+import { GraphQLMob } from "./Mob";
 
 
-const GraphQLMapEntity: GraphQLObjectType = new GraphQLObjectType({
+export const GraphQLMapEntity: GraphQLObjectType = new GraphQLObjectType({
   name: 'MapEntity',
   fields: () => ({
     id: {
@@ -68,7 +68,7 @@ const GraphQLMapEntity: GraphQLObjectType = new GraphQLObjectType({
     map: {
       type: GraphQLMap,
       resolve: (entity: IMapEntity, args: any, context: IGraphQLContext) => {
-        const mapController = Container.get(MapController)
+        const mapController = Container.get(MapControllerToken)
         return mapController.getMapById(entity.mapId, context)
       }
     },
@@ -110,5 +110,3 @@ const GraphQLMapEntity: GraphQLObjectType = new GraphQLObjectType({
 
   })
 })
-
-export default GraphQLMapEntity

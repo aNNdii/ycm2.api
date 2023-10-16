@@ -1,6 +1,7 @@
 import { EntityTableFilter } from "../interfaces/Entity";
 import { GameMobTable } from "../interfaces/GameMob";
-import Entity, { IEntity } from "./Entity";
+
+import { Entity, IEntity  } from "./Entity";
 
 export type GameMobProperties = EntityTableFilter<"mob_proto", GameMobTable>
 
@@ -78,7 +79,7 @@ export type IGameMob = IEntity & {
   revive: number
 }
 
-export default class GameMob extends Entity<GameMobProperties> implements IGameMob {
+export class GameMob extends Entity<GameMobProperties> implements IGameMob {
 
   get id() {
     return this.getProperty("mob_proto.vnum")

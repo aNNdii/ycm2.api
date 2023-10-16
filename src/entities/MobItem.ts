@@ -1,11 +1,11 @@
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { EntityTableFilter } from "../interfaces/Entity";
 import { MobItemTable } from "../interfaces/Mob";
 
 import { MobServiceToken } from "../services/MobService";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 
 export type MobItemProperties = EntityTableFilter<"mob_item", MobItemTable>
 
@@ -24,7 +24,7 @@ export type IMobItem = IEntity & {
   modifiedDate: string
 }
 
-export default class MobItem extends Entity<MobItemProperties> implements IMobItem {
+export class MobItem extends Entity<MobItemProperties> implements IMobItem {
 
   get id() {
     return this.getProperty("mob_item.mob_item_id")

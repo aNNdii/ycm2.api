@@ -3,7 +3,7 @@ import { GraphQLError } from "graphql";
 import { HttpStatusCode } from "../interfaces/HttpStatusCode";
 import { ErrorMessage } from "../interfaces/ErrorMessage";
 
-export default class HttpRouterError extends GraphQLError {
+export class HttpRouterError extends GraphQLError {
 
   readonly code: HttpStatusCode | number = HttpStatusCode.INTERNAL_SERVER_ERROR
 

@@ -2,7 +2,8 @@ import { GraphQLEnumType } from "graphql";
 
 import { CharacterJob } from "../interfaces/Character";
 
-const GraphQLCharacterJob = new GraphQLEnumType({
+
+export const GraphQLCharacterJob = new GraphQLEnumType({
   name: 'CharacterJob',
   values: {
     [CharacterJob[CharacterJob.WARRIOR_MALE].toLowerCase()]: { value: CharacterJob.WARRIOR_MALE },
@@ -15,5 +16,3 @@ const GraphQLCharacterJob = new GraphQLEnumType({
     [CharacterJob[CharacterJob.SHAMAN_FEMALE].toLowerCase()]: { value: CharacterJob.SHAMAN_FEMALE },
   }
 })
-
-export default GraphQLCharacterJob

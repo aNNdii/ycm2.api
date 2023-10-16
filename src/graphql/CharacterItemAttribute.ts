@@ -1,15 +1,15 @@
 import { GraphQLInt, GraphQLObjectType } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { ItemControllerToken } from "../controllers/ItemController";
 
 import { IGraphQLContext } from "../entities/GraphQLContext";
 
-import GraphQLItemAttribute from "./ItemAttribute";
+import { GraphQLItemAttribute } from "./ItemAttribute";
 
 
-const GraphQLCharacterItemAttribute: GraphQLObjectType = new GraphQLObjectType({
+export const GraphQLCharacterItemAttribute: GraphQLObjectType = new GraphQLObjectType({
   name: 'CharacterItemAttribute',
   fields: () => ({
     attribute: {
@@ -35,5 +35,3 @@ const GraphQLCharacterItemAttribute: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLCharacterItemAttribute

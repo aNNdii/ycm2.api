@@ -1,14 +1,14 @@
-import KoaRouter, { RouterContext as KoaRouterContext } from "koa-router"
 import { RateLimiterAbstract, RateLimiterRes } from "rate-limiter-flexible"
+import KoaRouter, { RouterContext as KoaRouterContext } from "koa-router"
 import { randomUUID } from "crypto"
 
 import { HttpStatusCode } from "../interfaces/HttpStatusCode"
 
-import HttpRouterContext, { IHttpRouterContext } from "../entities/HttpRouterContext"
-import HttpRouterError from "../entities/HttpRouterError"
+import { HttpRouterContext, IHttpRouterContext } from "../entities/HttpRouterContext"
+import { HttpRouterError } from "../entities/HttpRouterError"
 
 import { Token } from "./Container"
-import Logger from "./Logger"
+import { Logger } from "./Logger"
 
 export const HttpRouterToken = new Token<IHttpRouter>("HttpRouter")
 
@@ -29,7 +29,6 @@ export type HttpRouterHandler = (context: IHttpRouterContext) => Promise<void>
 export type HttpRouterOptions = {
   router: KoaRouter
   rateLimiter: RateLimiterAbstract
-  onError?: (error: Error) => void
 }
 
 export type IHttpRouter = {
@@ -39,7 +38,7 @@ export type IHttpRouter = {
   delete(path: string, handler: HttpRouterHandler): void
 }
 
-export default class HttpRouter extends Logger implements IHttpRouter {
+export class HttpRouter extends Logger implements IHttpRouter {
 
   private router: KoaRouter
   private rateLimiter: RateLimiterAbstract
@@ -77,12 +76,12 @@ export default class HttpRouter extends Logger implements IHttpRouter {
       const requestId = randomUUID()
 
       const context = new HttpRouterContext({ context: ctx })
-      
+
       this.requestCount++
-      
+
       try {
         this.log("requestStart", { id: requestId, ip: context.ip, method: ctx.method, url: ctx.url, activeRequests: this.requestCount })
-        
+
         await this.rateLimiter.consume(context.ip)
         await handler(context)
 
@@ -94,7 +93,7 @@ export default class HttpRouter extends Logger implements IHttpRouter {
         const message = isApiError ? e.message : isRateLimitError ? HttpStatusCode[HttpStatusCode.TOO_MANY_REQUESTS].toLowerCase() : HttpStatusCode[HttpStatusCode.INTERNAL_SERVER_ERROR].toLowerCase()
 
         context.setResponse({ status, error: { status, message } })
-        
+
         this.log("requestError", { status, message })
         if (!isApiError && !isRateLimitError) console.error(e)
       }

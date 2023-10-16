@@ -2,13 +2,13 @@ import { escape, escapeId } from "sqlstring";
 
 import { IMariaDatabaseConnection } from "../infrastructures/MariaDatabaseConnection";
 import { MariaDatabaseToken } from "../infrastructures/MariaDatabase";
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { EntityFilterMethod, EntityTable } from "../interfaces/Entity";
 
-import Entity from "../entities/Entity";
+import { Entity } from "../entities/Entity";
 
-import Repository, { IRepository } from "./Repository";
+import { Repository, IRepository } from "./Repository";
 
 export const MariaRepositoryToken = new Token<IMariaRepository>("MariaRepository")
 
@@ -52,17 +52,17 @@ export type MariaRepositoryUpdateOptions<T> = MariaRepositoryQueryOptions & Mari
 
 export type IMariaRepository = IRepository & {
   query(query: string, values?: any, options?: any): Promise<any>
-  
+
   getEntities<Entity, Filter>(options: MariaRepositorySelectOptions<Filter>): Promise<Entity[]>
   createEntities<Table = EntityTable, Response = any>(options: MariaRepositoryInsertOptions<Partial<Table>>): Promise<Response>
-  updateEntities<Table = EntityTable, Response = any>(options: MariaRepositoryUpdateOptions<Partial<Table>>): Promise<Response> 
-  deleteEntities<Table = EntityTable, Response = any>(options: MariaRepositoryUpdateOptions<Partial<Table>>): Promise<Response> 
+  updateEntities<Table = EntityTable, Response = any>(options: MariaRepositoryUpdateOptions<Partial<Table>>): Promise<Response>
+  deleteEntities<Table = EntityTable, Response = any>(options: MariaRepositoryUpdateOptions<Partial<Table>>): Promise<Response>
   truncateEntities(table: string): Promise<any>
 
   parseEntityFilter(column: string, filter: any): string
 }
 
-export default class MariaRepository extends Repository implements IMariaRepository {
+export class MariaRepository extends Repository implements IMariaRepository {
 
   async query(query: string, values?: any, options?: any) {
     const { connection } = options || {}
@@ -210,19 +210,20 @@ export default class MariaRepository extends Repository implements IMariaReposit
     } = this.getQueryFilter<Table>({ filter, where })
 
     const updateColumns: string[] = []
-    const updateValues: any[] = []
+    // const updateValues: any[] = []
 
     Object.entries(entity || {}).forEach(([column, value]) => {
-      const [updateColumn, updateValue] = this.parseEntityFilter(column, value)
+      const updateColumn = this.parseEntityFilter(column, value)
+      // const [updateColumn, updateValue] = this.parseEntityFilter(column, value)
 
       updateColumns.push(updateColumn)
-      updateValues.push(...updateValue)
+      // updateValues.push(...updateValue)
     })
-    
+
     const query = `UPDATE ${table} SET ${updateColumns.join(',')} WHERE ${queryFilter}`
 
     return {
-      values: [...updateValues, ...queryValues],
+      values: queryValues,
       query: query
     }
   }
@@ -250,59 +251,59 @@ export default class MariaRepository extends Repository implements IMariaReposit
 
   // private parseEntityFilter(column: string, filter: any): [string, any] {
   parseEntityFilter(column: string, filter: any): string {
-    const [action, value] = Array.isArray(filter) ? filter : [EntityFilterMethod.EQUAL, [filter]]
-
     column = escapeId(column)
+
+    const [action, value] = Array.isArray(filter) ? filter : [EntityFilterMethod.EQUAL, [filter]]
 
     switch (action) {
 
       case EntityFilterMethod.RAW:
         return `${column} = ${value}`
-        // return [`${column} = ${value}`, []]
+      // return [`${column} = ${value}`, []]
 
       case EntityFilterMethod.EQUAL_NULL:
         return `${column} IS NULL`
-        // return [`${column} IS NULL`, []]
+      // return [`${column} IS NULL`, []]
 
       case EntityFilterMethod.NOT_EQUAL_NULL:
         return `${column} IS NOT NULL`
-        // return [`${column} IS NOT NULL`, []]
+      // return [`${column} IS NOT NULL`, []]
 
       case EntityFilterMethod.EQUAL:
         return `${column} = ${escape(value)}`
-        // return [`${column} = ?`, value]
+      // return [`${column} = ?`, value]
 
       case EntityFilterMethod.NOT_EQUAL:
         return `${column} != ${escape(value)}`
-        // return [`${column} != ?`, value]
+      // return [`${column} != ?`, value]
 
       case EntityFilterMethod.GREATER:
         return `${column} > ${escape(value)}`
-        // return [`${column} > ?`, value]
+      // return [`${column} > ?`, value]
 
       case EntityFilterMethod.GREATER_EQUAL:
         return `${column} >= ${escape(value)}`
-        // return [`${column} >= ?`, value]
+      // return [`${column} >= ?`, value]
 
       case EntityFilterMethod.LESS:
         return `${column} < ${escape(value)}`
-        // return [`${column} < ?`, value]
+      // return [`${column} < ?`, value]
 
       case EntityFilterMethod.LESS_EQUAL:
         return `${column} <= ${escape(value)}`
-        // return [`${column} <= ?`, value]
+      // return [`${column} <= ?`, value]
 
       case EntityFilterMethod.IN:
         return `${column} IN (${escape(value)})`
-        // return [`${column} IN (?)`, [value]]
+      // return [`${column} IN (?)`, [value]]
 
       case EntityFilterMethod.LIKE:
         return `${column} LIKE ${escape(value)}`
-        // return [`${column} LIKE ?`, value]
+      // return [`${column} LIKE ?`, value]
 
       case EntityFilterMethod.BETWEEN:
         return `${column} BETWEEN ${escape(value[0])} AND ${escape(value[1])}`
-        // return [`${column} BETWEEN ? AND ?`, value]
+      // return [`${column} BETWEEN ? AND ?`, value]
     }
 
     throw new Error(`unknown filter action`)

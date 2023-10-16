@@ -1,6 +1,6 @@
 import { GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { CharacterControllerToken } from "../controllers/CharacterController";
 import { GuildControllerToken } from "../controllers/GuildController";
@@ -8,11 +8,11 @@ import { GuildControllerToken } from "../controllers/GuildController";
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { IGuildMessage } from "../entities/GuildMessage";
 
-import GraphQLCharacter from "./Character";
-import GraphQLGuild from "./Guild";
+import { GraphQLCharacter } from "./Character";
+import { GraphQLGuild } from "./Guild";
 
 
-const GraphQLGuildMessage = new GraphQLObjectType({
+export const GraphQLGuildMessage = new GraphQLObjectType({
   name: 'GuildMessage',
   fields: () => ({
     id: {
@@ -43,5 +43,3 @@ const GraphQLGuildMessage = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLGuildMessage

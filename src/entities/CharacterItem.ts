@@ -1,11 +1,11 @@
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { CharacterItemTable, CharacterItemWindow } from "../interfaces/CharacterItem";
 import { EntityTableFilter } from "../interfaces/Entity";
 
 import { CharacterServiceToken } from "../services/CharacterService";
 
-import Entity, { IEntity } from "./Entity";
+import { Entity, IEntity  } from "./Entity";
 
 export type CharacterItemProperties = EntityTableFilter<"item", CharacterItemTable>
 
@@ -40,7 +40,7 @@ export type ICharacterItem = IEntity & {
   attributeValue6: number
 }
 
-export default class CharacterItem extends Entity<CharacterItemProperties> implements ICharacterItem {
+export class CharacterItem extends Entity<CharacterItemProperties> implements ICharacterItem {
 
   get id() {
     return this.getProperty("item.id")

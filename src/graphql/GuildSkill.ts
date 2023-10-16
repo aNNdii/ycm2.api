@@ -4,7 +4,8 @@ import { IGuildSkill } from "../services/GameGuildService";
 
 import { GuildSkill } from "../interfaces/Guild";
 
-const GraphQLGuildSkill = new GraphQLObjectType({
+
+export const GraphQLGuildSkill = new GraphQLObjectType({
   name: 'GuildSkill',
   fields: () => ({
     id: {
@@ -21,5 +22,3 @@ const GraphQLGuildSkill = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLGuildSkill

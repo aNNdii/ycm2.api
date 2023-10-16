@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
 
-import Container from "../infrastructures/Container";
+import { Container } from "../infrastructures/Container";
 
 import { Authorization } from "../interfaces/Auth";
 import { CharacterItemWindow } from "../interfaces/CharacterItem";
@@ -11,13 +11,12 @@ import { ItemControllerToken } from "../controllers/ItemController";
 import { IGraphQLContext } from "../entities/GraphQLContext";
 import { ICharacterItem } from "../entities/CharacterItem";
 
+import { GraphQLCharacterItemAttribute } from "./CharacterItemAttribute";
+import { GraphQLCharacter } from "./Character";
+import { GraphQLItem } from "./Item";
 
-import GraphQLCharacterItemAttribute from "./CharacterItemAttribute";
-import GraphQLCharacter from "./Character";
-import GraphQLItem from "./Item";
 
-
-const GraphQLCharacterItem: GraphQLObjectType = new GraphQLObjectType({
+export const GraphQLCharacterItem: GraphQLObjectType = new GraphQLObjectType({
   name: 'CharacterItem',
   fields: () => ({
     id: {
@@ -82,5 +81,3 @@ const GraphQLCharacterItem: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
-
-export default GraphQLCharacterItem

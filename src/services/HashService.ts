@@ -1,7 +1,8 @@
 import { BinaryToTextEncoding, createHash } from "crypto";
 
 import { Token } from "../infrastructures/Container";
-import Service, { IService, ServiceOptions } from "./Service";
+
+import { Service, IService, ServiceOptions } from "./Service";
 
 export const HashServiceToken = new Token<IHashService>("HashService")
 
@@ -17,7 +18,7 @@ export type IHashService = IService & {
 
 export type HashServiceOptions = ServiceOptions & {}
 
-export default class HashService extends Service<any> implements IHashService {
+export class HashService extends Service<any> implements IHashService {
 
   hashObject(value: any) {
     return JSON.stringify(value)

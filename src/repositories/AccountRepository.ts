@@ -1,16 +1,16 @@
-import Container, { Token } from "../infrastructures/Container";
+import { Container, Token } from "../infrastructures/Container";
 
 import { merge } from "../helpers/Object";
 
 import { AccountGroupAccountTable, AccountGroupAuthorizationTable, AccountGroupTable, AccountTable } from "../interfaces/Account";
 
-import AccountGroupAuthorization, { AccountGroupAuthorizationProperties, IAccountGroupAuthorization } from "../entities/AccountGroupAuthorization";
-import AccountGroupAccount, { AccountGroupAccountProperties, IAccountGroupAccount } from "../entities/AccountGroupAccount";
-import AccountGroup, { AccountGroupProperties, IAccountGroup } from "../entities/AccountGroup";
-import Account, { AccountProperties, IAccount } from "../entities/Account";
+import { AccountGroupAuthorization, AccountGroupAuthorizationProperties, IAccountGroupAuthorization } from "../entities/AccountGroupAuthorization";
+import { AccountGroupAccount, AccountGroupAccountProperties, IAccountGroupAccount } from "../entities/AccountGroupAccount";
+import { AccountGroup, AccountGroupProperties, IAccountGroup } from "../entities/AccountGroup";
+import { Account, AccountProperties, IAccount } from "../entities/Account";
 
 import { MariaRepositoryInsertOptions, MariaRepositorySelectOptions, MariaRepositoryToken, MariaRepositoryUpdateOptions } from "./MariaRepository";
-import Repository, { IRepository } from "./Repository";
+import { Repository, IRepository } from "./Repository";
 import { GameRepositoryToken } from "./GameRepository";
 
 export const AccountRepositoryToken = new Token<IAccountRepository>("AccountRepository")
@@ -34,7 +34,7 @@ export type IAccountRepository = IRepository & {
   deleteAccountGroupAuthorizations<Response = any, Table = AccountGroupAccountTable>(options: MariaRepositoryUpdateOptions<Table>): Promise<Response>
 }
 
-export default class AccountRepository extends Repository implements IAccountRepository {
+export class AccountRepository extends Repository implements IAccountRepository {
 
   getAccounts<Entity = IAccount, Filter = AccountProperties>(options?: MariaRepositorySelectOptions<Filter>) {
     this.log("getAccounts", options)
@@ -44,12 +44,14 @@ export default class AccountRepository extends Repository implements IAccountRep
 
     const accountDatabase = gameRepository.getAccountDatabaseName()
     const playerDatabase = gameRepository.getPlayerDatabaseName()
+    const cmsDatabase = gameRepository.getCmsDatabaseName()
 
     return mariaRepository.getEntities<Entity, Filter>(merge({
       parser: (row: any) => new Account(row),
       table: `${accountDatabase}.account`,
       joins: [
-        `LEFT JOIN ${playerDatabase}.safebox ON safebox.account_id = account.id`
+        `LEFT JOIN ${playerDatabase}.safebox ON safebox.account_id = account.id`,
+        `LEFT JOIN ${cmsDatabase}.locale ON locale.locale_id = account.ycm2_account_locale_id`
       ]
     }, options))
   }

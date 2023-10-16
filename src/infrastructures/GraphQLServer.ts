@@ -6,10 +6,10 @@ import { HttpStatusCode } from "../interfaces/HttpStatusCode"
 
 import { IHttpRouterContext } from "../entities/HttpRouterContext"
 import { IGraphQLContext } from "../entities/GraphQLContext"
-import HttpRouterError from "../entities/HttpRouterError"
+import { HttpRouterError } from "../entities/HttpRouterError"
 
 import { Token } from "./Container"
-import Logger from "./Logger"
+import { Logger } from "./Logger"
 
 export const GraphQLServerToken = new Token<IGraphQLServer>("GraphQLServer")
 
@@ -21,7 +21,7 @@ export type IGraphQLServer = {
   handle(context: IHttpRouterContext): Promise<{ status: HttpStatusCode | number, headers: any, body: any }>
 }
 
-export default class GraphQLServer extends Logger implements IGraphQLServer {
+export class GraphQLServer extends Logger implements IGraphQLServer {
 
   private server: ApolloServer<IGraphQLContext>
 

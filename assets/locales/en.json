@@ -1,0 +1,10 @@
+{
+  "LabelAccountPasswordRecoveryFallbackLink" : "If the button does not work, please copy the following link and paste it into your browser's address bar:",
+  "LabelAccountPasswordRecoveryGreeting" : "Hello {{ username }},",
+  "LabelAccountPasswordRecoveryGreetingBody" : "we have received your request to reset your password. Don't worry, we will help you to quickly regain access to your account.",
+  "LabelAccountPasswordRecoveryHowTo" : "How to reset your password",
+  "LabelAccountPasswordRecoveryHowToBody" : "Click the button below to create a new password. For security reasons the link is only valid for the next {{ duration }} hours.",
+  "LabelAccountPasswordReset" : "Reset password",
+  "LabelMailIgnore" : "If you did not request this email or received it in error, you can simply ignore it.",
+  "LabelMailSupportHelp" : "Do you need help or have questions? Our support team is always there for you."
+}

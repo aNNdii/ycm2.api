@@ -1,0 +1,10 @@
+{% extends "./template.mjml" %}
+
+{% block header %}
+  <mj-text>AccountRequestUsername</mj-text>
+{% endblock %}
+
+{% block content %}
+  <mj-text>Username: {{ username }}</mj-text>
+{% endblock %}
+
