@@ -1,6 +1,10 @@
 {{ serverName }} 
- 
+
 {% block content %}
 {% endblock %} 
+
+{{ t('LabelMailSupportHelp') }}
+
+{{ t('LabelMailDoNotReply') }}
 
 Copyright © {{ currentYear }} {{ serverName }} 

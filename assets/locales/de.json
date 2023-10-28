@@ -1,10 +1,22 @@
 {
-  "LabelAccountPasswordRecoveryFallbackLink" : "Sollte der Button nicht funktionieren, bitte den folgenden Link kopieren und in die Adresszeile Deines Browsers einfügen:",
-  "LabelAccountPasswordRecoveryGreeting" : "Hallo {{ username }},",
+  "LabelAccountDeleteCodeRecovery" : "Dein neues Löschpasswort!",
+  "LabelAccountDeleteCodeRecoveryBody" : "Dein Löschpasswort lautet:",
+  "LabelAccountDeleteCodeRecoveryGreetingBody" : "wir haben festgestellt, dass Du Schwierigkeiten hattest, Dich an Dein Löschpasswort zu erinnern. Kein Problem, wir sind hier, um Dir zu helfen!",
+  "LabelAccountGreeting" : "Hi {{ username }},",
+  "LabelAccountMailChange" : "Bestätige Deine neue E-Mail-Adresse",
+  "LabelAccountMailChangeConfirm" : "E-Mail-Adresse bestätigen",
+  "LabelAccountMailChangeGreetingBody" : "wir haben einen Antrag auf Änderung Deiner E-Mail-Adresse erhalten. Um sicherzustellen, dass Du die Änderung vorgenommen hast und Dein Konto weiterhin sicher ist, bitten wir Dich, die neue E-Mail-Adresse zu bestätigen.",
+  "LabelAccountPasswordRecovery" : "Passwort zurücksetzen",
   "LabelAccountPasswordRecoveryGreetingBody" : "wir haben Deine Anfrage zum Zurücksetzen Deines Passworts erhalten. Keine Sorge, wir helfen Dir, schnell wieder Zugang zu Deinem Account zu bekommen.",
-  "LabelAccountPasswordRecoveryHowTo" : "So setzt Du Dein Passwort zurück",
-  "LabelAccountPasswordRecoveryHowToBody" : "Klicke auf den untenstehenden Button, um ein neues Passwort zu erstellen. Aus Sicherheitsgründen ist der Link nur für die nächsten {{ duration }} Stunden gültig.",
-  "LabelAccountPasswordReset" : "Passwort zurücksetzen",
+  "LabelAccountSafeBoxCodeRecovery" : "Dein neues Lagerpasswort!",
+  "LabelAccountSafeBoxCodeRecoveryBody" : "Dein neues Lagerpasswort lautet:",
+  "LabelAccountSafeBoxCodeRecoveryGreetingBody" : "wir haben festgestellt, dass Du Schwierigkeiten hattest, Dich an Dein Lagerpasswort zu erinnern. Kein Problem, wir sind hier, um Dir zu helfen!",
+  "LabelAccountUsernameRecovery" : "Benutzernamen vergessen?",
+  "LabelAccountUsernameRecoveryBody" : "Dein Benutzername lautet:",
+  "LabelAccountUsernameRecoveryGreetingBody" : "wir haben festgestellt, dass Du Schwierigkeiten hattest, Dich an Deinen Benutzernamen zu erinnern. Kein Problem, wir sind hier, um Dir zu helfen!\n\n",
+  "LabelMailButtonFallbackLink" : "Sollte der Button nicht funktionieren, bitte den folgenden Link kopieren und in die Adresszeile Deines Browsers einfügen:",
+  "LabelMailDoNotReply" : "Hinweis: Diese E-Mail wurde automatisch erstellt. Bitte antworte nicht auf diese Nachricht. Bei Fragen oder Problemen wenden Sie sich bitte an unseren Support.",
   "LabelMailIgnore" : "Wenn Du diese E-Mail nicht angefordert hast oder irrtümlich erhalten hast, kannst Du sie einfach ignorieren.",
-  "LabelMailSupportHelp" : "Brauchst Du Hilfe oder hast Du Fragen? Unser Support-Team ist jederzeit für Dich da."
+  "LabelMailSupportHelp" : "Brauchst Du Hilfe oder hast Du Fragen? Unser Support-Team ist jederzeit für Dich da.",
+  "LabelMailTokenSecurityDuration" : "Aus Sicherheitsgründen ist der Link nur für die nächsten {{ duration }} Stunden gültig."
 }

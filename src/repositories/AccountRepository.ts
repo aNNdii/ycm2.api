@@ -3,6 +3,7 @@ import { Container, Token } from "../infrastructures/Container";
 import { merge } from "../helpers/Object";
 
 import { AccountGroupAccountTable, AccountGroupAuthorizationTable, AccountGroupTable, AccountTable } from "../interfaces/Account";
+import { SafeBoxTable } from "../interfaces/SafeBox";
 
 import { AccountGroupAuthorization, AccountGroupAuthorizationProperties, IAccountGroupAuthorization } from "../entities/AccountGroupAuthorization";
 import { AccountGroupAccount, AccountGroupAccountProperties, IAccountGroupAccount } from "../entities/AccountGroupAccount";
@@ -25,9 +26,11 @@ export type IAccountRepository = IRepository & {
   createAccountGroups<Response = any, Table = AccountGroupTable>(options: MariaRepositoryInsertOptions<Table>): Promise<Response>
   createAccountGroupAccounts<Response = any, Table = AccountGroupAccountTable>(options: MariaRepositoryInsertOptions<Table>): Promise<Response>
   createAccountGroupAuthorizations<Response = any, Table = AccountGroupAuthorizationTable>(options: MariaRepositoryInsertOptions<Table>): Promise<Response>
+  createAccountSafeBox<Response = any, Table = SafeBoxTable>(options: MariaRepositoryInsertOptions<Table>): Promise<Response>
 
   updateAccounts<Response = any, Table = AccountTable>(options: MariaRepositoryUpdateOptions<Table>): Promise<Response>
   updateAccountGroups<Response = any, Table = AccountGroupTable>(options: MariaRepositoryUpdateOptions<Table>): Promise<Response>
+  updateAccountSafeBox<Response = any, Table = SafeBoxTable>(options: MariaRepositoryUpdateOptions<Table>): Promise<Response>
 
   deleteAccountGroups<Response = any, Table = AccountGroupTable>(options: MariaRepositoryUpdateOptions<Table>): Promise<Response>
   deleteAccountGroupAccounts<Response = any, Table = AccountGroupAccountTable>(options: MariaRepositoryUpdateOptions<Table>): Promise<Response>
@@ -151,6 +154,19 @@ export class AccountRepository extends Repository implements IAccountRepository 
     }, options))
   }
 
+  createAccountSafeBox<Response = any, Table = SafeBoxTable>(options: MariaRepositoryInsertOptions<Table>) {
+    this.log("createAccountSafeBox", options)
+
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const playerDatabase = gameRepository.getPlayerDatabaseName()
+
+    return mariaRepository.createEntities<Table, Response>(merge({
+      table: `${playerDatabase}.safebox`
+    }, options))
+  }
+
   updateAccounts<Response = any, Table = AccountTable>(options: MariaRepositoryUpdateOptions<Table>) {
     this.log("updateAccounts", options)
 
@@ -165,7 +181,7 @@ export class AccountRepository extends Repository implements IAccountRepository 
   }
 
   updateAccountGroups<Response = any, Table = AccountGroupTable>(options: MariaRepositoryUpdateOptions<Table>) {
-    this.log("updateAccounts", options)
+    this.log("updateAccountGroups", options)
 
     const mariaRepository = Container.get(MariaRepositoryToken)
     const gameRepository = Container.get(GameRepositoryToken)
@@ -174,6 +190,19 @@ export class AccountRepository extends Repository implements IAccountRepository 
 
     return mariaRepository.updateEntities<Table, Response>(merge({
       table: `${cmsDatabase}.account_group`
+    }, options))
+  }
+
+  updateAccountSafeBox<Response = any, Table = SafeBoxTable>(options: MariaRepositoryUpdateOptions<Table>) {
+    this.log("updateAccountSafeBox", options)
+
+    const mariaRepository = Container.get(MariaRepositoryToken)
+    const gameRepository = Container.get(GameRepositoryToken)
+
+    const playerDatabase = gameRepository.getPlayerDatabaseName()
+
+    return mariaRepository.updateEntities<Table, Response>(merge({
+      table: `${playerDatabase}.safebox`
     }, options))
   }
 

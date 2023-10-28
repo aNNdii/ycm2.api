@@ -42,6 +42,7 @@ export type MariaRepositorySelectOptions<T> = MariaRepositoryQueryOptions & Mari
 export type MariaRepositoryInsertOptions<T> = MariaRepositoryQueryOptions & {
   entities?: Partial<T>[]
   ignore?: boolean
+  delayed?: boolean
   duplicate?: (keyof T)[]
   returning?: string[]
 }
@@ -175,6 +176,7 @@ export class MariaRepository extends Repository implements IMariaRepository {
     const {
       table,
       ignore,
+      delayed,
       returning,
       duplicate,
       entities = [],
@@ -187,7 +189,7 @@ export class MariaRepository extends Repository implements IMariaRepository {
 
     const duplicationColumns = duplicate?.map((column: any) => `${column} = IFNULL(VALUES(${column}), ${column})`)
 
-    const query = `INSERT ${ignore ? 'IGNORE' : ''} INTO
+    const query = `INSERT ${delayed ? 'DELAYED' : ''} ${ignore ? 'IGNORE' : ''} INTO
                    ${table} (${columns.join(',')})
                    VALUES ${escape(rows)}
                    ${duplicate && duplicationColumns ? `ON DUPLICATE KEY UPDATE ` + duplicationColumns.join(',') : ''}

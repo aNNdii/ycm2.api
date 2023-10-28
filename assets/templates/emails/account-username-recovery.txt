@@ -1,7 +1,15 @@
-{% extends "./template.mjml" %}
+{% extends "./template.txt" %}
 
 {% block content %}
-  <mj-text>AccountRequestUsername</mj-text>
-  <mj-text>Username: {{ username }}</mj-text>
+{{ t('LabelAccountUsernameRecovery') }}
+
+{{ t('LabelAccountGreeting', { username: username })}}
+{{ t('LabelAccountUsernameRecoveryGreetingBody') }}
+
+{{ t('LabelAccountUsernameRecoveryBody') }}
+
+  {{ username }}
+
+{{ t('LabelMailIgnore') }}
 {% endblock %}
 

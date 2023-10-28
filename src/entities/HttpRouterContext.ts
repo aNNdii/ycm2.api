@@ -150,7 +150,7 @@ export class HttpRouterContext<T extends KoaRouterContext = KoaRouterContext> im
     if (!authorization) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_NOT_FOUND)
 
     const match = authorization.match(/^Bearer ([a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+\.?[a-zA-Z0-9\-_]*)$/)
-    if (!match) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_INVALID_TOKEN)
+    if (!match) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_TOKEN_INVALID)
 
     return match[1]
   }

@@ -66,7 +66,7 @@ export class MapService extends EntityService<MapServiceOptions> implements IMap
 
   deobfuscateMapId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.MAP_INVALID_ID,
+      error: ErrorMessage.MAP_ID_INVALID,
       salt: this.options.mapObfuscationSalt,
     })
   }
@@ -77,7 +77,7 @@ export class MapService extends EntityService<MapServiceOptions> implements IMap
 
   deobfuscateMapEntityId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.MAP_ENTITY_INVALID_ID,
+      error: ErrorMessage.MAP_ENTITY_ID_INVALID,
       salt: this.options.mapEntityObfuscationSalt,
     })
   }

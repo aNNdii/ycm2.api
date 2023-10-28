@@ -14,7 +14,7 @@ import { IItemSpecialAction, ItemSpecialActionProperties } from "../entities/Ite
 import { IItemAttribute, ItemAttributeProperties } from "../entities/ItemAttribute";
 import { IItem, ItemProperties } from "../entities/Item";
 
-import { EntityService, EntityOptions, IEntityService } from "./EntityService";
+import { EntityService, EntityServiceOptions, IEntityService } from "./EntityService";
 import { GameItemServiceToken } from './GameItemService';
 import { PaginationOptions } from "./PaginationService";
 
@@ -47,7 +47,7 @@ export type ItemSpecialActionOptions = PaginationOptions & {
   mobGroupId?: EntityFilter<number>
 }
 
-export type ItemServiceOptions = EntityOptions & {
+export type ItemServiceOptions = EntityServiceOptions & {
   itemSpecialActionObfuscationSalt: string
 }
 
@@ -78,7 +78,7 @@ export class ItemService extends EntityService<ItemServiceOptions> implements II
 
   deobfuscateItemSpecialActionId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.ITEM_SPECIAL_ACTION_INVALID_ID,
+      error: ErrorMessage.ITEM_SPECIAL_ACTION_ID_INVALID,
       salt: this.options.itemSpecialActionObfuscationSalt,
     })
   }

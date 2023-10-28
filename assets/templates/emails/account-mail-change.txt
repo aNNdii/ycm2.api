@@ -1,10 +1,10 @@
 {% extends "./template.txt" %}
 
 {% block content %}
-{{ t('LabelAccountPasswordRecovery') }}
+{{ t('LabelAccountMailChange') }}
 
 {{ t('LabelAccountGreeting', { username: username })}}
-{{ t('LabelAccountPasswordRecoveryGreetingBody') }}
+{{ t('LabelAccountMailChangeGreetingBody') }}
 
 {{ url }}
 

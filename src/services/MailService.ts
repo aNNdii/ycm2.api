@@ -25,6 +25,22 @@ export type SendAccountPasswordRecoveryOptions = SendOptions & {
   ttl: number
 }
 
+export type SendAccountMailChangeOptions = SendOptions & {
+  username: string
+  token: string
+  ttl: number
+}
+
+export type SendAccountSafeBoxCodeRecoveryOptions = SendOptions & {
+  username: string
+  safeBoxCode: string
+}
+
+export type SendAccountDeleteCodeRecoveryOptions = SendOptions & {
+  username: string
+  deleteCode: string
+}
+
 export type MailServiceOptions = ServiceOptions & {
   from: string
   serverUrl: string
@@ -37,6 +53,9 @@ export type IMailService = IService & {
 
   sendAccountUsernameRecovery(options: SendAccountUsernameRecoveryOptions): Promise<any>
   sendAccountPasswordRecovery(options: SendAccountPasswordRecoveryOptions): Promise<any>
+  sendAccountMailChange(options: SendAccountMailChangeOptions): Promise<any>
+  sendAccountSafeBoxCodeRecovery(options: SendAccountSafeBoxCodeRecoveryOptions): Promise<any>
+  sendAccountDeleteCodeRecovery(options: SendAccountDeleteCodeRecoveryOptions): Promise<any>
 }
 
 export class MailService extends Service<MailServiceOptions> implements IMailService {
@@ -88,7 +107,7 @@ export class MailService extends Service<MailServiceOptions> implements IMailSer
       ...sendOptions
     } = options
 
-    this.log("sendAccountUsernameRecovery", { username, localeCode })
+    this.log("sendAccountUsernameRecovery", options)
 
     const i18nClient = Container.get(InternationalizationClientToken)
   
@@ -98,7 +117,7 @@ export class MailService extends Service<MailServiceOptions> implements IMailSer
 
     return this.send({
       ...sendOptions,
-      subject: i18nClient.translate('LabelMailSubjectAccountRequestUsername', { localeCode }),
+      subject: i18nClient.translate('LabelAccountUsernameRecovery', { username, localeCode }),
       templateMjmlFilename,
       templateTextFilename,
       templateData
@@ -114,7 +133,7 @@ export class MailService extends Service<MailServiceOptions> implements IMailSer
       ...sendOptions
     } = options
 
-    this.log("sendAccountPasswordRecovery", { token, localeCode })
+    this.log("sendAccountPasswordRecovery", options)
 
     const i18nClient = Container.get(InternationalizationClientToken)
   
@@ -128,7 +147,89 @@ export class MailService extends Service<MailServiceOptions> implements IMailSer
 
     return this.send({
       ...sendOptions,
-      subject: i18nClient.translate('LabelAccountPasswordReset', { localeCode }),
+      subject: i18nClient.translate('LabelAccountPasswordRecovery', { localeCode }),
+      templateMjmlFilename,
+      templateTextFilename,
+      templateData
+    })
+  }
+
+  async sendAccountMailChange(options: SendAccountMailChangeOptions) {
+    const { 
+      token,
+      ttl, 
+      username,
+      localeCode, 
+      ...sendOptions
+    } = options
+
+    this.log("sendAccountMailChange", options)
+
+    const i18nClient = Container.get(InternationalizationClientToken)
+  
+    const templateMjmlFilename = 'emails/account-mail-change.mjml'
+    const templateTextFilename = 'emails/account-mail-change.txt'
+
+    const url = `${this.options.serverUrl}/confirm-mail/${token}`
+    const duration = Math.ceil(ttl / 3600)
+
+    const templateData = { url, duration, username, localeCode }
+
+    return this.send({
+      ...sendOptions,
+      subject: i18nClient.translate('LabelAccountMailChange', { localeCode }),
+      templateMjmlFilename,
+      templateTextFilename,
+      templateData
+    })
+  }
+
+  async sendAccountSafeBoxCodeRecovery(options: SendAccountSafeBoxCodeRecoveryOptions) {
+    const { 
+      safeBoxCode,
+      username,
+      localeCode, 
+      ...sendOptions
+    } = options
+
+    this.log("sendAccountSafeBoxCodeRecovery", options)
+
+    const i18nClient = Container.get(InternationalizationClientToken)
+  
+    const templateMjmlFilename = 'emails/account-safebox-code-recovery.mjml'
+    const templateTextFilename = 'emails/account-safebox-code-recovery.txt'
+
+    const templateData = { safeBoxCode, username, localeCode }
+
+    return this.send({
+      ...sendOptions,
+      subject: i18nClient.translate('LabelAccountSafeBoxCodeRecovery', { localeCode }),
+      templateMjmlFilename,
+      templateTextFilename,
+      templateData
+    })
+  }
+
+  async sendAccountDeleteCodeRecovery(options: SendAccountDeleteCodeRecoveryOptions) {
+    const { 
+      deleteCode,
+      username,
+      localeCode, 
+      ...sendOptions
+    } = options
+
+    this.log("sendAccountDeleteCodeRecovery", options)
+
+    const i18nClient = Container.get(InternationalizationClientToken)
+  
+    const templateMjmlFilename = 'emails/account-delete-code-recovery.mjml'
+    const templateTextFilename = 'emails/account-delete-code-recovery.txt'
+
+    const templateData = { deleteCode, username, localeCode }
+
+    return this.send({
+      ...sendOptions,
+      subject: i18nClient.translate('LabelAccountDeleteCodeRecovery', { localeCode }),
       templateMjmlFilename,
       templateTextFilename,
       templateData

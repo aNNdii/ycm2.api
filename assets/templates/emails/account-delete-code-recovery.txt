@@ -1,0 +1,14 @@
+{% extends "./template.txt" %}
+
+{% block content %}
+{{ t('LabelAccountDeleteCodeRecovery') }}
+
+{{ t('LabelAccountGreeting', { username: username })}}
+{{ t('LabelAccountDeleteCodeRecoveryGreetingBody') }}
+
+{{ t('LabelAccountDeleteCodeRecoveryBody') }}
+
+  {{ deleteCode }}
+
+{{ t('LabelMailIgnore') }}
+{% endblock %}

@@ -56,6 +56,7 @@ export type IDataLoaderService = IService & {
 
   getAccounts(options?: AccountsOptions): Promise<IAccount[]>
   getAccountsById(id: number | number[]): Promise<IAccount[]>
+  getAccountsByUsername(username: string | string[]): Promise<IAccount[]>
   getAccountsByMail(mail: string | string[]): Promise<IAccount[]>
 
   getAccountGroups(options?: AccountGroupOptions): Promise<IAccountGroup[]>
@@ -206,6 +207,11 @@ export class DataLoaderService extends Service<DataLoaderServiceOptions> impleme
   getAccountsById(id: number | number[]) {
     const func = this.getLoaderBatchFunc(ids => this.getAccounts({ id: [EntityFilterMethod.IN, ids] }))
     return this.getLoader('getAccountsById', func, { batch: true }).load(id)
+  }
+
+  getAccountsByUsername(username: string | string[]) {
+    const func = this.getLoaderBatchFunc(ids => this.getAccounts({ username: [EntityFilterMethod.IN, username] }), { key: 'username' })
+    return this.getLoader('getAccountsByMail', func, { batch: true }).load(username)
   }
 
   getAccountsByMail(mail: string | string[]) {

@@ -13,7 +13,12 @@ export type DeobfuscationOptions = ObfuscationOptions & {
   error: ErrorMessage
 }
 
-export type EntityOptions = ServiceOptions & {}
+export type EntitySetOptions<Filter = any, Properties = any> = {
+  filter: Filter
+  properties: Properties
+}
+
+export type EntityServiceOptions = ServiceOptions & {}
 
 export type IEntityService = IService & {}
 

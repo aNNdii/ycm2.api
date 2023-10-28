@@ -56,7 +56,7 @@ export class GuildService extends EntityService<GuildServiceOptions> implements 
 
   deobfuscateGuildId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.GUILD_INVALID_ID,
+      error: ErrorMessage.GUILD_ID_INVALID,
       salt: this.options.guildObfuscationSalt,
     })
   }
@@ -67,7 +67,7 @@ export class GuildService extends EntityService<GuildServiceOptions> implements 
 
   deobfuscateGuildMessageId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.GUILD_MESSAGE_INVALID_ID,
+      error: ErrorMessage.GUILD_MESSAGE_ID_INVALID,
       salt: this.options.guildMessageObfuscationSalt,
     })
   }

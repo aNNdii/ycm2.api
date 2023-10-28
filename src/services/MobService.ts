@@ -17,7 +17,7 @@ import { IMobGroup, MobGroupProperties } from "../entities/MobGroup";
 import { IMobItem, MobItemProperties } from "../entities/MobItem";
 import { IMob, MobProperties } from "../entities/Mob";
 
-import { EntityService, EntityOptions, IEntityService } from "./EntityService";
+import { EntityService, EntityServiceOptions, IEntityService } from "./EntityService";
 import { GameMobServiceToken } from "./GameMobService";
 import { PaginationOptions } from "./PaginationService";
 
@@ -68,7 +68,7 @@ export type MobProtoImportOptions = MobImportOptions & {
   format?: any
 }
 
-export type MobServiceOptions = EntityOptions & {
+export type MobServiceOptions = EntityServiceOptions & {
   mobItemObfuscationSalt: string
   mobRankItemObfuscationSalt: string
   mobGroupObfuscationSalt: string
@@ -124,7 +124,7 @@ export class MobService extends EntityService<MobServiceOptions> implements IMob
 
   deobfuscateMobItemId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.MOB_ITEM_INVALID_ID,
+      error: ErrorMessage.MOB_ITEM_ID_INVALID,
       salt: this.options.mobItemObfuscationSalt,
     })
   }
@@ -135,7 +135,7 @@ export class MobService extends EntityService<MobServiceOptions> implements IMob
 
   deobfuscateMobRankItemId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.MOB_RANK_ITEM_INVALID_ID,
+      error: ErrorMessage.MOB_RANK_ITEM_ID_INVALID,
       salt: this.options.mobItemObfuscationSalt,
     })
   }
@@ -146,7 +146,7 @@ export class MobService extends EntityService<MobServiceOptions> implements IMob
 
   deobfuscateMobGroupId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.MOP_GROUP_INVALID_ID,
+      error: ErrorMessage.MOP_GROUP_ID_INVALID,
       salt: this.options.mobGroupObfuscationSalt,
     })
   }
@@ -157,7 +157,7 @@ export class MobService extends EntityService<MobServiceOptions> implements IMob
 
   deobfuscateMobGroupMobId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.MOB_GROUP_MOB_INVALID_ID,
+      error: ErrorMessage.MOB_GROUP_MOB_ID_INVALID,
       salt: this.options.mobGroupMobObfuscationSalt,
     })
   }
@@ -168,7 +168,7 @@ export class MobService extends EntityService<MobServiceOptions> implements IMob
 
   deobfuscateMobGroupGroupId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.MOB_GROUP_GROUP_INVALID_ID,
+      error: ErrorMessage.MOB_GROUP_GROUP_ID_INVALID,
       salt: this.options.mobGroupGroupObfuscationSalt,
     })
   }
@@ -179,7 +179,7 @@ export class MobService extends EntityService<MobServiceOptions> implements IMob
 
   deobfuscateMobGroupGroupMobGroupId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.MOB_GROUP_GROUP_MOB_GROUP_INVALID_ID,
+      error: ErrorMessage.MOB_GROUP_GROUP_MOB_GROUP_ID_INVALID,
       salt: this.options.mobGroupGroupMobGroupObfuscationSalt,
     })
   }

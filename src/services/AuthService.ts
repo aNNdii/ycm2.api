@@ -50,7 +50,7 @@ export class AuthService extends Service<AuthServiceOptions> implements IAuthSer
         algorithms: [this.options.jwtAlgorithm] as Algorithm[]
       })
     } catch (e) {
-      throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_INVALID_TOKEN)
+      throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_TOKEN_INVALID)
     }
 
     return payload as any
@@ -58,7 +58,7 @@ export class AuthService extends Service<AuthServiceOptions> implements IAuthSer
 
   async getAuthByAccount(account: IAccount) {
     const accountService = Container.get(AccountServiceToken)
-
+    
     // const authorizations = await accountService.getAccountGroupAuthorizations({ accountId: account.id })
 
     return new Auth({
@@ -75,7 +75,7 @@ export class AuthService extends Service<AuthServiceOptions> implements IAuthSer
     const accountService = Container.get(AccountServiceToken)
 
     const payload = this.getJsonWebTokenPayload(token)
-    if (!types.includes(payload.typ)) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_INVALID_TOKEN)
+    if (!types.includes(payload.typ)) throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_TOKEN_INVALID)
 
     const [accountId] = accountService.deobfuscateAccountId(payload.accountId)
 

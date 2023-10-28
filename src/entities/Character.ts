@@ -1,6 +1,7 @@
 import { Container } from "../infrastructures/Container";
 
 import { CharacterEmpireTable, CharacterTable } from "../interfaces/Character";
+import { GuildGradeTable, GuildMemberTable } from "../interfaces/Guild";
 import { EntityTableFilter } from "../interfaces/Entity";
 import { AccountTable } from "../interfaces/Account";
 import { MapTable } from "../interfaces/Map";
@@ -8,7 +9,6 @@ import { MapTable } from "../interfaces/Map";
 import { CharacterServiceToken } from "../services/CharacterService";
 
 import { Entity, IEntity  } from "./Entity";
-import { GuildGradeTable, GuildMemberTable } from "../interfaces/Guild";
 
 export type CharacterProperties = EntityTableFilter<"player", CharacterTable>
                                 & EntityTableFilter<"player_index", CharacterEmpireTable>

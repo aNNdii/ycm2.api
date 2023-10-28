@@ -11,7 +11,7 @@ export type AccountTable = EntityTable & {
   login: string
   password: string
   securitycode: string
-  social_id: string
+  social_id: string 
   status: AccountStatus
   availDt: string
   create_time: string

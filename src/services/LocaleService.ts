@@ -13,7 +13,7 @@ import { ILocaleItem, LocaleItemProperties } from "../entities/LocaleItem"
 import { ILocaleMob, LocaleMobProperties } from "../entities/LocaleMob"
 import { ILocale, LocaleProperties } from "../entities/Locale"
 
-import { EntityService, EntityOptions, IEntityService } from "./EntityService"
+import { EntityService, EntityServiceOptions, IEntityService } from "./EntityService"
 import { GameItemServiceToken } from "./GameItemService"
 import { GameMobServiceToken } from "./GameMobService"
 import { PaginationOptions } from "./PaginationService"
@@ -41,7 +41,7 @@ export type LocaleMobOptions = PaginationOptions & {
   localeId?: EntityFilter<number>
 }
 
-export type LocaleServiceOptions = EntityOptions & {
+export type LocaleServiceOptions = EntityServiceOptions & {
   localeObfuscationSalt: string
   localeItemObfuscationSalt: string
   localeMobObfuscationSalt: string
@@ -76,7 +76,7 @@ export class LocaleService extends EntityService<LocaleServiceOptions> implement
 
   deobfuscateLocaleId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.LOCALE_INVALID_ID,
+      error: ErrorMessage.LOCALE_ID_INVALID,
       salt: this.options.localeObfuscationSalt,
     })
   }
@@ -87,7 +87,7 @@ export class LocaleService extends EntityService<LocaleServiceOptions> implement
 
   deobfuscateLocaleItemId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.LOCALE_ITEM_INVALID_ID,
+      error: ErrorMessage.LOCALE_ITEM_ID_INVALID,
       salt: this.options.localeObfuscationSalt,
     })
   }
@@ -98,7 +98,7 @@ export class LocaleService extends EntityService<LocaleServiceOptions> implement
 
   deobfuscateLocaleMobId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.LOCALE_MOB_INVALID_ID,
+      error: ErrorMessage.LOCALE_MOB_ID_INVALID,
       salt: this.options.localeObfuscationSalt,
     })
   }

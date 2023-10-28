@@ -1,7 +1,7 @@
 
-export type SafeboxTable = {
+export type SafeBoxTable = {
   account_id: number
   size: number
-  password: number
+  password: string
   gold: number
 }

@@ -16,7 +16,9 @@ export const TokenServiceToken = new Token<ITokenService>("TokenService")
 export enum TokenType {
   UNKNOWN,
   CAPTCHA,
+  
   ACCOUNT_PASSWORD_RECOVERY,
+  ACCOUNT_MAIL_CHANGE
 }
 
 export type TokenOptions = {

@@ -1,14 +1,14 @@
 {% extends "./template.mjml" %}
 
 {% block header %}
-  <mj-text mj-class="header-title">{{ t('LabelAccountPasswordRecovery') }}</mj-text>
+  <mj-text mj-class="header-title">{{ t('LabelAccountMailChange') }}</mj-text>
 {% endblock %}
 
 {% block content %}
   <mj-text>{{ t('LabelAccountGreeting', { username: username })}}</mj-text>
-  <mj-text>{{ t('LabelAccountPasswordRecoveryGreetingBody') }}</mj-text>
+  <mj-text>{{ t('LabelAccountMailChangeGreetingBody') }}</mj-text>
 
-  <mj-button href="{{ url }}">{{ t('LabelAccountPasswordRecovery') }}</mj-button>
+  <mj-button href="{{ url }}">{{ t('LabelAccountMailChangeConfirm') }}</mj-button>
 
   <mj-text>{{ t('LabelMailButtonFallbackLink') }}</mj-text>
   <mj-text>{{ url }}</mj-text>

@@ -1,10 +1,16 @@
 {% extends "./template.mjml" %}
 
 {% block header %}
-  <mj-text>AccountRequestUsername</mj-text>
+  <mj-text mj-class="header-title">{{ t('LabelAccountUsernameRecovery') }}</mj-text>
 {% endblock %}
 
 {% block content %}
-  <mj-text>Username: {{ username }}</mj-text>
+  <mj-text>{{ t('LabelAccountGreeting', { username: username })}}</mj-text>
+  <mj-text>{{ t('LabelAccountUsernameRecoveryGreetingBody') }}</mj-text>
+
+  <mj-text font-weight="bold">{{ t('LabelAccountUsernameRecoveryBody') }}</mj-text>
+  <mj-text align="center" font-size="24px" letter-spacing="8px" font-family="monospace">{{ username }}</mj-text>
+
+  <mj-text>{{ t('LabelMailIgnore') }}</mj-text>
 {% endblock %}
 

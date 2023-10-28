@@ -38,6 +38,7 @@ import { GuildRepository, GuildRepositoryToken } from "../src/repositories/Guild
 import { ItemRepository, ItemRepositoryToken } from "../src/repositories/ItemRepository"
 import { MobRepository, MobRepositoryToken } from "../src/repositories/MobRepository"
 import { MapRepository, MapRepositoryToken } from "../src/repositories/MapRepository"
+import { LogRepository, LogRepositoryToken } from "../src/repositories/LogRepository"
 
 import { GameCharacterService, GameCharacterServiceToken } from "../src/services/GameCharacterService"
 import { ObfuscationService, ObfuscationServiceToken } from "../src/services/ObfuscationService"
@@ -60,6 +61,7 @@ import { HashService, HashServiceToken } from "../src/services/HashService"
 import { AuthService, AuthServiceToken } from "../src/services/AuthService"
 import { MobService, MobServiceToken } from "../src/services/MobService"
 import { MapService, MapServiceToken } from "../src/services/MapService"
+import { LogService, LogServiceToken } from "../src/services/LogService"
 
 import { CharacterController, CharacterControllerToken } from "../src/controllers/CharacterController"
 import { GraphQLController, GraphQLControllerToken } from "../src/controllers/GraphQLController"
@@ -191,12 +193,16 @@ import { GraphQLMobQuery } from "../src/graphql/MobQuery"
   const MOB_GROUP_MOB_OBFUSCATION_SALT = process.env.MOB_GROUP_MOB_OBFUSCATION_SALT || OBFUSCATION_SALT
   const MOB_GROUP_GROUP_OBFUSCATION_SALT = process.env.MOB_GROUP_GROUP_OBFUSCATION_SALT || OBFUSCATION_SALT
   const MOB_GROUP_GROUP_MOB_GROUP_OBFUSCATION_SALT = process.env.MOB_GROUP_GROUP_MOB_GROUP_OBFUSCATION_SALT || OBFUSCATION_SALT
+  const LOG_OBFUSCATION_SALT = process.env.LOG_OBFUSCATION_SALT || OBFUSCATION_SALT
 
   const CAPTCHA_TOKEN_OBFUSCATION_SALT = process.env.CAPTCHA_TOKEN_OBFUSCATION_SALT || TOKEN_OBFUSCATION_SALT
   const CAPTCHA_TOKEN_TTL = ~~(process.env.CAPTCHA_TOKEN_TTL || 300)
 
   const ACCOUNT_PASSWORD_RECOVERY_TOKEN_OBFUSCATION_SALT = process.env.ACCOUNT_PASSWORD_RECOVERY_TOKEN_OBFUSCATION_SALT || TOKEN_OBFUSCATION_SALT
   const ACCOUNT_PASSWORD_RECOVERY_TOKEN_TTL = ~~(process.env.ACCOUNT_PASSWORD_RECOVERY_TOKEN_TTL || 28_800)
+
+  const ACCOUNT_MAIL_CHANGE_TOKEN_OBFUSCATION_SALT = process.env.ACCOUNT_MAIL_CHANGE_TOKEN_OBFUSCATION_SALT || TOKEN_OBFUSCATION_SALT
+  const ACCOUNT_MAIL_CHANGE_TOKEN_TTL = ~~(process.env.ACCOUNT_MAIL_CHANGE_TOKEN_TTL || 28_800)
 
   const ACCOUNT_USERNAME_MIN_LENGTH = ~~(process.env.ACCOUNT_USERNAME_MIN_LENGTH || 8)
   const ACCOUNT_USERNAME_MAX_LENGTH = ~~(process.env.ACCOUNT_USERNAME_MAX_LENGTH || 16)
@@ -363,6 +369,7 @@ import { GraphQLMobQuery } from "../src/graphql/MobQuery"
   Container.set(ItemRepositoryToken, new ItemRepository())
   Container.set(MobRepositoryToken, new MobRepository())
   Container.set(MapRepositoryToken, new MapRepository())
+  Container.set(LogRepositoryToken, new LogRepository())
 
 
   /*****************************************************************************
@@ -390,6 +397,21 @@ import { GraphQLMobQuery } from "../src/graphql/MobQuery"
     minLength: TOKEN_MIN_LENGTH,
     ttl: TOKEN_TTL,
     obfuscationSalt: TOKEN_OBFUSCATION_SALT,
+  }))
+
+  Container.set(CaptchaServiceToken, new CaptchaService({
+    length: CAPTCHA_LENGTH,
+
+    tokenObfuscationSalt: CAPTCHA_TOKEN_OBFUSCATION_SALT,
+    tokenTtl: CAPTCHA_TOKEN_TTL,
+
+    imageFont: CAPTCHA_IMAGE_FONT ? `${__dirname}/../${CAPTCHA_IMAGE_FONT}` : undefined,
+    imageFontSize: CAPTCHA_IMAGE_FONT_SIZE,
+    imageInverse: CAPTCHA_IMAGE_INVERSE,
+    imageColors: CAPTCHA_IMAGE_COLORS,
+    imageNoises: CAPTCHA_IMAGE_NOISES,
+    imageWidth: CAPTCHA_IMAGE_WIDTH,
+    imageHeight: CAPTCHA_IMAGE_HEIGHT,
   }))
 
   Container.set(AuthServiceToken, new AuthService({
@@ -423,6 +445,9 @@ import { GraphQLMobQuery } from "../src/graphql/MobQuery"
 
     accountPasswordRecoveryTokenObfuscationSalt: ACCOUNT_PASSWORD_RECOVERY_TOKEN_OBFUSCATION_SALT,
     accountPasswordRecoveryTokenTtl: ACCOUNT_PASSWORD_RECOVERY_TOKEN_TTL,
+
+    accountMailChangeTokenObfuscationSalt: ACCOUNT_MAIL_CHANGE_TOKEN_OBFUSCATION_SALT,
+    accountMailChangeTokenTtl: ACCOUNT_MAIL_CHANGE_TOKEN_TTL
   }))
 
   Container.set(CharacterServiceToken, new CharacterService({
@@ -465,19 +490,8 @@ import { GraphQLMobQuery } from "../src/graphql/MobQuery"
 
   Container.set(GameMapServiceToken, new GameMapService({}))
 
-  Container.set(CaptchaServiceToken, new CaptchaService({
-    length: CAPTCHA_LENGTH,
-
-    tokenObfuscationSalt: CAPTCHA_TOKEN_OBFUSCATION_SALT,
-    tokenTtl: CAPTCHA_TOKEN_TTL,
-
-    imageFont: CAPTCHA_IMAGE_FONT ? `${__dirname}/../${CAPTCHA_IMAGE_FONT}` : undefined,
-    imageFontSize: CAPTCHA_IMAGE_FONT_SIZE,
-    imageInverse: CAPTCHA_IMAGE_INVERSE,
-    imageColors: CAPTCHA_IMAGE_COLORS,
-    imageNoises: CAPTCHA_IMAGE_NOISES,
-    imageWidth: CAPTCHA_IMAGE_WIDTH,
-    imageHeight: CAPTCHA_IMAGE_HEIGHT,
+  Container.set(LogServiceToken, new LogService({
+    logObfuscationSalt: LOG_OBFUSCATION_SALT
   }))
 
 

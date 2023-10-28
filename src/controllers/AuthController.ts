@@ -6,6 +6,7 @@ import { AuthenticationTokenType } from "../interfaces/Auth";
 import { AccountStatus } from "../interfaces/Account";
 
 import { ValidatorServiceToken } from "../services/ValidatorService";
+import { AccountServiceToken } from "../services/AccountService";
 import { HashServiceToken } from "../services/HashService";
 import { AuthServiceToken } from "../services/AuthService";
 
@@ -14,7 +15,6 @@ import { HttpRouterError } from "../entities/HttpRouterError";
 import { IAuth } from "../entities/Auth";
 
 import { Controller, IController } from "./Controller";
-import { AccountServiceToken } from "../services/AccountService";
 
 export const AuthControllerToken = new Token<IAuthController>("AuthController")
 
@@ -53,7 +53,7 @@ export class AuthController extends Controller implements IAuthController {
         break
 
       default:
-        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_INVALID_METHOD)
+        throw new HttpRouterError(HttpStatusCode.BAD_REQUEST, ErrorMessage.AUTH_METHOD_INVALID)
 
     }
 

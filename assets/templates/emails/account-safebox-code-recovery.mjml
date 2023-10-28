@@ -1,0 +1,16 @@
+{% extends "./template.mjml" %}
+
+{% block header %}
+  <mj-text mj-class="header-title">{{ t('LabelAccountSafeBoxCodeRecovery') }}</mj-text>
+{% endblock %}
+
+{% block content %}
+  <mj-text>{{ t('LabelAccountGreeting', { username: username })}}</mj-text>
+  <mj-text>{{ t('LabelAccountSafeBoxCodeRecoveryGreetingBody') }}</mj-text>
+
+  <mj-text font-weight="bold">{{ t('LabelAccountSafeBoxCodeRecoveryBody') }}</mj-text>
+  <mj-text align="center" font-size="24px" letter-spacing="8px" font-family="monospace">{{ safeBoxCode }}</mj-text>
+
+  <mj-text>{{ t('LabelMailIgnore') }}</mj-text>
+{% endblock %}
+

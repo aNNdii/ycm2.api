@@ -39,7 +39,8 @@
     <mj-section>
       <mj-column>
         <mj-divider />
-        <mj-text>{{ t('MailDoNotReply') }}</mj-text>
+        <mj-text>{{ t('LabelMailSupportHelp') }}</mj-text>
+        <mj-text>{{ t('LabelMailDoNotReply') }}</mj-text>
         <mj-text>Copyright &copy; {{ currentYear }} {{ serverName }}</mj-text>
       </mj-column>
     </mj-section>

@@ -11,7 +11,7 @@ import { CharacterRepositoryToken } from "../repositories/CharacterRepository";
 import { CharacterItemProperties, ICharacterItem } from "../entities/CharacterItem";
 import { ICharacter, CharacterProperties } from "../entities/Character";
 
-import { EntityService, EntityOptions, IEntityService } from "./EntityService";
+import { EntityService, EntityServiceOptions, IEntityService } from "./EntityService";
 import { PaginationOptions } from "./PaginationService";
 
 export const CharacterServiceToken = new Token<ICharacterService>("CharacterService")
@@ -30,7 +30,7 @@ export type CharacterItemOptions = PaginationOptions & {
   window?: EntityFilter<CharacterItemWindow>
 }
 
-export type CharacterServiceOptions = EntityOptions & {
+export type CharacterServiceOptions = EntityServiceOptions & {
   characterObfuscationSalt: string
   characterItemObfuscationSalt: string
 }
@@ -56,7 +56,7 @@ export class CharacterService extends EntityService<CharacterServiceOptions> imp
 
   deobfuscateCharacterId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.CHARACTER_INVALID_ID,
+      error: ErrorMessage.CHARACTER_ID_INVALID,
       salt: this.options.characterObfuscationSalt,
     })
   }
@@ -67,7 +67,7 @@ export class CharacterService extends EntityService<CharacterServiceOptions> imp
 
   deobfuscateCharacterItemId(value: string | string[]) {
     return this.deobfuscateId(value, {
-      error: ErrorMessage.CHARACTER_ITEM_INVALID_ID,
+      error: ErrorMessage.CHARACTER_ITEM_ID_INVALID,
       salt: this.options.characterItemObfuscationSalt,
     })
   }

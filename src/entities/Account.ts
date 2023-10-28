@@ -3,14 +3,14 @@ import { Container } from "../infrastructures/Container";
 import { AccountTable } from "../interfaces/Account";
 import { EntityTableFilter } from "../interfaces/Entity";
 import { LocaleTable } from "../interfaces/Locale";
-import { SafeboxTable } from "../interfaces/Safebox";
+import { SafeBoxTable } from "../interfaces/SafeBox";
 
 import { AccountServiceToken } from "../services/AccountService";
 
 import { Entity, IEntity  } from "./Entity";
 
 export type AccountProperties = EntityTableFilter<"account", AccountTable>
-                              & EntityTableFilter<"safebox", SafeboxTable>
+                              & EntityTableFilter<"safebox", SafeBoxTable>
                               & EntityTableFilter<"locale", LocaleTable>
 
 export type IAccount = IEntity & {
